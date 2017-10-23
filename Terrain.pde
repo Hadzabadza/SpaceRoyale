@@ -2,7 +2,7 @@ class Terrain {
   int x, y;
   float elevation;
   color fill;
-  float deepness;
+  float depth;
   boolean hovered;
   boolean water;
   float lava;
@@ -36,7 +36,7 @@ class Terrain {
     {
       if (water)
       {
-        if (1-abs(cos(radians(frameCount)))<deepness||deepness>0.6)
+        if (1-abs(cos(radians(frameCount)))<depth||depth>0.6)
         {
           fill(fill);
         } else
@@ -51,7 +51,7 @@ class Terrain {
     {
       if (water)
       {
-        if (1-abs(cos(radians(frameCount)))<deepness||deepness>0.7)
+        if (1-abs(cos(radians(frameCount)))<depth||depth>0.7)
         {
           fill(fill);
         } else
@@ -79,14 +79,14 @@ class Terrain {
         fill=color(0, 0, map(elevation, p.minHeight*0.5, (p.minHeight+(p.avgHeight-p.minHeight)*0.4)*1.3+50, 0, 255));
       }
       propagateLava();
-      deepness=map(elevation, p.minHeight, (p.minHeight+(p.avgHeight-p.minHeight)*0.4), 1, 0);
-      if (deepness>0)
+      depth=map(elevation, p.minHeight, (p.minHeight+(p.avgHeight-p.minHeight)*0.4), 1, 0);
+      if (depth>0)
       {
         water=true;
       } else
       {
         water=false;
-        deepness=0;
+        depth=0;
       }
     }
 

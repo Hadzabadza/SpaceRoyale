@@ -11,13 +11,14 @@ class Planet {
   float maxHeight=0;
   float totalHeight=0;
   int mapRes;
+  int orbitNumber;
   PVector pos;
   PVector vel;
   PVector grav;
   Terrain [] terrain;
   Star orbitStar;
 
-  Planet(Star s, float mas, float distS) {
+  Planet(Star s, float mas, float distS, int number) {
     orbitStar=s;
     pos= new PVector();
     vel= new PVector();
@@ -30,18 +31,19 @@ class Planet {
     pos.x=orbitStar.pos.x+distance*cos(radians(phase));
     pos.y=orbitStar.pos.y+distance*sin(radians(phase));
     spin=random(-1, 1);
-
-
+    orbitNumber=number;
     surface=createImage((int)radius*4, (int)radius*4, ARGB);
     terrain=new Terrain[surface.width*surface.height];
     mapRes=floor(width/(surface.width+20));
     surface.loadPixels();
-    float prevT=random(50, 200);
+    float seaLevel=random(40,180);
+    float noiseOffset=orbitNumber*10000;
+    float prevT=seaLevel;
     for (int y=0; y<surface.height; y++)
     { 
       for (int x=0; x<surface.width; x++)
       { 
-        prevT=random(50, 200);
+        prevT=noise(float(x)/100+noiseOffset,float(y)/100+noiseOffset)*seaLevel;
         totalHeight+=prevT;
         terrain[x+y*surface.height]=(new Terrain(x, y, prevT, this, x+y*surface.height));
         surface.pixels[y*surface.height+x]=color(round(terrain[x+y*surface.height].elevation));
@@ -61,7 +63,7 @@ class Planet {
       {
         t.water=true;
         t.fill=color(0, 0, map(t.elevation, minHeight*0.5, (minHeight+(avgHeight-minHeight)*0.4)*1.3, 0, 255));
-        t.deepness=map(t.elevation, minHeight, (minHeight+(avgHeight-minHeight)*0.4), 1, 0);
+        t.depth=map(t.elevation, minHeight, (minHeight+(avgHeight-minHeight)*0.4), 1, 0);
         surface.pixels[t.y*surface.height+t.x]=t.fill;
       }
     }

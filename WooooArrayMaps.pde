@@ -58,7 +58,7 @@ void draw()
       {
         fill(255);
         text("Current: "+t.elevation, 50, -40);
-        text("Deepness: "+t.deepness, 250, -40);
+        text("Deepness: "+t.depth, 250, -40);
         text("Index: "+t.index, 50,-20);
       }
     }
