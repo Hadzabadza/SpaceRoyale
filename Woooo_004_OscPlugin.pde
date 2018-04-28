@@ -1,3 +1,10 @@
+import oscP5.*;
+import netP5.*;
+
+OscP5 oscP5;
+NetAddress controller;
+String controllerIP="192.168.1.236";
+
 boolean[] move;
 float spill=0;
 ArrayList<Star> stars;
@@ -12,6 +19,9 @@ boolean heightColour;
 int tSize=50;
 Terrain active;
 Ship ship;
+PVector cursor;
+
+int OSCIndicatorToggle=0;
 
 PFont pixFont;
 
@@ -27,6 +37,9 @@ void setup()
   ship= new Ship();
   stars.add(new Star(0, 0));
   mapScreenShift=new PVector(100, 100);
+  cursor=new PVector(0.5, 0.5);
+
+  startOSC(12000, controllerIP, 9000);
 }
 
 void draw()
@@ -37,6 +50,7 @@ void draw()
   } else
   {
   }
+  OSCtoggle();
 
   ship.update();
   ship.draw();
@@ -51,29 +65,35 @@ void draw()
     translate(ship.pos.x-width/2*zoom+mapScreenShift.x*zoom, ship.pos.y-height/2*zoom+mapScreenShift.y*zoom, 2);
     scale(zoom);
     rectMode(CENTER);
-    for (Terrain t : ship.land.terrain)
-    {
-      t.draw();
-      if (t.checkHover())
+    if (ship.land!=null) {
+      for (Terrain t : ship.land.terrain)
+      {
+        t.draw();
+      }
+      Terrain selected=ship.land.pickTile();
+      if (selected!=null)
       {
         fill(255);
-        text("Current: "+t.elevation, 50, -40);
-        text("Deepness: "+t.depth, 250, -40);
-        text("Index: "+t.index, 50,-20);
+        text("Current: "+selected.elevation, 50, -40);
+        text("Deepness: "+selected.depth, 250, -40);
+        text("Index: "+selected.index, 50, -20);
       }
+      fill(255);
+      textAlign(CENTER);
+      text("Avg: "+ship.land.avgHeight, 50, -60);
+      text("Max: "+ship.land.maxHeight, 250, -60);
+      text("Min: "+ship.land.minHeight, 450, -60);
+      if (heightColour)
+        text("Height Colouring: ON", 450, -40);
+      else
+        text("Height Colouring: OFF", 450, -40);
+      text("Total Height: "+ship.land.totalHeight, 250, -20);
+      //image(ship.land.map, -mapScreenShift.x+(width-ship.land.map.width)/4, -mapScreenShift.y+(height-ship.land.map.height)/4);
+      popMatrix();
+    } else
+    {
+      mapScreen=false;
     }
-    fill(255);
-    textAlign(CENTER);
-    text("Avg: "+ship.land.avgHeight, 50, -60);
-    text("Max: "+ship.land.maxHeight, 250, -60);
-    text("Min: "+ship.land.minHeight, 450, -60);
-    if (heightColour)
-    text("Height Colouring: ON", 450, -40);
-    else
-    text("Height Colouring: OFF", 450, -40);
-    text("Total Height: "+ship.land.totalHeight, 250,-20);
-    //image(ship.land.map, -mapScreenShift.x+(width-ship.land.map.width)/4, -mapScreenShift.y+(height-ship.land.map.height)/4);
-    popMatrix();
   }
 }
 
@@ -104,17 +124,13 @@ void mouseReleased()
   {
     if (mapScreen) 
     {
-      boolean hovered=false;
-      for (Terrain t : ship.land.terrain)
+      Terrain t=ship.land.pickTile();
+      if (t!=null)
       {
-        if (t.checkHover())
-        {
-          t.build();
-          t.volcanize();
-          hovered=true;
-        }
+        t.build();
+        t.volcanize();
       }
-      if (!hovered)
+      if (t==null)
       {
         mapScreen=false;
         active=null;
@@ -128,6 +144,11 @@ void mouseReleased()
   {
     zoom=1;
   }
+}
+
+void mouseMoved() {
+  cursor.x=mouseX;
+  cursor.y=mouseY;
 }
 
 void keyReleased() {

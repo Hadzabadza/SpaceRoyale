@@ -1,4 +1,4 @@
-class Star {
+  class Star {
   float mass;
   float radius;
   float AOE;

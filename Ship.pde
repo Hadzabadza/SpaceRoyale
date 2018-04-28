@@ -1,7 +1,7 @@
 class Ship {
   boolean warp;
   float warpSpeed=10;
-  float dir=180;
+  float dir=0;
   PVector vel, pos, grav;
   float thrust=0;
   Planet land;

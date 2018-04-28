@@ -3,7 +3,6 @@ class Terrain {
   float elevation;
   color fill;
   float depth;
-  boolean hovered;
   boolean water;
   float lava;
   boolean volcano;
@@ -20,9 +19,10 @@ class Terrain {
     elevation=elev;
     this.index=index;
   }
-
+  /*
   boolean checkHover() {
-    if ((((mouseX>=x*p.mapRes-p.mapRes/2+(width-p.map.width)/2)&&(mouseX<x*p.mapRes+p.mapRes/2+(width-p.map.width)/2))&&((mouseY>=y*p.mapRes-p.mapRes/2+(height-p.map.height)/2)&&(mouseY<y*p.mapRes+p.mapRes/2+(height-p.map.height)/2)))||((mouseX==x*p.mapRes+(width-p.map.width)/2)&&(mouseY==y*p.mapRes+(height-p.map.height)/2))) {        
+    int leftBorder=(width-p.map.width)/2;
+    if ((((cursor.x>=x*p.mapRes-p.mapRes/2+leftBorder)&&(cursor.x<x*p.mapRes+p.mapRes/2+(width-p.map.width)/2))&&((cursor.y>=y*p.mapRes-p.mapRes/2+(height-p.map.height)/2)&&(cursor.y<y*p.mapRes+p.mapRes/2+(height-p.map.height)/2)))||((cursor.x==x*p.mapRes+(width-p.map.width)/2)&&(cursor.y==y*p.mapRes+(height-p.map.height)/2))) {        
       hovered=true;
       return true;
     } else
@@ -31,6 +31,7 @@ class Terrain {
       return false;
     }
   }
+  */
   void draw() {
     if (heightColour)
     {
@@ -76,7 +77,8 @@ class Terrain {
         fill=color(map(elevation, p.minHeight, p.maxHeight, 255, 0), map(elevation, p.minHeight, p.maxHeight, 0, 255), 0);
       } else
       {
-        fill=color(0, 0, map(elevation, p.minHeight*0.5, (p.minHeight+(p.avgHeight-p.minHeight)*0.4)*1.3+50, 0, 255));
+        //fill=color(0, 0, map(elevation, p.minHeight*0.5, (p.minHeight+(p.avgHeight-p.minHeight)*0.4)*1.3+50, 0, 255));
+        fill=color(0, 0, round(250-200*depth));
       }
       propagateLava();
       depth=map(elevation, p.minHeight, (p.minHeight+(p.avgHeight-p.minHeight)*0.4), 1, 0);
@@ -95,21 +97,28 @@ class Terrain {
     /*
     point(x*p.mapRes-mapScreenShift.x+(width-p.map.width)/2, y*p.mapRes-mapScreenShift.y+(height-p.map.height)/2);
      */
-    if (hovered) {
-      pushMatrix();
-      translate(0, 0, 1);
+     if (p.selected==this)
+     {
+       drawSelection();
+     }
+  };
+  void build() {
+  }
+  void drawSelection(){
+      strokeWeight(1);
+      //pushMatrix();
+      //translate(0, 0, 1);
+      stroke(130,150,0);
+      line(-width,y*ship.land.mapRes-mapScreenShift.y+(height-p.map.height)/2,width,y*ship.land.mapRes-mapScreenShift.y+(height-p.map.height)/2);
+      line(x*ship.land.mapRes-mapScreenShift.x+(width-p.map.width)/2,-height,x*ship.land.mapRes-mapScreenShift.x+(width-p.map.width)/2,height);
       stroke(100+50*cos(frameCount/2), 0, 0);
       strokeWeight(ship.land.mapRes);
       point((x-1)*ship.land.mapRes-mapScreenShift.x+(width-p.map.width)/2, y*ship.land.mapRes-mapScreenShift.y+(height-p.map.height)/2);
       point((x+1)*ship.land.mapRes-mapScreenShift.x+(width-p.map.width)/2, y*ship.land.mapRes-mapScreenShift.y+(height-p.map.height)/2);
       point(x*ship.land.mapRes-mapScreenShift.x+(width-p.map.width)/2, (y-1)*ship.land.mapRes-mapScreenShift.y+(height-p.map.height)/2);
       point(x*ship.land.mapRes-mapScreenShift.x+(width-p.map.width)/2, (y+1)*ship.land.mapRes-mapScreenShift.y+(height-p.map.height)/2);
-      popMatrix();
-    }
-  };
-  void build() {
+      //popMatrix();
   }
-
   void volcanize() {
     volcanoTime=300;
   }

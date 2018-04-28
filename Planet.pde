@@ -16,6 +16,7 @@ class Planet {
   PVector vel;
   PVector grav;
   Terrain [] terrain;
+  Terrain selected;
   Star orbitStar;
 
   Planet(Star s, float mas, float distS, int number) {
@@ -36,14 +37,14 @@ class Planet {
     terrain=new Terrain[surface.width*surface.height];
     mapRes=floor(width/(surface.width+20));
     surface.loadPixels();
-    float seaLevel=random(40,180);
+    float seaLevel=random(40, 180);
     float noiseOffset=orbitNumber*10000;
     float prevT=seaLevel;
     for (int y=0; y<surface.height; y++)
     { 
       for (int x=0; x<surface.width; x++)
       { 
-        prevT=noise(float(x)/100+noiseOffset,float(y)/100+noiseOffset)*seaLevel;
+        prevT=noise(float(x)/100+noiseOffset, float(y)/100+noiseOffset)*seaLevel;
         totalHeight+=prevT;
         terrain[x+y*surface.height]=(new Terrain(x, y, prevT, this, x+y*surface.height));
         surface.pixels[y*surface.height+x]=color(round(terrain[x+y*surface.height].elevation));
@@ -107,6 +108,8 @@ class Planet {
     noFill();
     strokeWeight(3);
     ellipse (pos.x, pos.y, radius*2, radius*2);
+    strokeWeight(1);
+    ellipse (pos.x,pos.y,radius*20,radius*20);
     popMatrix();
 
     pushMatrix();
@@ -142,5 +145,22 @@ class Planet {
     grav.mult(0.0001);
     vel.add(grav);
     pos.add(vel);
+  }
+
+  Terrain pickTile() {
+    int xOffset=(width-ship.land.map.width)/2;
+    int yOffset=(height-ship.land.map.height)/2;
+    float halfRes=mapRes/2;
+    if (cursor.x>xOffset-halfRes&&cursor.x<width-xOffset-halfRes&&cursor.y>yOffset-halfRes&&cursor.y<height-yOffset-halfRes) {
+      int x=round((cursor.x-xOffset)/mapRes);
+      int y=round((cursor.y-yOffset)/mapRes);
+      selected=terrain[x+y*surface.height];
+
+      return selected;
+    } else
+    {
+      selected=null;
+      return null;
+    }
   }
 }
