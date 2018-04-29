@@ -6,7 +6,6 @@ NetAddress controller;
 String controllerIP="192.168.1.236";
 
 boolean[] move;
-float spill=0;
 ArrayList<Star> stars;
 ArrayList<Planet> planets;
 long seed=1;
@@ -20,8 +19,8 @@ int tSize=50;
 Terrain active;
 Ship ship;
 PVector cursor;
+Osc osc;
 
-int OSCIndicatorToggle=0;
 
 PFont pixFont;
 
@@ -39,23 +38,23 @@ void setup()
   mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
 
-  startOSC(12000, controllerIP, 9000);
+  osc=new Osc(12000, controllerIP, 9000);
 }
 
 void draw()
 {
-  background(0);
+  background(100);
   if (ship.land!=null)
   {
   } else
   {
   }
-  OSCtoggle();
 
   ship.update();
   ship.draw();
   drawStars();
   drawPlanets();
+  osc.OMUpdate();
   //stars();
   //camera(pos.x+mouseX-width/2, pos.y+mouseY-height/2, zoom*600.0, pos.x+mouseX-width/2, pos.y+mouseY-height/2, 0.0, 0.0, 1.0, 0.0);
   camera(ship.pos.x, ship.pos.y, zoom*600, ship.pos.x, ship.pos.y, 0.0, 0.0, 1.0, 0.0);
@@ -180,4 +179,11 @@ void drawPlanets() {
     p.update();
     p.draw();
   }
+}
+void exit(){
+    println("quitting");
+    OscMessage exitMessage = new OscMessage("/OM/label35/visible");
+    exitMessage.add(1);
+    oscP5.send(exitMessage, controller);
+    super.exit();
 }

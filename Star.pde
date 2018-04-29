@@ -11,7 +11,7 @@
     pos.x=round(random(-width, width));
     pos.y=round(random(-height, height));
     float distS=random(50, 300);
-    for (int i=0; i<round(random(1, 3)); i++) {
+    for (int i=0; i<round(random(minPlanetsPerStar, maxPlanetsPerStar)); i++) {
       float pMass=random(10, 100);
       distS+=random(40, 100)+sqrt(pMass)*5*2;
       planets.add(new Planet(this, pMass, distS, i+1));
@@ -25,7 +25,7 @@
     pos.x=x;
     pos.y=y;
     float distS=random(500, 1000);
-    for (int i=0; i<round(random(3, 8)); i++) {
+    for (int i=0; i<round(random(minPlanetsPerStar, maxPlanetsPerStar)); i++) {
       float pMass=random(10, 100);
       distS+=random(100, 1000)+sqrt(pMass)*5*2;
       planets.add(new Planet(this, pMass, distS, i+1));
