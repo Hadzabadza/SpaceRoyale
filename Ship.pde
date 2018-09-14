@@ -2,8 +2,10 @@ class Ship {
   boolean warp;
   float warpSpeed=10;
   float dir=0;
+  float aimDir=0;
   PVector vel, pos, grav;
   float thrust=0;
+  float bulSpeed=2;
   Planet land;
 
   Ship() {
@@ -17,9 +19,22 @@ class Ship {
     fill(255);
     line(pos.x, pos.y, pos.x+100*cos(radians(dir)), pos.y+100*sin(radians(dir)));
     ellipse(pos.x, pos.y, 15, 15);
+    noFill();
+    stroke(0, 255, 0);
+    line(pos.x+12*cos(radians(aimDir)), pos.y+12*sin(radians(aimDir)), pos.x+40*cos(radians(aimDir)), pos.y+40*sin(radians(aimDir)));
+    ellipse(pos.x, pos.y, 25, 25);
   }
 
   void update() {
+    if (input[4]) {
+      aimDir-=3;
+    }
+    if (input[5]) {
+      aimDir+=3;
+    }
+    if (input[6]){
+      shoot();
+    }
     if (warp)
     {
       pos.x+=warpSpeed*cos(radians(dir));
@@ -54,18 +69,18 @@ class Ship {
           land=null;
         }
       }
-      if (move[0]) {
+      if (input[0]) {
         if (thrust<=0.99)
           thrust+=0.01;
       }
-      if (move[1]) {
+      if (input[1]) {
         dir-=4*thrust+1;
       }
-      if (move[2]) {
+      if (input[2]) {
         if (thrust>=0.01)
           thrust-=0.01;
       }
-      if (move[3]) {
+      if (input[3]) {
         dir+=4*thrust+1;
       }
       vel.x+=cos(radians(dir))*thrust*thrust/100;
@@ -75,5 +90,8 @@ class Ship {
     }
   }
   void toggleWarp() {
+  }
+  void shoot(){
+    bullets.add(new Bullet(pos,new PVector(bulSpeed*cos(radians(aimDir))+vel.x,bulSpeed*sin(radians(aimDir))+vel.y),3));
   }
 }

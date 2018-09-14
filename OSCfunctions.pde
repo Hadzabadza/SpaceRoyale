@@ -37,13 +37,15 @@ class Osc {
     oscP5.plug(this, "moveCursor", "/PV/locator");
     oscP5.plug(this, "placeVolcano", "/PV/placeVolcano");
     oscP5.plug(this, "heightView", "/PV/heightView");
+    oscP5.plug(this, "changeZoom", "/OM/zoom");
+    oscP5.plug(this, "shoot", "/FC/fire");
+    oscP5.plug(this, "changeAim", "/FC/targeter");
     oscP5.plug(this, "pageSwitch", "/SC");
     oscP5.plug(this, "pageSwitch", "/PV");
     oscP5.plug(this, "pageSwitch", "/OM");
   }
 
   void OMStart() { //Startup of orbital map page
-
     OMPlanets=planets.size();
     OMPlanetDistances=new int[OMPlanets];
     longestDistance=round(planets.get(OMPlanets-1).distance);
@@ -56,60 +58,47 @@ class Osc {
     /* create an osc bundle */
     OscBundle myBundle = new OscBundle();
 
-    /* createa new osc message object */
-    OscMessage myMessage = new OscMessage("/OM/star");
-    myMessage.add(1);
-
-    /* add an osc message to the osc bundle */
-    myBundle.add(myMessage);
-
-    /* reset and clear the myMessage object for refill. */
-    myMessage.clear();
-
-    myMessage = new OscMessage("/OM/ship");
-    myMessage.add(1);
-    myBundle.add(myMessage);
-    myMessage.clear();
-    
-    myMessage = new OscMessage("/SC/directionIndicator");
-    myMessage.add(1);
-    myBundle.add(myMessage);
-    myMessage.clear();
-
-    myMessage = new OscMessage("/OM/label35/visible");
-    myMessage.add(0);
-    myBundle.add(myMessage);
-    myMessage.clear();
-
+    myBundle.add(new OscMessage("/OM/star").add(1));     
+    myBundle.add(new OscMessage("/OM/ship").add(1));     
+    myBundle.add(new OscMessage("/SC/directionIndicator").add(1));     
+    myBundle.add(new OscMessage("/OM/label35/visible").add(0));     
     for (int i=0; i<OMPlanets; i++) {
-      myMessage = new OscMessage("/OM/planet"+i);
-      myMessage.add(1);
-      myBundle.add(myMessage);
-      myMessage.clear();
-      OMPlanetMove(myBundle, i);
-    }
+      myBundle.add(new OscMessage("/OM/planet"+i).add(1));
+    }     
     for (int i=OMPlanets; i<maxPlanetsPerStar; i++)
     {
-      myMessage = new OscMessage("/OM/planet"+i+"/position/x");
-      myMessage.add(-30);
-      myBundle.add(myMessage);
-      myMessage.clear();
+      myBundle.add(new OscMessage("/OM/planet"+i+"/position/x").add(-30));
     }
-
-    /* refill the osc message object again */
-    //myMessage.setAddrPattern("/test2");
-    //myMessage.add("defg");
-    //myBundle.add(myMessage);
-
+    myBundle.add(new OscMessage("/OM/zoom").add(0.84));
     myBundle.setTimetag(myBundle.now());
-    /* send the osc bundle, containing 2 osc messages, to a remote location. */
     oscP5.send(myBundle, controller);
   }
 
   void OMUpdate() {
-    OscBundle myBundle = new OscBundle();
+    OscBundle myBundle = new OscBundle();    
+    if (frameCount%120==0) {      
+      myBundle.add(new OscMessage("/OM/star").add(1));
+      myBundle.add(new OscMessage("/OM/ship").add(1));
+      myBundle.add(new OscMessage("/SC/directionIndicator").add(1));
+      myBundle.add(new OscMessage("/OM/label35/visible").add(0));
+      myBundle.add(new OscMessage("/FC/centreIndicator").add(1));
+      for (int i=0; i<OMPlanets; i++) {
+        myBundle.add(new OscMessage("/OM/planet"+i).add(1));
+      }
+      for (int i=OMPlanets; i<maxPlanetsPerStar; i++)
+      {
+        myBundle.add(new OscMessage("/OM/planet"+i+"/position/x").add(-30));
+      }
+    }
+    displaceDIndicator();
     for (int i=0; i<OMPlanets; i++) {
       OMPlanetMove(myBundle, i);
+    }
+    if (ship.land!=null) {
+      myBundle.add(new OscMessage("/SC/planetView/color").add("green"));
+    } else
+    {
+      myBundle.add(new OscMessage("/SC/planetView/color").add("gray"));
     }
     OMShipMove(myBundle);
     myBundle.setTimetag(myBundle.now());
@@ -118,21 +107,12 @@ class Osc {
   }
 
   void OMPlanetMove(OscBundle outBundle, int targetPlanetIndex) {
-    OscMessage myMessage;
-    myMessage = new OscMessage("/OM/planet"+targetPlanetIndex+"/position/x");
     int OMPlanetPosX=round(planets.get(targetPlanetIndex).pos.x/longestDistance+OMCenterX+OMCorrectionOffset);
-    //println ("X= "+OMPlanetPosX);
-    myMessage.add(OMPlanetPosX);
-    outBundle.add(myMessage);
-    myMessage.clear();
-    myMessage = new OscMessage("/OM/planet"+targetPlanetIndex+"/position/y");
+    outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/x").add(OMPlanetPosX));
     int OMPlanetPosY=round(planets.get(targetPlanetIndex).pos.y/longestDistance+OMCenterY+OMCorrectionOffset);
-    //println ("Y= "+OMPlanetPosY);
-    //println();
-    myMessage.add(OMPlanetPosY);
-    outBundle.add(myMessage);
-    myMessage.clear();
+    outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/y").add(OMPlanetPosY));
   }
+
   void OMShipMove(OscBundle outBundle) { //Don't use alone! Needs the bundle sent at some point after use
     OscMessage myMessage;
     myMessage = new OscMessage("/OM/ship/position/x");
@@ -172,18 +152,33 @@ class Osc {
     ship.warp=!ship.warp;
   }
   public void turnLeft(float f) {
-    if (f==0) move[1]=false;
+    if (f==0) input[1]=false;
     else {
-      move[1]=true;
+      input[1]=true;
       displaceDIndicator();
     }
   }
   public void turnRight(float f) {
-    if (f==0) move[3]=false;
+    if (f==0) input[3]=false;
     else {
-      move[3]=true;
+      input[3]=true;
       displaceDIndicator();
     }
+  }
+
+  public void changeZoom(float f) {
+    zoom=0.8+9.2*(1-f)*(1-f);
+  }
+
+  public void shoot(float f) {
+    ship.shoot();
+  }
+
+  public void changeAim(float x, float y)
+  {
+    x-=0.5;
+    y-=0.5;
+    ship.aimDir=degrees(atan2(y, x))-90;
   }
 
   public void displaceDIndicator() {
@@ -207,13 +202,12 @@ class Osc {
     } else if (ship.land!=null) {
       mapScreen=true;
       ship.thrust=0;
-      oscP5.send(new OscMessage("/PV"),controller);
+      oscP5.send(new OscMessage("/PV"), controller);
     }
   }
 
   public void turnTo(float f) {
     ship.dir+=(ship.thrust+1)*f;
-    displaceDIndicator();
   }
 
   public void moveCursor(float x, float y)
