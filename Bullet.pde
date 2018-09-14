@@ -1,13 +1,8 @@
-class Bullet {
-  float radius;
-  PVector pos;
-  PVector vel;
+class Bullet extends Object{
   int timer=1200;
 
-  Bullet (PVector spawn, PVector direction, float _radius) {
-    pos= new PVector(spawn.x, spawn.y);
-    vel= new PVector(direction.x, direction.y);
-    radius=_radius;
+  Bullet (PVector _pos, PVector _vel, float _radius) {
+    super(new PVector(_pos.x, _pos.y),new PVector(_vel.x, _vel.y),0,_radius);
   }
 
   void draw() 
@@ -34,5 +29,9 @@ class Bullet {
         bullets.remove(this);
       }
     }
+  }
+  void destroy(){
+    bullets.remove(this);
+    super.destroy();
   }
 }

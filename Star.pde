@@ -1,11 +1,8 @@
-  class Star {
+  class Star extends Object{
   float mass;
-  float radius;
-  float AOE;
-  PVector pos;
 
   Star() {
-    pos= new PVector();
+    super(new PVector(),new PVector(),0,0);
     mass=random(100, 1000);
     radius=sqrt(mass)*5;
     pos.x=round(random(-width, width));
@@ -27,11 +24,9 @@
   }
 
   Star(float x, float y) {
-    pos= new PVector();
+    super(new PVector(x,y),new PVector(),0,0);
     mass=random(100, 1000);
     radius=sqrt(mass)*5;
-    pos.x=x;
-    pos.y=y;
     float distS=random(500, 1000);
     int isAsteroid=round(random(0,100));
     for (int i=0; i<round(random(minPlanetsPerStar, maxPlanetsPerStar)); i++) {
@@ -46,13 +41,15 @@
       planets.add(new Planet(this, pMass, distS, i+1));
     }
   }
-  Star(float mass_) {
-  }
 
   void draw()
   {
     stroke(0);
     fill(255, 200, 40);
     ellipse (pos.x, pos.y, radius*2, radius*2);
+  }
+  void destroy(){
+    stars.remove(this);
+    super.destroy();
   }
 }

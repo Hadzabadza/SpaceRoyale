@@ -1,19 +1,13 @@
-class Asteroid {
+class Asteroid extends Object{
   float mass;
-  float radius;
-  float AOE;
   float distance;
-  PVector pos;
-  PVector vel;
   PVector grav;
   Star orbitStar;
 
   Asteroid (Star s, float mas, float distS) {
+    super(new PVector(), new PVector(),0,sqrt(mas)*5);
     orbitStar=s;
-    pos= new PVector();
-    vel= new PVector();
     mass=mas;
-    radius=sqrt(mass)*5;
     distance = distS+orbitStar.radius;
     float phase=random(0, 360);
     vel.x=sqrt(0.0001*distance)*cos(radians(phase+90));
@@ -50,6 +44,10 @@ class Asteroid {
     grav.normalize();
     grav.mult(0.0001);
     vel.add(grav);
-    pos.add(vel);
+    super.update();
+  }
+  void destroy(){
+    asteroids.remove(this);
+    super.destroy();
   }
 }

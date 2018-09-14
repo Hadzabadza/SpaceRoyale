@@ -1,9 +1,7 @@
-class Planet {
+class Planet extends Object{
   PImage surface;
   PImage map;
   float mass;
-  float radius;
-  float AOE;
   float distance;
   float spin;
   float avgHeight=122;
@@ -12,19 +10,15 @@ class Planet {
   float totalHeight=0;
   int mapRes;
   int orbitNumber;
-  PVector pos;
-  PVector vel;
   PVector grav;
   Terrain [] terrain;
   Terrain selected;
   Star orbitStar;
 
   Planet(Star s, float mas, float distS, int number) {
+    super(new PVector(),new PVector(),0,sqrt(mas)*5);
     orbitStar=s;
-    pos= new PVector();
-    vel= new PVector();
     mass=mas;
-    radius=sqrt(mass)*5;
     distance = distS+orbitStar.radius;
     float phase=random(0, 360);
     vel.x=sqrt(0.0001*distance)*cos(radians(phase+90));
@@ -144,7 +138,7 @@ class Planet {
     grav.normalize();
     grav.mult(0.0001);
     vel.add(grav);
-    pos.add(vel);
+    super.update();
   }
 
   Terrain pickTile() {
@@ -162,5 +156,9 @@ class Planet {
       selected=null;
       return null;
     }
+  }
+  void destroy(){
+    planets.remove(this);
+    super.destroy();
   }
 }

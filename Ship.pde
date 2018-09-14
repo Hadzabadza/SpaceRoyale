@@ -1,28 +1,26 @@
-class Ship {
+class Ship extends Object{
   boolean warp;
-  float warpSpeed=10;
-  float dir=0;
-  float aimDir=0;
-  PVector vel, pos, grav;
-  float thrust=0;
-  float bulSpeed=2;
+  float warpSpeed=warpCap;
+  float turretGfxRadius=turretGfxSize;
+  float aimDir;
+  PVector grav;
+  float thrust;
+  float bulSpeed=projectileSpeed;
   Planet land;
 
   Ship() {
-    vel = new PVector();
-    pos= new PVector();
-    pos.x=0;
-    pos.y=0;
+    super(new PVector(), new PVector(),0,shipSize);
+    turretGfxRadius+=radius;
   }
   void draw() {
     stroke(255, 0, 0);
     fill(255);
     line(pos.x, pos.y, pos.x+100*cos(radians(dir)), pos.y+100*sin(radians(dir)));
-    ellipse(pos.x, pos.y, 15, 15);
+    ellipse(pos.x, pos.y, radius, radius);
     noFill();
     stroke(0, 255, 0);
     line(pos.x+12*cos(radians(aimDir)), pos.y+12*sin(radians(aimDir)), pos.x+40*cos(radians(aimDir)), pos.y+40*sin(radians(aimDir)));
-    ellipse(pos.x, pos.y, 25, 25);
+    ellipse(pos.x, pos.y, turretGfxRadius, turretGfxRadius);
   }
 
   void update() {
@@ -85,13 +83,16 @@ class Ship {
       }
       vel.x+=cos(radians(dir))*thrust*thrust/100;
       vel.y+=sin(radians(dir))*thrust*thrust/100;
-      pos.x+=vel.x;
-      pos.y+=vel.y;
+      super.update();
     }
   }
   void toggleWarp() {
   }
   void shoot(){
     bullets.add(new Bullet(pos,new PVector(bulSpeed*cos(radians(aimDir))+vel.x,bulSpeed*sin(radians(aimDir))+vel.y),3));
+  }
+  void destroy(){
+    ships.remove(this);
+    super.destroy();
   }
 }
