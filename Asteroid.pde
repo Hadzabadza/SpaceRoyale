@@ -16,25 +16,25 @@ class Asteroid extends Object{
     pos.y=orbitStar.pos.y+distance*sin(radians(phase));
   }
 
-  void draw() 
+  void draw(PGraphics renderer) 
   {
-    pushMatrix();
-    translate(0, 0, -1);
-    stroke(255, 105+55*cos(radians(frameCount)),105+55*cos(radians(frameCount)),125+75*cos(radians(frameCount)));
-    noFill();
-    ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
-    line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
-    popMatrix();
+    renderer.pushMatrix();
+    renderer.translate(0, 0, -1);
+    renderer.stroke(255, 105+55*cos(radians(frameCount)),105+55*cos(radians(frameCount)),125+75*cos(radians(frameCount)));
+    renderer.noFill();
+    renderer.ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
+    renderer.line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
+    renderer.popMatrix();
 
-    pushMatrix();
-    translate(0, 0, 1);
-    fill(200,20,100);
-    strokeWeight(3);
-    ellipse (pos.x, pos.y, diameter, diameter);
-    strokeWeight(1);
-    noFill();
-    ellipse (pos.x,pos.y,diameter*10,diameter*10);
-    popMatrix();
+    renderer.pushMatrix();
+    renderer.translate(0, 0, 1);
+    renderer.fill(200,20,100);
+    renderer.strokeWeight(3);
+    renderer.ellipse (pos.x, pos.y, diameter, diameter);
+    renderer.strokeWeight(1);
+    renderer.noFill();
+    renderer.ellipse (pos.x,pos.y,diameter*10,diameter*10);
+    renderer.popMatrix();
   }
 
   void update() {

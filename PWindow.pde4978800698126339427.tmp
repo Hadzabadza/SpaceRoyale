@@ -1,0 +1,30 @@
+class PWindow extends PGraphicsOpenGL {
+  int winSize;
+  int x, y;
+  Ship target;
+
+  PWindow(int _winSize, int _x, int _y, Ship sh) {
+    super();
+    winSize=_winSize;
+    x=_x;
+    y=_y;
+    target=sh;
+    PApplet.runSketch(new String[] {this.getClass().getSimpleName()}, super);
+  }
+
+  void settings() {
+    //size(winSize, winSize, P3D);
+  }
+
+  void setup() {
+    size(winSize, winSize, P3D);
+    background(150);
+  }
+
+  void draw() {
+    camera(target.pos.x, target.pos.y, zoom*600, target.pos.x, target.pos.y, 0.0, 0.0, 1.0, 0.0);
+    for (Object o : objects) {
+      o.draw();
+    }
+  }
+}

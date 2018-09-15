@@ -99,12 +99,12 @@ class Terrain {
      */
      if (p.selected==this)
      {
-       drawSelection();
+       drawSelection(ships[0]);
      }
   };
   void build() {
   }
-  void drawSelection(){
+  void drawSelection(Ship ship){
       strokeWeight(1);
       //pushMatrix();
       //translate(0, 0, 1);

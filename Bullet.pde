@@ -5,12 +5,12 @@ class Bullet extends Object {
     super(new PVector(_pos.x, _pos.y), new PVector(_vel.x, _vel.y), 0, _radius);
   }
 
-  void draw() 
+  void draw(PGraphics renderer) 
   {
-    fill(255, 0, 0);
-    strokeWeight(1);
-    stroke (255);
-    ellipse (pos.x, pos.y, diameter, diameter);
+    renderer.fill(255, 0, 0);
+    renderer.strokeWeight(1);
+    renderer.stroke (255);
+    renderer.ellipse (pos.x, pos.y, diameter, diameter);
   }
 
   void update() {
@@ -24,6 +24,14 @@ class Bullet extends Object {
       if (checkCollision(a))
       {
         a.queueDestroy();
+        queueDestroy();
+      }
+    }
+    for (Ship s:ships)
+    {
+      if (checkCollision(s))
+      {
+        s.HP-=Settings.bullDmg;
         queueDestroy();
       }
     }

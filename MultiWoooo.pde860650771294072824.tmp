@@ -5,13 +5,19 @@ ArrayList<Star> stars;
 ArrayList<Planet> planets;
 ArrayList<Asteroid> asteroids;
 ArrayList<Bullet> bullets;
-Ship[] ships;
+ArrayList<Ship> ships;
+Ship ship;
+Ship ship1;
 ArrayList<Object> destroyees;
 ArrayList<Object> newSpawns;
 ArrayList<Object> objects;
 long seed=1;
 float offx=0;
 float offy=0;
+float zoom=1;
+float zoom1=1;
+boolean ship1ZoomIn;
+boolean ship1ZoomOut;
 PVector mapScreenShift;
 boolean mapScreen;
 boolean heightColour;
@@ -21,37 +27,39 @@ PVector cursor;
 OscHub osc;
 
 /*PWindow win; 
- PWindow win1;*/
-PGraphics[] screen;
+PWindow win1;*/
+PGraphics leftView;
+PGraphics rightView;
 
 PFont pixFont;
 
 void setup() {
   size(1300, 650, P3D);
-  surface.setLocation((displayWidth-1300)/2, (displayHeight-650)/2);
+  surface.setLocation((displayWidth-1300)/2,(displayHeight-650)/2);
+  leftView=createGraphics(width/2,height,P3D);
+  rightView=createGraphics(width/2,height,P3D);
   pixFont=createFont("Minecraftia-Regular.ttf", 120, true);
   textFont(pixFont, 12);
-
-  init();
-
-  osc=new OscHub(Settings.ships);
+  
+ init();
+  
+  osc=new OscHub(2);
 }
 
-void init() {
+void init(){
   stars=new ArrayList<Star>();
   planets=new ArrayList<Planet>();
   asteroids=new ArrayList<Asteroid>();
   bullets=new ArrayList<Bullet>();
-  ships=new Ship[Settings.ships];
+  ships=new ArrayList<Ship>();
   destroyees=new ArrayList<Object>();
   newSpawns=new ArrayList<Object>();
   objects=new ArrayList<Object>();
-  screen= new PGraphics[Settings.ships];
-  for (int i=0; i<Settings.ships; i++) {
-    ships[i]=new Ship();
-    screen[i]=createGraphics(width/Settings.ships, height, P3D);
-  }
-  //ship1.c=color(255,255,0);
+  
+  ship = new Ship();
+  ships.add(ship);
+  ship1 = new Ship();
+  ship1.c=color(255,255,0);
   stars.add(new Star(0, 0));
   mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
@@ -59,34 +67,46 @@ void init() {
 
 void draw() {
   objectUpdates();
+  for (int i=0; i<ships.size()-1; i++) osc.OMUpdate(i,ships.get(i));
   background(0);
-  osc.OMUpdate();
-  int screenSize=width/screen.length;
-  int halfScreen=screenSize/2;
-  for (int i=0; i<screen.length; i++)
-  {
-    screen[i].beginDraw();
-    screen[i].background(Settings.backgroundColor);
-    screen[i].camera(ships[i].pos.x, ships[i].pos.y, ships[i].zoom*600, ships[i].pos.x, ships[i].pos.y, 0.0, 0.0, 1.0, 0.0);
-    for (Object o : objects) {
-      o.draw(screen[i]);
-    }
-    screen[i].endDraw();
-    image(screen[i], screenSize*i, 0);
+  if (ship1ZoomIn) zoom1*=0.99;
+  else if (ship1ZoomOut) zoom1*=1.01;
+  leftView.beginDraw();
+  leftView.background(50,60,50);
+  leftView.camera(ship.pos.x, ship.pos.y, zoom*600, ship.pos.x, ship.pos.y, 0.0, 0.0, 1.0, 0.0);
+  for (Object o : objects) {
+    o.draw(leftView);
   }
+  leftView.endDraw();
+
+  rightView.beginDraw();
+  rightView.background(60,60,50);
+  rightView.camera(ship1.pos.x, ship1.pos.y, zoom1*600, ship1.pos.x, ship1.pos.y, 0.0, 0.0, 1.0, 0.0);
+  for (Object o : objects) {
+    o.draw(rightView);
+  }
+  rightView.stroke(255);
+
+  rightView.endDraw();
+
+  //add the two viewports to your main panel
+  image(leftView, 0, 0);
+  image(rightView, width/2, 0);
+  
   stroke (255);
   strokeWeight(1);
   noFill();
-  for (int i=0; i<screen.length; i++)
-  {
-    rect(screenSize*i+halfScreen-50, 10, 100, 10);
-    fill(60+195*(1-ships[i].HP), 60+195*ships[i].HP, 0);
-    rect(width/4-50, 10, 100*ships[i].HP, 10);
-  }
-  strokeWeight(3);
-  for (int i=1;i<screen.length; i++) line (screenSize, 0, screenSize, height);
+  rect(width/4-50,10,100,10);
+  rect(width/2+width/4-50,10,100,10);
+  fill(60+195*(1-ship.HP),60+195*ship.HP,0);
+  rect(width/4-50,10,100*ship.HP,10);
+  fill(60+195*(1-ship1.HP),60+195*ship1.HP,0);
+  rect(width/2+width/4-50,10,100*ship1.HP,10);
 
-  /*if (mapScreen) {
+  strokeWeight(3);
+  line (width/2,0,width/2,height);
+
+  if (mapScreen) {
     camera(ship.pos.x, ship.pos.y, (height/2.0) / tan(PI*30.0 / 180.0)*zoom, ship.pos.x, ship.pos.y, 0.0, 0.0, 1.0, 0.0);
     pushMatrix();
     translate(ship.pos.x-width/2*zoom+mapScreenShift.x*zoom, ship.pos.y-height/2*zoom+mapScreenShift.y*zoom, 2);
@@ -121,18 +141,68 @@ void draw() {
     {
       mapScreen=false;
     }
-  }*/
+  }
+}
+
+
+void mouseWheel(MouseEvent e) {
+  if (e.getCount()>0)
+  {
+    zoom*=1.01;
+  } else
+  {
+    zoom*=0.99;
+  }
+}
+
+void mouseReleased() {
+  if (mouseButton==RIGHT)
+  {
+    if (mapScreen)
+    {
+      heightColour=!heightColour;
+    }
+  }
+  if (mouseButton==LEFT)
+  {
+    if (mapScreen) 
+    {
+      Terrain t=ship.land.pickTile();
+      if (t!=null)
+      {
+        t.build();
+        t.volcanize();
+      }
+      if (t==null)
+      {
+        mapScreen=false;
+        active=null;
+      }
+    } else if (ship.land!=null) {
+      mapScreen=true;
+      ship.thrust=0;
+    }
+  }
+  if (mouseButton==CENTER)
+  {
+    zoom=1;
+  }
+}
+
+void mouseMoved() {
+  cursor.x=mouseX;
+  cursor.y=mouseY;
 }
 
 void objectUpdates() {
   for (Object o : objects) {
     o.update();
   }
-  for (int i=destroyees.size()-1; i>=0; i--) {
+  for (int i=destroyees.size()-1; i>=0; i--){
     destroyees.get(i).destroy();
     destroyees.remove(i);
   }
-  for (int i=newSpawns.size()-1; i>=0; i--) {
+  for (int i=newSpawns.size()-1; i>=0; i--){
     newSpawns.get(i).spawn();
     newSpawns.remove(i);
   }

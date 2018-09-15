@@ -87,30 +87,41 @@ class Planet extends Object{
     map.updatePixels();
   }
 
-  void draw() 
+  void draw(PGraphics renderer) 
   {
-    pushMatrix();
-    translate(0, 0, -1);
-    stroke(255, 125+75*cos(radians(frameCount)));
-    noFill();
-    ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
-    line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
-    popMatrix();
+    renderer.pushMatrix();
+    renderer.translate(0, 0, -1);
+    renderer.stroke(255, 125+75*cos(radians(frameCount)));
+    renderer.noFill();
+    renderer.ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
+    renderer.line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
+    renderer.popMatrix();
 
-    pushMatrix();
-    translate(0, 0, 1);
-    noFill();
-    strokeWeight(3);
-    ellipse (pos.x, pos.y, diameter, diameter);
-    strokeWeight(1);
-    ellipse (pos.x,pos.y,diameter*10,diameter*10);
-    popMatrix();
+    renderer.pushMatrix();
+    renderer.translate(0, 0, 1);
+    renderer.noFill();
+    renderer.strokeWeight(3);
+    renderer.ellipse (pos.x, pos.y, diameter, diameter);
+    renderer.strokeWeight(1);
+    renderer.ellipse (pos.x,pos.y,diameter*10,diameter*10);
+    renderer.popMatrix();
 
-    pushMatrix();
-    translate(pos.x, pos.y);
-    rotate((radians(frameCount))/4*spin);
-    image(surface, 0-surface.width/(surface.width/radius), 0-surface.height/(surface.height/radius), surface.width/2, surface.height/2);
-    popMatrix();
+    renderer.pushMatrix();
+    renderer.translate(pos.x, pos.y);
+    renderer.rotate((radians(frameCount))/4*spin);
+    renderer.image(surface, 0-surface.width/(surface.width/radius), 0-surface.height/(surface.height/radius), surface.width/2, surface.height/2);
+    renderer.popMatrix();
+  }
+
+  void update() {
+    grav=new PVector();
+    grav.x=-(pos.x-orbitStar.pos.x);
+    grav.y=-(pos.y-orbitStar.pos.y);
+    grav.normalize();
+    grav.mult(0.0001);
+    vel.add(grav);
+    super.update();
+    
     if (frameCount%5==0)
     {
       totalHeight=0;
@@ -131,19 +142,9 @@ class Planet extends Object{
     }
   }
 
-  void update() {
-    grav=new PVector();
-    grav.x=-(pos.x-orbitStar.pos.x);
-    grav.y=-(pos.y-orbitStar.pos.y);
-    grav.normalize();
-    grav.mult(0.0001);
-    vel.add(grav);
-    super.update();
-  }
-
   Terrain pickTile() {
-    int xOffset=(width-ship.land.map.width)/2;
-    int yOffset=(height-ship.land.map.height)/2;
+    int xOffset=(width-map.width)/2;
+    int yOffset=(height-map.height)/2;
     float halfRes=mapRes/2;
     if (cursor.x>xOffset-halfRes&&cursor.x<width-xOffset-halfRes&&cursor.y>yOffset-halfRes&&cursor.y<height-yOffset-halfRes) {
       int x=round((cursor.x-xOffset)/mapRes);

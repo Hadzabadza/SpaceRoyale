@@ -1,6 +1,6 @@
 //TODO: stop sending orbital data when OM page is not active
 
-class Osc {
+class OscHub {
   int OMPlanets; //TouchOSC orbital map planets count
   int OMPlanetSize=10; //Width/height of a planet on display
   int displaySize=280; //Smallest dimension of the display
@@ -12,53 +12,30 @@ class Osc {
   int turnWheelPosX=108;
   int turnWheelPosY=10;
   int turnWheelRadius=120;
-  int player=0;
+  OscDock[] dock;
 
-  Osc(int port) {
-    oscP5 = new OscP5(this, port);
-    controller = new NetAddress("127.0.0.1", 12000);
+  OscHub(int controllers) {
+    dock=new OscDock[controllers];
+    for (int i=0; i<controllers; i++) 
+    {
+      dock[i]=new OscDock(new NetAddress(Settings.controllerIP[i], Settings.controllerInPort[i]),ships.get(i));
+      dock[i].plugs();
+    }
     OMStart();
-    plugs();
   }
 
-  Osc(int port, String outIP, int outPort) {
-    oscP5 = new OscP5(this, port);
-    controller = new NetAddress(outIP, outPort);
-    OMStart();
-    plugs();
-  }
-
-  void plugs() {
-    oscP5.plug(this, "changeThrottle", "/SC/throttle");
-    oscP5.plug(this, "warp", "/SC/warp");
-    oscP5.plug(this, "turnLeft", "/SC/turnLeft");
-    oscP5.plug(this, "turnRight", "/SC/turnRight");
-    oscP5.plug(this, "enterPlanet", "/SC/planetView");
-    oscP5.plug(this, "turnTo", "/SC/turnWheel");
-    oscP5.plug(this, "moveCursor", "/PV/locator");
-    oscP5.plug(this, "placeVolcano", "/PV/placeVolcano");
-    oscP5.plug(this, "heightView", "/PV/heightView");
-    oscP5.plug(this, "changeZoom", "/OM/zoom");
-    oscP5.plug(this, "shoot", "/FC/fire");
-    oscP5.plug(this, "changeAim", "/FC/targeter");
-    oscP5.plug(this, "pageSwitch", "/SC");
-    oscP5.plug(this, "pageSwitch", "/PV");
-    oscP5.plug(this, "pageSwitch", "/OM");
-  }
-
-  void OMStart() { //Startup of orbital map page
+  void OMStart() { //Initializing startup data
     OMPlanets=planets.size();
     OMPlanetDistances=new int[OMPlanets];
     longestDistance=round(planets.get(OMPlanets-1).distance);
     longestDistance=longestDistance/100;
-    for (int i=0; i<OMPlanets; i++)
-    {
-      OMPlanetDistances[i]=round(planets.get(i).distance/longestDistance);
-    }
+    for (int i=0; i<OMPlanets; i++) OMPlanetDistances[i]=round(planets.get(i).distance/longestDistance);
+    for (int i=0; i<oscp5.length; i++) sendStart(i);
+  }
 
+  void unicastStart(int which) {
     /* create an osc bundle */
     OscBundle myBundle = new OscBundle();
-
     myBundle.add(new OscMessage("/OM/star").add(1));     
     myBundle.add(new OscMessage("/OM/ship").add(1));     
     myBundle.add(new OscMessage("/SC/directionIndicator").add(1));     
@@ -66,16 +43,16 @@ class Osc {
     for (int i=0; i<OMPlanets; i++) {
       myBundle.add(new OscMessage("/OM/planet"+i).add(1));
     }     
-    for (int i=OMPlanets; i<maxPlanetsPerStar; i++)
+    for (int i=OMPlanets; i<Settings.maxPlanetsPerStar; i++)
     {
       myBundle.add(new OscMessage("/OM/planet"+i+"/position/x").add(-30));
     }
     myBundle.add(new OscMessage("/OM/zoom").add(0.84));
     myBundle.setTimetag(myBundle.now());
-    oscP5.send(myBundle, controller);
+    for (OscDock d: dock) d.ex.send(myBundle);
   }
 
-  void OMUpdate() {
+  void OMUpdate(int which, Ship sh) {
     OscBundle myBundle = new OscBundle();    
     if (frameCount%120==0) {      
       myBundle.add(new OscMessage("/OM/star").add(1));
@@ -86,12 +63,12 @@ class Osc {
       for (int i=0; i<OMPlanets; i++) {
         myBundle.add(new OscMessage("/OM/planet"+i).add(1));
       }
-      for (int i=OMPlanets; i<maxPlanetsPerStar; i++)
+      for (int i=OMPlanets; i<Settings.maxPlanetsPerStar; i++)
       {
         myBundle.add(new OscMessage("/OM/planet"+i+"/position/x").add(-30));
       }
     }
-    displaceDIndicator();
+    displaceDIndicator(myBundle);
     for (int i=0; i<OMPlanets; i++) {
       OMPlanetMove(myBundle, i);
     }
@@ -101,10 +78,10 @@ class Osc {
     {
       myBundle.add(new OscMessage("/SC/planetView/color").add("gray"));
     }
-    OMShipMove(myBundle);
+    OMShipMove(myBundle, sh);
     myBundle.setTimetag(myBundle.now());
     /* send the osc bundle, containing 2 osc messages, to a remote location. */
-    oscP5.send(myBundle, controller);
+    oscp5[which].send(myBundle, controller[which]);
   }
 
   void OMPlanetMove(OscBundle outBundle, int targetPlanetIndex) {
@@ -114,10 +91,10 @@ class Osc {
     outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/y").add(OMPlanetPosY));
   }
 
-  void OMShipMove(OscBundle outBundle) { //Don't use alone! Needs the bundle sent at some point after use
+  void OMShipMove(OscBundle outBundle, Ship sh) { //Don't use alone! Needs the bundle sent at some point after use
     OscMessage myMessage;
     myMessage = new OscMessage("/OM/ship/position/x");
-    int OMShipPosX=round(ship.pos.x/longestDistance+OMCenterX+OMCorrectionOffset);
+    int OMShipPosX=round(sh.pos.x/longestDistance+OMCenterX+OMCorrectionOffset);
     if (OMShipPosX>OMCenterX*2) {
       OMShipPosX=OMCenterX*2;
     } else
@@ -131,7 +108,7 @@ class Osc {
     myMessage.clear();
 
     myMessage = new OscMessage("/OM/ship/position/y");
-    int OMShipPosY=round(ship.pos.y/longestDistance+OMCenterY+OMCorrectionOffset);
+    int OMShipPosY=round(sh.pos.y/longestDistance+OMCenterY+OMCorrectionOffset);
     if (OMShipPosY>OMCenterY*2) {
       OMShipPosY=OMCenterY*2;
     } else
@@ -152,18 +129,18 @@ class Osc {
   public void warp(float f) {
     ships.get(player).warp=!ships.get(player).warp;
   }
-  public void turnLeft(float f) {
+  public void turnLeft(float f, OscBundle outBundle) {
     if (f==0) ships.get(player).turnLeft=false;
     else {
       ships.get(player).turnLeft=true;
-      displaceDIndicator();
+      displaceDIndicator(outBundle);
     }
   }
-  public void turnRight(float f) {
+  public void turnRight(float f, OscBundle outBundle) {
     if (f==0) ships.get(player).turnRight=false;
     else {
       ships.get(player).turnRight=true;
-      displaceDIndicator();
+      displaceDIndicator(outBundle);
     }
   }
 
@@ -182,20 +159,17 @@ class Osc {
     ship.aimDir=atan2(y, x)-HALF_PI;
   }
 
-  public void displaceDIndicator() {
-    OscBundle dIndicBundle=new OscBundle();
+  public void displaceDIndicator(OscBundle outBundle) {
     OscMessage dIndicMessage=new OscMessage("/SC/directionIndicator/position/x");
     dIndicMessage.add(OMCorrectionOffset+round(turnWheelPosX+turnWheelRadius+turnWheelRadius*cos(radians(ship.dir))));
-    dIndicBundle.add(dIndicMessage);
+    outBundle.add(dIndicMessage);
     dIndicMessage.clear();
     dIndicMessage=new OscMessage("/SC/directionIndicator/position/y");
     dIndicMessage.add(OMCorrectionOffset+round(turnWheelPosY+turnWheelRadius+turnWheelRadius*sin(radians(ship.dir))));
-    dIndicBundle.add(dIndicMessage);
-    dIndicBundle.setTimetag(dIndicBundle.now());
-    oscP5.send(dIndicBundle, controller);
+    outBundle.add(dIndicMessage);
   }
 
-  public void enterPlanet(float f) {
+  public void enterPlanet(float f, int which) {
     if (mapScreen==true)  
     {
       mapScreen=false;
@@ -203,7 +177,7 @@ class Osc {
     } else if (ship.land!=null) {
       mapScreen=true;
       ship.thrust=0;
-      oscP5.send(new OscMessage("/PV"), controller);
+      oscp5[which].send(new OscMessage("/PV"), controller[which]);
     }
   }
 
@@ -235,22 +209,39 @@ class Osc {
       }
     }
   }
+  public void exit() {
+    OscMessage exitMessage = new OscMessage("/OM/label35/visible");
+    exitMessage.add(1);
+    for (int i=0; i<oscp5.length; i++) oscp5[i].send(exitMessage, controller[i]);
+  }
+}
 
-  /*void oscEvent(OscMessage theOscMessage) {
-   // print the address pattern and the typetag of the received OscMessage 
-   print("### received an osc message.");
-   print(" addrpattern: "+theOscMessage.addrPattern());
-   println(" typetag: "+theOscMessage.typetag());
-   }*/
-
-  void oscTest() {
-    /* in the following different ways of creating osc messages are shown by example 
-     OscMessage myMessage = new OscMessage("/test");
-     myMessage.setAddrPattern("/SC/TurnWheel");
-     myMessage.add(1);  add an int to the osc message */
-
-    ; /* add an int to the osc message */
-    /* send the message */
-    //oscP5.send(myMessage, controller);
+class OscDock{
+  OscP5 ex;
+  Ship s;
+  NetAddress c;
+  
+  OscDock(NetAddress _c,Ship _s){
+    ex=new OscP5(this, Settings.OscOutPort);
+    c=_c;
+    s=_s;
+  }
+  
+  void plugs() {
+      ex.plug(this,"changeThrottle", "/SC/throttle");
+      ex.plug(this, "warp", "/SC/warp");
+      ex.plug(this, "turnLeft", "/SC/turnLeft");
+      ex.plug(this, "turnRight", "/SC/turnRight");
+      ex.plug(this, "enterPlanet", "/SC/planetView");
+      ex.plug(this, "turnTo", "/SC/turnWheel");
+      ex.plug(this, "moveCursor", "/PV/locator");
+      ex.plug(this, "placeVolcano", "/PV/placeVolcano");
+      ex.plug(this, "heightView", "/PV/heightView");
+      ex.plug(this, "changeZoom", "/OM/zoom");
+      ex.plug(this, "shoot", "/FC/fire");
+      ex.plug(this, "changeAim", "/FC/targeter");
+      ex.plug(this, "pageSwitch", "/SC");
+      ex.plug(this, "pageSwitch", "/PV");
+      ex.plug(this, "pageSwitch", "/OM");
   }
 }

@@ -31,6 +31,6 @@ class Object { //Superclass for physical ingame objects
   void destroy(){
     objects.remove(this);
   }
-  void draw(){
+  void draw(PGraphics renderer){
   }
 }

@@ -10,7 +10,7 @@
     pos.y=round(random(-height, height));
     float distS=random(50, 300);
     int isAsteroid=round(random(0,100));
-    for (int i=0; i<round(random(minPlanetsPerStar, maxPlanetsPerStar)); i++) {
+    for (int i=0; i<round(random(Settings.minPlanetsPerStar, Settings.maxPlanetsPerStar)); i++) {
       if (isAsteroid>40){
         float pMass=random(1, 5);
         distS+=random(10, 100)+sqrt(pMass)*5*2;
@@ -31,7 +31,7 @@
     diameter=radius*2;
     float distS=random(500, 1000);
     int isAsteroid=round(random(0,100));
-    for (int i=0; i<round(random(minPlanetsPerStar, maxPlanetsPerStar)); i++) {
+    for (int i=0; i<round(random(Settings.minPlanetsPerStar, Settings.maxPlanetsPerStar)); i++) {
       if (isAsteroid>40){
         float pMass=random(1, 5);
         distS+=random(10, 30)+sqrt(pMass)*5*2;
@@ -44,11 +44,11 @@
     }
   }
 
-  void draw()
+  void draw(PGraphics renderer)
   {
-    stroke(0);
-    fill(255, 200, 40);
-    ellipse (pos.x, pos.y, diameter, diameter);
+    renderer.stroke(0);
+    renderer.fill(255, 200, 40);
+    renderer.ellipse (pos.x, pos.y, diameter, diameter);
   }
   void spawn(){
     stars.add(this);
