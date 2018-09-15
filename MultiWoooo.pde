@@ -31,10 +31,12 @@ void setup() {
   surface.setLocation((displayWidth-1300)/2, (displayHeight-650)/2);
   pixFont=createFont("Minecraftia-Regular.ttf", 120, true);
   textFont(pixFont, 12);
+  frameRate(Settings.FPS);
 
   init();
 
   osc=new OscHub(Settings.ships);
+  OscBundle boom= new OscBundle();
 }
 
 void init() {
@@ -48,13 +50,55 @@ void init() {
   objects=new ArrayList<Object>();
   screen= new PGraphics[Settings.ships];
   for (int i=0; i<Settings.ships; i++) {
-    ships[i]=new Ship();
     screen[i]=createGraphics(width/Settings.ships, height, P3D);
+    switch (i) {
+    case 0: 
+      {
+        ships[i]=new Ship(color(255, 0, 0));
+        break;
+      }
+    case 1: 
+      {
+        ships[i]=new Ship(color(0, 255, 0));
+        break;
+      }
+    case 2: 
+      {
+        ships[i]=new Ship(color(0, 0, 255));
+        break;
+      }
+    case 3: 
+      {
+        ships[i]=new Ship(color(0, 255, 255));
+        break;
+      }
+    case 4: 
+      {
+        ships[i]=new Ship(color(255, 0, 255));
+        break;
+      }
+    case 5: 
+      {
+        ships[i]=new Ship(color(255, 255, 0));
+        break;
+      }
+    case 6: 
+      {
+        ships[i]=new Ship(color(100, 100, 0));
+        break;
+      }
+    case 7: 
+      {
+        ships[i]=new Ship(color(100));
+        break;
+      }
+    }
   }
   //ship1.c=color(255,255,0);
   stars.add(new Star(0, 0));
   mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
+  osc.OMStart();
 }
 
 void draw() {
@@ -76,52 +120,52 @@ void draw() {
   }
   stroke (255);
   strokeWeight(1);
-  noFill();
   for (int i=0; i<screen.length; i++)
   {
-    rect(screenSize*i+halfScreen-50, 10, 100, 10);
     fill(60+195*(1-ships[i].HP), 60+195*ships[i].HP, 0);
-    rect(width/4-50, 10, 100*ships[i].HP, 10);
+    rect(screenSize*i+halfScreen-50, 10, 100*ships[i].HP, 10);
+    noFill();
+    rect(screenSize*i+halfScreen-50, 10, 100, 10);
   }
   strokeWeight(3);
-  for (int i=1;i<screen.length; i++) line (screenSize, 0, screenSize, height);
+  for (int i=1; i<screen.length; i++) line (screenSize, 0, screenSize, height);
 
   /*if (mapScreen) {
-    camera(ship.pos.x, ship.pos.y, (height/2.0) / tan(PI*30.0 / 180.0)*zoom, ship.pos.x, ship.pos.y, 0.0, 0.0, 1.0, 0.0);
-    pushMatrix();
-    translate(ship.pos.x-width/2*zoom+mapScreenShift.x*zoom, ship.pos.y-height/2*zoom+mapScreenShift.y*zoom, 2);
-    scale(zoom);
-    rectMode(CENTER);
-    if (ship.land!=null) {
-      for (Terrain t : ship.land.terrain)
-      {
-        t.draw();
-      }
-      Terrain selected=ship.land.pickTile();
-      if (selected!=null)
-      {
-        fill(255);
-        text("Current: "+selected.elevation, 50, -40);
-        text("Deepness: "+selected.depth, 250, -40);
-        text("Index: "+selected.index, 50, -20);
-      }
-      fill(255);
-      textAlign(CENTER);
-      text("Avg: "+ship.land.avgHeight, 50, -60);
-      text("Max: "+ship.land.maxHeight, 250, -60);
-      text("Min: "+ship.land.minHeight, 450, -60);
-      if (heightColour)
-        text("Height Colouring: ON", 450, -40);
-      else
-        text("Height Colouring: OFF", 450, -40);
-      text("Total Height: "+ship.land.totalHeight, 250, -20);
-      //image(ship.land.map, -mapScreenShift.x+(width-ship.land.map.width)/4, -mapScreenShift.y+(height-ship.land.map.height)/4);
-      popMatrix();
-    } else
-    {
-      mapScreen=false;
-    }
-  }*/
+   camera(ship.pos.x, ship.pos.y, (height/2.0) / tan(PI*30.0 / 180.0)*zoom, ship.pos.x, ship.pos.y, 0.0, 0.0, 1.0, 0.0);
+   pushMatrix();
+   translate(ship.pos.x-width/2*zoom+mapScreenShift.x*zoom, ship.pos.y-height/2*zoom+mapScreenShift.y*zoom, 2);
+   scale(zoom);
+   rectMode(CENTER);
+   if (ship.land!=null) {
+   for (Terrain t : ship.land.terrain)
+   {
+   t.draw();
+   }
+   Terrain selected=ship.land.pickTile();
+   if (selected!=null)
+   {
+   fill(255);
+   text("Current: "+selected.elevation, 50, -40);
+   text("Deepness: "+selected.depth, 250, -40);
+   text("Index: "+selected.index, 50, -20);
+   }
+   fill(255);
+   textAlign(CENTER);
+   text("Avg: "+ship.land.avgHeight, 50, -60);
+   text("Max: "+ship.land.maxHeight, 250, -60);
+   text("Min: "+ship.land.minHeight, 450, -60);
+   if (heightColour)
+   text("Height Colouring: ON", 450, -40);
+   else
+   text("Height Colouring: OFF", 450, -40);
+   text("Total Height: "+ship.land.totalHeight, 250, -20);
+   //image(ship.land.map, -mapScreenShift.x+(width-ship.land.map.width)/4, -mapScreenShift.y+(height-ship.land.map.height)/4);
+   popMatrix();
+   } else
+   {
+   mapScreen=false;
+   }
+   }*/
 }
 
 void objectUpdates() {

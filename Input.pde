@@ -1,5 +1,4 @@
 void keyPressed() { 
-  println (int(key));
   if (!mapScreen) {
     if ((key == 'w')||(key=='W'))  ships[0].speedUp = true;
     if ((key == 's')||(key=='S'))  ships[0].slowDown = true;
@@ -47,8 +46,8 @@ void keyReleased() {
 }
 
 void mouseWheel(MouseEvent e) {
-  if (e.getCount()>0) ships[0].zoom*=1.01;
-  else ships[0].zoom*=0.99;
+  if (e.getCount()>0) ships[0].zoomOut();
+  else ships[0].zoomIn();
 }
 
 

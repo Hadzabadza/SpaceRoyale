@@ -25,7 +25,12 @@ class Ship extends Object {
   Ship() {
     super(new PVector(), new PVector(), 0, Settings.shipSize);
     turretGfxDiameter+=diameter;
-    c=color(0, 255, 0);
+    c=color(100);
+  }
+  Ship(color _c) {
+    super(new PVector(), new PVector(), 0, Settings.shipSize);
+    turretGfxDiameter+=diameter;
+    c=_c;
   }
   Ship(PVector _pos) {
     super(_pos, new PVector(), 0, Settings.shipSize);
@@ -38,7 +43,7 @@ class Ship extends Object {
     rr.line(pos.x, pos.y, pos.x+100*cos(radians(dir)), pos.y+100*sin(radians(dir)));
     rr.ellipse(pos.x, pos.y, diameter, diameter);
     rr.noFill();
-    rr.stroke(255, 0, 0);
+    rr.stroke(200);
     rr.line(pos.x+12*cos(aimDir), pos.y+12*sin(aimDir), pos.x+40*cos(aimDir), pos.y+40*sin(aimDir));
     rr.arc(pos.x, pos.y, turretGfxDiameter, turretGfxDiameter, aimDir-1, aimDir+1);
     if (warp)
@@ -76,13 +81,23 @@ class Ship extends Object {
       if (slowDown)if (thrust>=0.01) thrust-=0.01;
       if (turnLeft) dir-=4*thrust+1;
       if (turnRight) dir+=4*thrust+1;
-      if (zoomIn) zoom*=0.99;
-      else if (zoomOut) zoom*=1.01;
-      vel.x+=cos(radians(dir))*thrust*thrust/100;
+      if (zoomIn) zoomIn();
+      if (zoomOut) zoomOut();
+        vel.x+=cos(radians(dir))*thrust*thrust/100;
       vel.y+=sin(radians(dir))*thrust*thrust/100;
       super.update();
     }
   }
+
+  void zoomIn() {
+    if (zoom>0.3) zoom*=0.99;
+    else zoom=0.3;
+  }
+  void zoomOut() {
+    if (zoom<9.3) zoom*=1.01;
+    else zoom=9.3;
+  }
+
   void shoot() {
     if (cooldown<=0) {
       float offDis=radius+turretGfxDiameter/2;
@@ -90,15 +105,20 @@ class Ship extends Object {
       cooldown=Settings.fireCooldown;
     }
   }
+
   void spawn(int which) {
     ships[which]=this;
     super.spawn();
   }
+
   void queueDestroy() {
     destroyees.add(this);
   }
+
   void destroy() {
     //ships.remove(this);
+    radius=-10;
+    diameter=radius*2;
     super.destroy();
   }
 }
