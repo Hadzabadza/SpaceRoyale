@@ -39,15 +39,9 @@ class Ship extends Object{
   }
 
   void update() {
-    if (turnTurretLeft) {
-      aimDir-=0.042;
-    }
-    if (turnTurretRight) {
-      aimDir+=0.042;
-    }
-    if (fire){
-      shoot();
-    }
+    if (turnTurretLeft) aimDir-=0.042;
+    if (turnTurretRight) aimDir+=0.042;
+    if (fire) shoot();
     if (warp)
     {
       pos.x+=warpSpeed*cos(radians(dir));
@@ -90,12 +84,8 @@ class Ship extends Object{
         if (thrust>=0.01)
           thrust-=0.01;
       }
-      if (turnLeft) {
-        dir-=4*thrust+1;
-      }
-      if (turnRight) {
-        dir+=4*thrust+1;
-      }
+      if (turnLeft) dir-=4*thrust+1;
+      if (turnRight) dir+=4*thrust+1;
       vel.x+=cos(radians(dir))*thrust*thrust/100;
       vel.y+=sin(radians(dir))*thrust*thrust/100;
       super.update();

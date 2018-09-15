@@ -13,6 +13,7 @@ ArrayList<Asteroid> asteroids;
 ArrayList<Bullet> bullets;
 ArrayList<Ship> ships;
 Ship ship;
+Ship ship1;
 ArrayList<Object> destroyees;
 ArrayList<Object> newSpawns;
 ArrayList<Object> objects;
@@ -27,13 +28,14 @@ int tSize=50;
 Terrain active;
 PVector cursor;
 Osc[] osc;
+PGraphics leftViewport;
+PGraphics rightViewport;
 
 
 PFont pixFont;
 
 void setup() {
-
-  size(700, 700, P3D);
+  size(1360, 680, P3D);
   pixFont=createFont("Minecraftia-Regular.ttf", 120, true);
   textFont(pixFont, 12);
   stars=new ArrayList<Star>();
@@ -46,27 +48,28 @@ void setup() {
   objects=new ArrayList<Object>();
   ship = new Ship();
   ships.add(ship);
-  ships.add(new Ship());
-  ships.get(1).c=color(255,255,0);
+  ship1 = new Ship();
+  ship1.c=color(255,255,0);
   stars.add(new Star(0, 0));
   mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
   osc=new Osc[controllerIP.length];
   for (int i=0; i<osc.length; i++)  osc[i]=new Osc(controllerOutPort[i], controllerIP[i], controllerInPort[i]);
+  
+  leftViewport = createGraphics(width/2, height, P3D);
+  rightViewport = createGraphics(width/2, height, P3D);
 }
 
 void draw() {
-  background(50);
-  if (ship.land!=null)
-  {
-  } else
-  {
-  }
-  objectManagement();
+  objectUpdates();
   osc[0].OMUpdate();
-  //stars();
-  //camera(pos.x+mouseX-width/2, pos.y+mouseY-height/2, zoom*600.0, pos.x+mouseX-width/2, pos.y+mouseY-height/2, 0.0, 0.0, 1.0, 0.0);
+  background(50);
   camera(ship.pos.x, ship.pos.y, zoom*600, ship.pos.x, ship.pos.y, 0.0, 0.0, 1.0, 0.0);
+
+  for (Object o : objects) {
+    o.draw();
+  }
+
   if (mapScreen) {
     camera(ship.pos.x, ship.pos.y, (height/2.0) / tan(PI*30.0 / 180.0)*zoom, ship.pos.x, ship.pos.y, 0.0, 0.0, 1.0, 0.0);
     pushMatrix();
@@ -110,11 +113,9 @@ void mouseWheel(MouseEvent e) {
   if (e.getCount()>0)
   {
     zoom*=1.01;
-    println(zoom);
   } else
   {
     zoom*=0.99;
-    println(zoom);
   }
 }
 
@@ -157,27 +158,9 @@ void mouseMoved() {
   cursor.y=mouseY;
 }
 
-void objectManagement() {
-  /*
-  ship.draw();
-   for (Star s : stars) {
-   s.draw();
-   }
-   for (Planet p : planets) {
-   p.update();
-   p.draw();
-   }
-   for (Asteroid a : asteroids) {
-   a.update();
-   a.draw();
-   }
-   for (int i=bullets.size()-1;i>=0;i--) {
-   bullets.get(i).draw();
-   bullets.get(i).update();
-   }*/
+void objectUpdates() {
   for (Object o : objects) {
     o.update();
-    o.draw();
   }
   for (int i=destroyees.size()-1; i>=0; i--){
     destroyees.get(i).destroy();
@@ -187,7 +170,6 @@ void objectManagement() {
     newSpawns.get(i).spawn();
     newSpawns.remove(i);
   }
-  
 }
 
 void exit() {
