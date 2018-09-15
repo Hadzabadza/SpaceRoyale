@@ -3,7 +3,7 @@ static class Settings {
 
   //Game settings
   static int backgroundColor=50;
-  static int FPS=5; //For debug
+  static int FPS=1; //For debug
   
   //Generation
   static int minPlanetsPerStar =3;
@@ -15,7 +15,8 @@ static class Settings {
   static String[] controllerIP={"192.168.1.162", "192.168.1.162"};
   static int[] oscInPort={8000, 8001};
   static int[] controllerInputPort={9000, 9001};
-  static boolean decodeOSC=false; //For debug
+  static boolean decodeOSC=false;           //For debug
+  static boolean displayOSCBundleLogs=true; //
 
   //Ship properties
   static float shipSize=7.5; //Radius of ship entities

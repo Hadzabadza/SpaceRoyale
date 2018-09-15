@@ -10,6 +10,7 @@ class Ship extends Object {
   float HP=1;
   float cooldown;
   float zoom=1;
+  OscDock dock;
 
   boolean speedUp;
   boolean slowDown;
@@ -64,18 +65,24 @@ class Ship extends Object {
     {
       pos.x+=warpSpeed*cos(radians(dir));
       pos.y+=warpSpeed*sin(radians(dir));
+      if (land!=null) {
+        dock.landingChange();
+        land=null;
+      }
     } else
     {
-      for (Star s : stars) if (checkCollision(s)) vel=new PVector();
-      for (Planet p : planets)
-      {
-        if (checkCollision(p))
-        {
-          land=p;
-          vel.x=p.vel.x;
-          vel.y=p.vel.y;
-          break;
-        } else land=null;
+      if (land!=null) { //Check if landed
+        if (!checkCollision(land)) dock.landingChange(); //Check if drifted away
+      } else {
+        for (Planet p : planets) if (checkCollision(p))
+          {
+            land=p;
+            vel.x=p.vel.x;
+            vel.y=p.vel.y;
+            dock.landingChange();
+            break;
+          }
+        for (Star s : stars) if (checkCollision(s)) vel=new PVector();
       }
       if (speedUp) if (thrust<=0.99) thrust+=0.01;
       if (slowDown)if (thrust>=0.01) thrust-=0.01;
@@ -83,7 +90,7 @@ class Ship extends Object {
       if (turnRight) dir+=4*thrust+1;
       if (zoomIn) zoomIn();
       if (zoomOut) zoomOut();
-        vel.x+=cos(radians(dir))*thrust*thrust/100;
+      vel.x+=cos(radians(dir))*thrust*thrust/100;
       vel.y+=sin(radians(dir))*thrust*thrust/100;
       super.update();
     }

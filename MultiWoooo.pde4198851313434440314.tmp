@@ -1,4 +1,4 @@
-import oscP5.*; //<>//
+import oscP5.*;
 import netP5.*;
 
 ArrayList<Star> stars;
@@ -32,7 +32,11 @@ void setup() {
   pixFont=createFont("Minecraftia-Regular.ttf", 120, true);
   textFont(pixFont, 12);
   frameRate(Settings.FPS);
+
   init();
+
+  osc=new OscHub(Settings.ships);
+  OscBundle boom= new OscBundle();
 }
 
 void init() {
@@ -90,11 +94,10 @@ void init() {
       }
     }
   }
+  //ship1.c=color(255,255,0);
   stars.add(new Star(0, 0));
   mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
-  println("Setting up..................");
-  osc=new OscHub(Settings.ships);
 }
 
 void draw() {
