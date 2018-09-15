@@ -1,3 +1,5 @@
+//TODO: Fix mapScreen, move all corresponding vars to ship object
+
 class Ship extends Object {
   float warpSpeed=Settings.warpCap;
   float turretGfxDiameter=Settings.turretGfxSize;

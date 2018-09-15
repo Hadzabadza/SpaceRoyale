@@ -1,4 +1,7 @@
-//TODO: stop sending orbital data when OM page is not active
+//TODO: Find the name of the connected device and add to bundle logs. //<>//
+//TODO: Fix controller unresponsiveness after reinit
+//TODO: Add a closest target blip on fire control screen
+//TODO: Try to patch in mrmr
 
 class OscHub {
   int OMPlanets; //TouchOSC orbital map planets count
@@ -31,28 +34,28 @@ class OscHub {
   }
 
   void update() { //
-    OscBundle refreshBundle=new OscBundle();
-    if (frameCount%120==0) {      
-      refreshBundle.add(new OscMessage("/OM/star").add(1));
-      refreshBundle.add(new OscMessage("/OM/ship").add(1));
-      refreshBundle.add(new OscMessage("/SC/directionIndicator").add(1));
-      refreshBundle.add(new OscMessage("/OM/label35/visible").add(0));
-      refreshBundle.add(new OscMessage("/FC/centreIndicator").add(1));
-    }
     for (OscDock d : dock) {
       OscBundle updateBundle = new OscBundle(); 
       d.bundleLog.add("UBundle-C"+d.id+". Initial segment. Size: "+updateBundle.size());
-      updateBundle=refreshBundle;
+      if (frameCount%Settings.refreshInterval==d.refreshPhase) {      
+        updateBundle.add(new OscMessage("/OM/star").add(1));
+        updateBundle.add(new OscMessage("/OM/ship").add(1));
+        updateBundle.add(new OscMessage("/SC/directionIndicator").add(1));
+        updateBundle.add(new OscMessage("/OM/label35/visible").add(0));
+        updateBundle.add(new OscMessage("/FC/centreIndicator").add(1));
+      }
       d.bundleLog.add("UBundle-C"+d.id+". Refresh segment. Size: "+updateBundle.size());
       d.sendUpdates(updateBundle);
     }
   }
 
   void OMPlanetMove(OscDock d, OscBundle outBundle, int targetPlanetIndex) {
-    int OMPlanetPosX=round(planets.get(targetPlanetIndex).pos.x/longestDistance+OMCenterX+OMCorrectionOffset);
-    outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/x").add(OMPlanetPosX));
-    int OMPlanetPosY=round(planets.get(targetPlanetIndex).pos.y/longestDistance+OMCenterY+OMCorrectionOffset);
-    outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/y").add(OMPlanetPosY));
+    if (frameCount%Settings.planetLocationUpdateInterval==d.planetLocationUpdatePhase) {
+      int OMPlanetPosX=round(planets.get(targetPlanetIndex).pos.x/longestDistance+OMCenterX+OMCorrectionOffset);
+      outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/x").add(OMPlanetPosX));
+      int OMPlanetPosY=round(planets.get(targetPlanetIndex).pos.y/longestDistance+OMCenterY+OMCorrectionOffset);
+      outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/y").add(OMPlanetPosY));
+    }
     d.bundleLog.add("UBundle-C"+d.id+". Planet position segment. Size: "+outBundle.size());
   }
 
@@ -74,12 +77,14 @@ class OscDock {
   Ship s;
   NetAddress c;
   int activePage=0;
-  boolean activated;
-  boolean unlocked;
-  boolean cleared;
-  boolean changeLandingButton;
+  boolean activated=false;
+  boolean unlocked=false;
+  boolean cleared=false;
+  boolean changeLandingButton=false;
   ArrayList<String> bundleLog;
-  int id;
+  int id=0;
+  int refreshPhase=0;
+  int planetLocationUpdatePhase=0;
 
   OscDock(OscHub _hub, int _id, NetAddress _c, int port, Ship _s) {
     ex=new OscP5(this, port);
@@ -90,10 +95,12 @@ class OscDock {
     id=_id;
     plugs();
     bundleLog=new ArrayList<String>();
+    refreshPhase=Settings.refreshInterval/Settings.ships*id;
+    planetLocationUpdatePhase=Settings.planetLocationUpdateInterval/Settings.ships*id;
   }
 
   void initializeDock() {
-    OscBundle startBundle = new OscBundle(); //<>//
+    OscBundle startBundle = new OscBundle();
     startBundle.add(new OscMessage("/SC"));
     startBundle.add(new OscMessage("/OM/star").add(1));     
     startBundle.add(new OscMessage("/OM/ship").add(1));     
@@ -168,9 +175,12 @@ class OscDock {
 
   void lockScreenGreen(OscBundle b) {
     b.add(new OscMessage("/SC/connectionStatus/visible").add(1));
-    b.add(new OscMessage("/SC/connectionStatus").add("Connected"));
+    b.add(new OscMessage("/SC/connectionStatus").add("Connection established"));
     b.add(new OscMessage("/SC/connectionStatus/color").add("green"));
+    b.add(new OscMessage("/SC/screenBlock/visible").add(1));
     b.add(new OscMessage("/SC/screenBlock/color").add("green"));
+    b.add(new OscMessage("/SC/label41/color").add("gray"));
+    b.add(new OscMessage("/SC/tapHint/visible").add(1));
     b.add(new OscMessage("/SC/tapHint/position/y").add(202));
     bundleLog.add("UBundle-C"+id+". Lock screen update segment. Size: "+b.size());
   }
@@ -180,6 +190,7 @@ class OscDock {
     b.add(new OscMessage("/SC/connectionStatus/visible").add(0));
     b.add(new OscMessage("/SC/screenBlock/visible").add(0));
     b.add(new OscMessage("/SC/tapHint/visible").add(0));
+    b.add(new OscMessage("/SC/label41/color").add("green"));
     bundleLog.add("UBundle-C"+id+". Lock screen clearer segment. Size: "+b.size());
   }
 
@@ -187,6 +198,7 @@ class OscDock {
   void send(OscBundle b) {
     bundleLog.add("UBundle-C"+id+". Sending... Size: "+b.size());
     if (Settings.displayOSCBundleLogs) for (String s : bundleLog) println(s);
+    bundleLog.clear();
     if (b.size()>0) {
       b.setTimetag(b.now());
       ex.send(b, c);
@@ -230,11 +242,11 @@ class OscDock {
     s.warp=!s.warp;
   }
   public void turnLeft(float f) {
-    if (f==0) s.turnLeft=false;
+    if (!s.warp) if (f==0) s.turnLeft=false;
     else s.turnLeft=true;
   }
   public void turnRight(float f, OscBundle outBundle) {
-    if (f==0) s.turnRight=false;
+    if (!s.warp) if (f==0) s.turnRight=false;
     else s.turnRight=true;
   }
 
@@ -251,7 +263,7 @@ class OscDock {
   }
 
   public void turnTo(float f) {
-    s.dir+=(s.thrust+1)*f;
+    if (!s.warp) s.dir+=(s.thrust+1)*f;
   }
 
   public void moveCursor(float x, float y)
@@ -278,7 +290,7 @@ class OscDock {
   }
 
   public void changeZoom(float f) {
-    s.zoom=0.8+9.2*(1-f)*(1-f);
+    s.zoom=0.8+8.5*(1-f)*(1-f);
   }
 
   public void shoot(float f) {

@@ -1,30 +1,7 @@
-import oscP5.*; //<>//
+//TODO: Sequencify screen loaders to ease up loading time. Can't play more than 4 ships otherwise. //<>//
+
+import oscP5.*;
 import netP5.*;
-
-ArrayList<Star> stars;
-ArrayList<Planet> planets;
-ArrayList<Asteroid> asteroids;
-ArrayList<Bullet> bullets;
-Ship[] ships;
-ArrayList<Object> destroyees;
-ArrayList<Object> newSpawns;
-ArrayList<Object> objects;
-long seed=1;
-float offx=0;
-float offy=0;
-PVector mapScreenShift;
-boolean mapScreen;
-boolean heightColour;
-int tSize=50;
-Terrain active;
-PVector cursor;
-OscHub osc;
-
-/*PWindow win; 
- PWindow win1;*/
-PGraphics[] screen;
-
-PFont pixFont;
 
 void setup() {
   size(1300, 650, P3D);
@@ -93,11 +70,12 @@ void init() {
   stars.add(new Star(0, 0));
   mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
-  println("Setting up..................");
   osc=new OscHub(Settings.ships);
+  println("Setting up..................");
 }
 
 void draw() {
+  if (Settings.DEBUG) println("...................................................NEWFRAME..................................................................");
   objectUpdates();
   background(0);
   osc.update();
