@@ -7,13 +7,14 @@ String[] controllerIP={"192.168.1.162"};
 int[] controllerOutPort={8000};
 int[] controllerInPort={9000};
 
-boolean[] input;
 ArrayList<Star> stars;
 ArrayList<Planet> planets;
 ArrayList<Asteroid> asteroids;
 ArrayList<Bullet> bullets;
 ArrayList<Ship> ships;
 Ship ship;
+ArrayList<Object> destroyees;
+ArrayList<Object> newSpawns;
 ArrayList<Object> objects;
 long seed=1;
 float offx=0;
@@ -40,10 +41,13 @@ void setup() {
   asteroids=new ArrayList<Asteroid>();
   bullets=new ArrayList<Bullet>();
   ships=new ArrayList<Ship>();
+  destroyees=new ArrayList<Object>();
+  newSpawns=new ArrayList<Object>();
   objects=new ArrayList<Object>();
-  input=new boolean[7];
   ship = new Ship();
   ships.add(ship);
+  ships.add(new Ship());
+  ships.get(1).c=color(255,255,0);
   stars.add(new Star(0, 0));
   mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
@@ -58,9 +62,7 @@ void draw() {
   } else
   {
   }
-
-  ship.update();
-  drawObjects();
+  objectManagement();
   osc[0].OMUpdate();
   //stars();
   //camera(pos.x+mouseX-width/2, pos.y+mouseY-height/2, zoom*600.0, pos.x+mouseX-width/2, pos.y+mouseY-height/2, 0.0, 0.0, 1.0, 0.0);
@@ -122,9 +124,6 @@ void mouseReleased() {
     if (mapScreen)
     {
       heightColour=!heightColour;
-    } else
-    {
-      ship.warp=!ship.warp;
     }
   }
   if (mouseButton==LEFT)
@@ -158,53 +157,43 @@ void mouseMoved() {
   cursor.y=mouseY;
 }
 
-void keyReleased() {
-  if (!mapScreen) {
-    if ((key == 'w')||(keyCode==UP)||(key=='W'))  input[0] = false;
-    if ((key == 'a')||(keyCode==LEFT)||(key=='A'))  input[1] = false;
-    if ((key == 's')||(keyCode==DOWN)||(key=='S')) input[2] = false;
-    if ((key == 'd')||(keyCode==RIGHT)||(key=='D'))  input[3] = false;
-    if ((key == 'q')||(key=='Q'))  input[4] = false;
-    if ((key == 'e')||(key=='E'))  input[5] = false;
-    if (key == ' ')  input[6] = false;
-  }
-}
-
-void keyPressed() { 
-  if (!mapScreen) {
-    if ((key == 'w')||(keyCode==UP)||(key=='W'))  input[0] = true;
-    if ((key == 'a')||(keyCode==LEFT)||(key=='A'))  input[1] = true;
-    if ((key == 's')||(keyCode==DOWN)||(key=='S'))  input[2] = true;
-    if ((key == 'd')||(keyCode==RIGHT)||(key=='D'))  input[3] = true;
-    if ((key == 'q')||(key=='Q'))  input[4] = true;
-    if ((key == 'e')||(key=='E'))  input[5] = true;
-    if (key == ' ')  input[6] = true;
-  }
-}
-
-void drawObjects() {
+void objectManagement() {
+  /*
   ship.draw();
-  for (Star s : stars) {
-    s.draw();
+   for (Star s : stars) {
+   s.draw();
+   }
+   for (Planet p : planets) {
+   p.update();
+   p.draw();
+   }
+   for (Asteroid a : asteroids) {
+   a.update();
+   a.draw();
+   }
+   for (int i=bullets.size()-1;i>=0;i--) {
+   bullets.get(i).draw();
+   bullets.get(i).update();
+   }*/
+  for (Object o : objects) {
+    o.update();
+    o.draw();
   }
-  for (Planet p : planets) {
-    p.update();
-    p.draw();
+  for (int i=destroyees.size()-1; i>=0; i--){
+    destroyees.get(i).destroy();
+    destroyees.remove(i);
   }
-  for (Asteroid a : asteroids) {
-    a.update();
-    a.draw();
+  for (int i=newSpawns.size()-1; i>=0; i--){
+    newSpawns.get(i).spawn();
+    newSpawns.remove(i);
   }
-  for (int i=bullets.size()-1;i>=0;i--) {
-    bullets.get(i).draw();
-    bullets.get(i).update();
-  }
+  
 }
 
 void exit() {
-    println("quitting");
-    OscMessage exitMessage = new OscMessage("/OM/label35/visible");
-    exitMessage.add(1);
-    oscP5.send(exitMessage, controller);
-    super.exit();
+  println("quitting");
+  OscMessage exitMessage = new OscMessage("/OM/label35/visible");
+  exitMessage.add(1);
+  oscP5.send(exitMessage, controller);
+  super.exit();
 }

@@ -101,9 +101,9 @@ class Planet extends Object{
     translate(0, 0, 1);
     noFill();
     strokeWeight(3);
-    ellipse (pos.x, pos.y, radius*2, radius*2);
+    ellipse (pos.x, pos.y, diameter, diameter);
     strokeWeight(1);
-    ellipse (pos.x,pos.y,radius*20,radius*20);
+    ellipse (pos.x,pos.y,diameter*10,diameter*10);
     popMatrix();
 
     pushMatrix();
@@ -156,6 +156,13 @@ class Planet extends Object{
       selected=null;
       return null;
     }
+  }
+  void spawn(){
+    planets.add(this);
+    super.spawn();
+  }
+  void queueDestroy(){
+    destroyees.add(this);
   }
   void destroy(){
     planets.remove(this);

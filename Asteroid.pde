@@ -30,10 +30,10 @@ class Asteroid extends Object{
     translate(0, 0, 1);
     fill(200,20,100);
     strokeWeight(3);
-    ellipse (pos.x, pos.y, radius*2, radius*2);
+    ellipse (pos.x, pos.y, diameter, diameter);
     strokeWeight(1);
     noFill();
-    ellipse (pos.x,pos.y,radius*20,radius*20);
+    ellipse (pos.x,pos.y,diameter*10,diameter*10);
     popMatrix();
   }
 
@@ -45,6 +45,13 @@ class Asteroid extends Object{
     grav.mult(0.0001);
     vel.add(grav);
     super.update();
+  }
+  void spawn(){
+    asteroids.add(this);
+    super.spawn();
+  }
+  void queueDestroy(){
+    destroyees.add(this);
   }
   void destroy(){
     asteroids.remove(this);

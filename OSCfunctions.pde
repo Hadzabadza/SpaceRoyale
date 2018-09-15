@@ -12,6 +12,7 @@ class Osc {
   int turnWheelPosX=108;
   int turnWheelPosY=10;
   int turnWheelRadius=120;
+  int player=0;
 
   Osc(int port) {
     oscP5 = new OscP5(this, port);
@@ -149,19 +150,19 @@ class Osc {
     ship.thrust=f;
   }
   public void warp(float f) {
-    ship.warp=!ship.warp;
+    ships.get(player).warp=!ships.get(player).warp;
   }
   public void turnLeft(float f) {
-    if (f==0) input[1]=false;
+    if (f==0) ships.get(player).turnLeft=false;
     else {
-      input[1]=true;
+      ships.get(player).turnLeft=true;
       displaceDIndicator();
     }
   }
   public void turnRight(float f) {
-    if (f==0) input[3]=false;
+    if (f==0) ships.get(player).turnRight=false;
     else {
-      input[3]=true;
+      ships.get(player).turnRight=true;
       displaceDIndicator();
     }
   }
@@ -171,14 +172,14 @@ class Osc {
   }
 
   public void shoot(float f) {
-    ship.shoot();
+    ships.get(player).shoot();
   }
 
   public void changeAim(float x, float y)
   {
     x-=0.5;
     y-=0.5;
-    ship.aimDir=degrees(atan2(y, x))-90;
+    ship.aimDir=atan2(y, x)-HALF_PI;
   }
 
   public void displaceDIndicator() {

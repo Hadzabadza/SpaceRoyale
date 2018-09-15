@@ -5,6 +5,7 @@
     super(new PVector(),new PVector(),0,0);
     mass=random(100, 1000);
     radius=sqrt(mass)*5;
+    diameter=radius*2;
     pos.x=round(random(-width, width));
     pos.y=round(random(-height, height));
     float distS=random(50, 300);
@@ -27,6 +28,7 @@
     super(new PVector(x,y),new PVector(),0,0);
     mass=random(100, 1000);
     radius=sqrt(mass)*5;
+    diameter=radius*2;
     float distS=random(500, 1000);
     int isAsteroid=round(random(0,100));
     for (int i=0; i<round(random(minPlanetsPerStar, maxPlanetsPerStar)); i++) {
@@ -46,7 +48,14 @@
   {
     stroke(0);
     fill(255, 200, 40);
-    ellipse (pos.x, pos.y, radius*2, radius*2);
+    ellipse (pos.x, pos.y, diameter, diameter);
+  }
+  void spawn(){
+    stars.add(this);
+    super.spawn();
+  }
+  void queueDestroy(){
+    destroyees.add(this);
   }
   void destroy(){
     stars.remove(this);
