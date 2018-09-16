@@ -1,6 +1,3 @@
-//TODO: Fix mapScreen, move all corresponding vars to ship object
-//TODO: Improve targeting
-
 class Ship extends Object {
   float warpSpeed=Settings.warpCap;
   float turretGfxDiameter=Settings.turretGfxSize;
@@ -135,6 +132,7 @@ class Ship extends Object {
     }
     distToTarget=min;
   }
+  
   void drawTarget(PGraphics renderer) {
     if (dock.activePage==3)
     if ((distToTarget<Settings.targetingDistance)&&(target!=null)) {

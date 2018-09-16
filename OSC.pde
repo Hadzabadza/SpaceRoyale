@@ -1,16 +1,11 @@
-//TODO: Find the name of the connected device and add to bundle logs. //<>//
-//TODO: Fix controller unresponsiveness after reinit
-//TODO: Add a closest target blip on fire control screen
-//TODO: Try to patch in mrmr
-
-class OscHub {
+class OscHub { //<>// //<>//
   OscDock[] dock; //Multiple docks with specific data for multiple controllers 
   int displaySize=280; //Smallest dimension of the display
   int longestDistance; //Farthest star
 
-  int SCturnWheelPosX=108; //Properties of the turn wheel
-  int SCturnWheelPosY=10;
-  int SCturnWheelRadius=120;
+  int SCturnWheelPosX=108+75; //Properties of the turn wheel
+  int SCturnWheelPosY=20+75;
+  int SCturnWheelRadius=45;
   int SCLEDCorrectionOffset=-10; //Offset ship direction LED by this ammount (they are drawn from top-left)
 
   int OMPlanets; //TouchOSC orbital map planets count
@@ -23,18 +18,29 @@ class OscHub {
   OscHub(int controllers) { //Hub that computes the messages before sending
     dock=new OscDock[controllers];
     for (int i=0; i<controllers; i++) dock[i]=new OscDock(this, i, new NetAddress(Settings.controllerIP[i], Settings.controllerInputPort[i]), Settings.oscInPort[i], ships[i]);
-
     //initializeHub();
     OMPlanets=planets.size();
     OMPlanetDistances=new int[OMPlanets];
     longestDistance=round(planets.get(OMPlanets-1).distance);
     longestDistance=longestDistance/100;
     for (int i=0; i<OMPlanets; i++) OMPlanetDistances[i]=round(planets.get(i).distance/longestDistance);
-    for (OscDock d : dock) d.initializeDock();
+    //for (OscDock d : dock) d.initializeDock(); //WIP
   }
 
   void initializeHub() { //Initializing Orbital Map data
   }
+
+  /*void addDock() {
+   if (dock==null) {
+   dock=new OscDock[1];
+   dock[0]=new OscDock(this, 0, new NetAddress(Settings.controllerIP[0], Settings.controllerInputPort[0]), Settings.oscInPort[0], ships[0]);
+   } else {
+   OscDock[] tempDocks=new OscDock[dock.length+1];
+   for (int i=0; i<dock.length; i++) tempDocks[i]=dock[i];
+   tempDocks[dock.length]=new OscDock(this, dock.length, new NetAddress(Settings.controllerIP[dock.length], Settings.controllerInputPort[dock.length]), Settings.oscInPort[dock.length], ships[dock.length]);
+   dock=tempDocks;
+   }
+   }*/
 
   void update() { //
     for (OscDock d : dock) {
@@ -88,6 +94,7 @@ class OscDock {
   int id=0;
   int refreshPhase=0;
   int planetLocationUpdatePhase=0;
+  int outPort;
 
   int FCLEDScale=20; //Scale of the target LED
   int FCPadX=120; //Properties of the targeting pad
@@ -99,20 +106,95 @@ class OscDock {
   float FCTGTX=0.5;
   float FCTGTY=0.5;
 
+  OscDock() {
+  }
+
   OscDock(OscHub _hub, int _id, NetAddress _c, int port, Ship _s) {
-    ex=new OscP5(this, port);
     hub=_hub;
     c=_c;
     s=_s;
     s.dock=this;
     id=_id;
-    plugs();
+    outPort=port;
     bundleLog=new ArrayList<String>();
     refreshPhase=Settings.refreshInterval/Settings.ships*id;
     planetLocationUpdatePhase=Settings.planetLocationUpdateInterval/Settings.ships*id;
   }
 
-  void initializeDock() {
+  OscDockInitialized initializeDock() {
+    return (new OscDockInitialized(this));
+  }
+  void sendUpdates(OscBundle uB) {
+  }
+  public void displaceDirectionIndicator(OscBundle uB) {
+  }
+  void OMShipMove(OscBundle uB) {
+  }
+  void landingChange() {
+  }
+  void oscEvent(OscMessage theOscMessage) {
+  }
+  void lockScreenGreen(OscBundle b) {
+  }
+  void lockScreenClear(OscBundle b) {
+  }
+  void updateTargetBlip(OscBundle uB) {
+  }
+  void updateTargeters(OscBundle uB) {
+  }
+  void send(OscBundle b) {
+  }
+  void send(OscMessage m) {
+  }
+  void plugs() {
+  }
+  public void changeThrottle(float f) {
+  }
+  public void warp(float f) {
+  }
+  public void turnLeft(float f) {
+  }
+  public void turnRight(float f, OscBundle outBundle) {
+  }
+  public void enterPlanet(float f) {
+  }
+  public void turnTo(float f) {
+  }
+  public void moveCursor(float x, float y) {
+  }
+  public void placeVolcano(float f) {
+  }
+  public void heightView(float f) {
+  }
+  public void changeZoom(float f) {
+  }
+  public void shoot(float f) {
+  }
+  public void changeAim(float x, float y) {
+  }
+  public void fineTuneX(float f) {
+  }
+  public void fineTuneY(float f) {
+  }
+  public void switchFineTune(float f) {
+  }
+  public void switchToSC() {
+  }
+  public void switchToPV() {
+  }
+  public void switchToOM() {
+  }
+  public void switchToFC() {
+  }  
+  public void unlock(float f) {
+  }
+}
+
+class OscDockInitialized extends OscDock {
+  OscDockInitialized(OscDock buildOn) {
+    super(buildOn.hub, buildOn.id, buildOn.c, buildOn.outPort, buildOn.s);
+    ex=new OscP5(this, outPort);
+    plugs();
     OscBundle startBundle = new OscBundle();
     startBundle.add(new OscMessage("/SC"));
     startBundle.add(new OscMessage("/OM/star").add(1));     
@@ -129,12 +211,12 @@ class OscDock {
     startBundle.add(new OscMessage("/FC/fineTune").add(0));
     startBundle.add(new OscMessage("/FC/fineX/color").add("yellow"));
     startBundle.add(new OscMessage("/FC/fineY/color").add("yellow"));
+    startBundle.add(new OscMessage("/vibrate"));
     startBundle.setTimetag(startBundle.now());
     bundleLog.add("StartBundle-C"+id+". Size: "+startBundle.size());
     lockScreenGreen(startBundle);
     send(startBundle);
   }
-
   void sendUpdates(OscBundle uB) {
     if (!activated) lockScreenGreen(uB);
     else
@@ -148,6 +230,7 @@ class OscDock {
           for (int i=0; i<hub.OMPlanets; i++) uB.add(new OscMessage("/OM/planet"+i).add(1));
           for (int i=hub.OMPlanets; i<Settings.maxPlanetsPerStar; i++) uB.add(new OscMessage("/OM/planet"+i+"/position/x").add(-30));
           for (int i=0; i<hub.OMPlanets; i++) hub.OMPlanetMove(this, uB, i);
+          OMShipMove(uB);
         }
         if (activePage==3) {
           updateTargetBlip(uB);
@@ -226,8 +309,8 @@ class OscDock {
       float targetDir=atan2(s.target.pos.y-s.pos.y, s.target.pos.x-s.pos.x);
       uB.add(new OscMessage("/FC/hostileBlip/position/x").add(FCLEDCorrectionOffset+round(FCPadX+FCPadRadius+FCPadRadius*cos(targetDir)*(1-quad))));
       uB.add(new OscMessage("/FC/hostileBlip/position/y").add(FCLEDCorrectionOffset+round(FCPadY+FCPadRadius+FCPadRadius*sin(targetDir)*(1-quad))));
-      uB.add(new OscMessage("/FC/hostileBlip/width").add(scale));
-      uB.add(new OscMessage("/FC/hostileBlip/height").add(scale));
+      uB.add(new OscMessage("/FC/hostileBlip/size/w").add(scale));
+      uB.add(new OscMessage("/FC/hostileBlip/size/h").add(scale));
       uB.add(new OscMessage("/FC/hostileBlip/").add(quad));
     } else {
       uB.add(new OscMessage("/FC/hostileBlip/position/x").add(-20));

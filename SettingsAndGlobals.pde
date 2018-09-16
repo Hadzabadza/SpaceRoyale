@@ -21,6 +21,7 @@ PFont pixFont;
 
 ////////////////MISC/////////////////
 long seed=1;
+int gameState=0;
 
 /////////!!!!!FIX THESE!!!!!/////////
 PVector mapScreenShift;
@@ -74,7 +75,7 @@ static class Settings {
     9005, 
     9006, 
     9007};
-  static boolean decodeOSC=true;            //For debug
+  static boolean decodeOSC=false;            //For debug
   static boolean displayOSCBundleLogs=false; //
   static int refreshInterval=120;
   static int planetLocationUpdateInterval=30;
