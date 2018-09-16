@@ -20,11 +20,11 @@ class Planet extends Object{
     orbitStar=s;
     mass=mas;
     distance = distS+orbitStar.radius;
-    float phase=random(0, 360);
-    vel.x=sqrt(0.0001*distance)*cos(radians(phase+90));
-    vel.y=sqrt(0.0001*distance)*sin(radians(phase+90));
-    pos.x=orbitStar.pos.x+distance*cos(radians(phase));
-    pos.y=orbitStar.pos.y+distance*sin(radians(phase));
+    float phase=random(0, TWO_PI);
+    vel.x=sqrt(0.0001*distance)*cos(phase+PI);
+    vel.y=sqrt(0.0001*distance)*sin(phase+PI);
+    pos.x=orbitStar.pos.x+distance*cos(phase);
+    pos.y=orbitStar.pos.y+distance*sin(phase);
     spin=random(-1, 1);
     orbitNumber=number;
     surface=createImage((int)radius*4, (int)radius*4, ARGB);
@@ -87,30 +87,30 @@ class Planet extends Object{
     map.updatePixels();
   }
 
-  void draw(PGraphics renderer) 
+  void draw(PGraphics rr) 
   {
-    renderer.pushMatrix();
-    renderer.translate(0, 0, -1);
-    renderer.stroke(255, 125+75*cos(radians(frameCount)));
-    renderer.noFill();
-    renderer.ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
-    renderer.line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
-    renderer.popMatrix();
+    rr.pushMatrix();
+    rr.translate(0, 0, -1);
+    rr.stroke(255, 125+75*cos(radians(frameCount)));
+    rr.noFill();
+    rr.ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
+    rr.line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
+    rr.popMatrix();
 
-    renderer.pushMatrix();
-    renderer.translate(0, 0, 1);
-    renderer.noFill();
-    renderer.strokeWeight(3);
-    renderer.ellipse (pos.x, pos.y, diameter, diameter);
-    renderer.strokeWeight(1);
-    renderer.ellipse (pos.x,pos.y,diameter*10,diameter*10);
-    renderer.popMatrix();
+    rr.pushMatrix();
+    rr.translate(0, 0, 1);
+    rr.noFill();
+    rr.strokeWeight(3);
+    rr.ellipse (pos.x, pos.y, diameter, diameter);
+    rr.strokeWeight(1);
+    rr.ellipse (pos.x,pos.y,diameter*10,diameter*10);
+    rr.popMatrix();
 
-    renderer.pushMatrix();
-    renderer.translate(pos.x, pos.y);
-    renderer.rotate((radians(frameCount))/4*spin);
-    renderer.image(surface, 0-surface.width/(surface.width/radius), 0-surface.height/(surface.height/radius), surface.width/2, surface.height/2);
-    renderer.popMatrix();
+    rr.pushMatrix();
+    rr.translate(pos.x, pos.y);
+    rr.rotate((radians(frameCount))/4*spin);
+    rr.image(surface, 0-surface.width/(surface.width/radius), 0-surface.height/(surface.height/radius), surface.width/2, surface.height/2);
+    rr.popMatrix();
   }
 
   void update() {

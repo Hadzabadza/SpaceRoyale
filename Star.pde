@@ -44,11 +44,11 @@
     }
   }
 
-  void draw(PGraphics renderer)
+  void draw(PGraphics rr)
   {
-    renderer.stroke(0);
-    renderer.fill(255, 200, 40);
-    renderer.ellipse (pos.x, pos.y, diameter, diameter);
+    rr.stroke(0);
+    rr.fill(255, 200, 40);
+    rr.ellipse (pos.x, pos.y, diameter, diameter);
   }
   void spawn(){
     stars.add(this);

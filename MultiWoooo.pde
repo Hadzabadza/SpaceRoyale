@@ -76,6 +76,7 @@ void init() {
   cursor=new PVector(0.5, 0.5);
   osc=new OscHub(Settings.ships);
   println("Setting up..................");
+  loadImages();
 }
 
 void draw() {

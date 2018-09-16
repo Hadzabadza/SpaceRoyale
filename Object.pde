@@ -20,7 +20,7 @@ class Object { //Superclass for physical ingame objects
     else return false;
   }
   float checkDist(Object to) {
-    return dist(pos.x, pos.y, to.pos.x, to.pos.y);
+    return dist(pos.x,pos.y,to.pos.x, to.pos.y);
   }
   void update()
   {
@@ -33,8 +33,8 @@ class Object { //Superclass for physical ingame objects
     destroyees.add(this);
   }
   void destroy() {
-    objects.remove(this);
     destroyed=true;
+    objects.remove(this);
   }
   void draw(PGraphics renderer) {
   }

@@ -9,32 +9,32 @@ class Asteroid extends Object{
     orbitStar=s;
     mass=mas;
     distance = distS+orbitStar.radius;
-    float phase=random(0, 360);
-    vel.x=sqrt(0.0001*distance)*cos(radians(phase+90));
-    vel.y=sqrt(0.0001*distance)*sin(radians(phase+90));
-    pos.x=orbitStar.pos.x+distance*cos(radians(phase));
-    pos.y=orbitStar.pos.y+distance*sin(radians(phase));
+    float phase=random(0, TWO_PI);
+    vel.x=sqrt(0.0001*distance)*cos(phase+PI);
+    vel.y=sqrt(0.0001*distance)*sin(phase+PI);
+    pos.x=orbitStar.pos.x+distance*cos(phase);
+    pos.y=orbitStar.pos.y+distance*sin(phase);
   }
 
-  void draw(PGraphics renderer) 
+  void draw(PGraphics rr) 
   {
-    renderer.pushMatrix();
-    renderer.translate(0, 0, -1);
-    renderer.stroke(255, 105+55*cos(radians(frameCount)),105+55*cos(radians(frameCount)),125+75*cos(radians(frameCount)));
-    renderer.noFill();
-    renderer.ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
-    renderer.line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
-    renderer.popMatrix();
+    rr.pushMatrix();
+    rr.translate(0, 0, -1);
+    rr.stroke(255, 105+55*cos(radians(frameCount)),105+55*cos(radians(frameCount)),125+75*cos(radians(frameCount)));
+    rr.noFill();
+    rr.ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
+    rr.line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
+    rr.popMatrix();
 
-    renderer.pushMatrix();
-    renderer.translate(0, 0, 1);
-    renderer.fill(200,20,100);
-    renderer.strokeWeight(3);
-    renderer.ellipse (pos.x, pos.y, diameter, diameter);
-    renderer.strokeWeight(1);
-    renderer.noFill();
-    renderer.ellipse (pos.x,pos.y,diameter*10,diameter*10);
-    renderer.popMatrix();
+    rr.pushMatrix();
+    rr.translate(0, 0, 1);
+    rr.fill(200,20,100);
+    rr.strokeWeight(3);
+    rr.ellipse (pos.x, pos.y, diameter, diameter);
+    rr.strokeWeight(1);
+    rr.noFill();
+    rr.ellipse (pos.x,pos.y,diameter*10,diameter*10);
+    rr.popMatrix();
   }
 
   void update() {

@@ -42,10 +42,16 @@ class Ship extends Object {
     c=color(0, 255, 0);
   }
   void draw(PGraphics rr) {
-    rr.stroke(c);
+    /*rr.stroke(c);
     rr.fill(255);
     rr.line(pos.x, pos.y, pos.x+100*cos(radians(dir)), pos.y+100*sin(radians(dir)));
-    rr.ellipse(pos.x, pos.y, diameter, diameter);
+    rr.ellipse(pos.x, pos.y, diameter, diameter);*/
+    rr.pushMatrix();
+    rr.translate(pos.x,pos.y);
+    rr.rotate(dir);
+    rr.scale(0.2);
+    rr.image(IMGShip,-IMGShip.width/2,-IMGShip.height/2);
+    rr.popMatrix();
     rr.noFill();
     rr.stroke(200);
     rr.line(pos.x+12*cos(aimDir), pos.y+12*sin(aimDir), pos.x+40*cos(aimDir), pos.y+40*sin(aimDir));
@@ -53,8 +59,8 @@ class Ship extends Object {
     if (warp)
     {
       rr.stroke(0, 0, 255);
-      rr.line(pos.x+100*cos(radians(dir-180))-10*sin(radians(dir-180)), pos.y+100*sin(radians(dir-180))+10*cos(radians(dir-180)), pos.x-100*cos(radians(dir-180))-10*sin(radians(dir-180)), pos.y-100*sin(radians(dir-180))+10*cos(radians(dir-180)));
-      rr.line(pos.x+100*cos(radians(dir-180))-10*sin(radians(dir)), pos.y+100*sin(radians(dir-180))+10*cos(radians(dir)), pos.x-100*cos(radians(dir-180))-10*sin(radians(dir)), pos.y-100*sin(radians(dir-180))+10*cos(radians(dir)));
+      rr.line(pos.x+100*cos(dir-PI)-10*sin(dir-PI), pos.y+100*sin(dir-PI)+10*cos(dir-PI), pos.x-100*cos(dir-PI)-10*sin(dir-PI), pos.y-100*sin(dir-PI)+10*cos(dir-PI));
+      rr.line(pos.x+100*cos(dir-PI)-10*sin(dir), pos.y+100*sin(dir-PI)+10*cos(dir), pos.x-100*cos(dir-PI)-10*sin(dir), pos.y-100*sin(dir-PI)+10*cos(dir));
     }
   }
 
@@ -66,8 +72,8 @@ class Ship extends Object {
     if (fire) shoot();
     if (warp)
     {
-      pos.x+=warpSpeed*cos(radians(dir));
-      pos.y+=warpSpeed*sin(radians(dir));
+      pos.x+=warpSpeed*cos(dir);
+      pos.y+=warpSpeed*sin(dir);
       if (land!=null) {
         dock.landingChange();
         land=null;
@@ -89,12 +95,12 @@ class Ship extends Object {
       }
       if (speedUp) if (thrust<=0.99) thrust+=0.01;
       if (slowDown)if (thrust>=0.01) thrust-=0.01;
-      if (turnLeft) dir-=4*thrust+1;
-      if (turnRight) dir+=4*thrust+1;
+      if (turnLeft) dir-=0.1*thrust+0.03;
+      if (turnRight) dir+=0.1*thrust+0.03;
       if (zoomIn) zoomIn();
       if (zoomOut) zoomOut();
-      vel.x+=cos(radians(dir))*thrust*thrust/100;
-      vel.y+=sin(radians(dir))*thrust*thrust/100;
+      vel.x+=cos(dir)*thrust*thrust/100;
+      vel.y+=sin(dir)*thrust*thrust/100;
       super.update();
       findClosestTarget();
     }
@@ -112,7 +118,7 @@ class Ship extends Object {
   void shoot() {
     if (cooldown<=0) {
       float offDis=radius+turretGfxDiameter/2;
-      new Bullet(new PVector(pos.x+offDis*cos(aimDir), pos.y+offDis*sin(aimDir)), new PVector(bulSpeed*cos(aimDir)+vel.x, bulSpeed*sin(aimDir)+vel.y), 3);
+      new Bullet(new PVector(pos.x+offDis*cos(aimDir),pos.y+offDis*sin(aimDir)),new PVector(bulSpeed*cos(aimDir)+vel.x, bulSpeed*sin(aimDir)+vel.y),aimDir, 3);
       cooldown=Settings.fireCooldown;
     }
   }
@@ -139,7 +145,7 @@ class Ship extends Object {
       renderer.stroke(200);
       renderer.strokeWeight(1);
       renderer.noFill();
-      for (int i =0; i<3; i++) for (int j=0; j<4; j++) renderer.arc(target.pos.x, target.pos.y, target.diameter*1.05+10+(target.diameter*0.05+6)*i, target.diameter*1.05+10+(target.diameter*0.05+6)*i, radians(22.5+90*j+frameCount), radians(67.5+90*j+frameCount));
+      for (int i =0; i<3; i++) for (int j=0; j<4; j++) renderer.arc(target.pos.x, target.pos.y, target.diameter*1.05+10+(target.diameter*0.05+6)*i, target.diameter*1.05+10+(target.diameter*0.05+6)*i, QUARTER_PI/2+HALF_PI*j+frameCount, (QUARTER_PI+QUARTER_PI/2)+HALF_PI*j+frameCount);
     }
   }
 

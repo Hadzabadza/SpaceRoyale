@@ -44,17 +44,17 @@ class OscHub { //<>// //<>//
 
   void update() { //
     for (OscDock d : dock) {
-      OscBundle updateBundle = new OscBundle(); 
-      d.bundleLog.add("UBundle-C"+d.id+". Initial segment. Size: "+updateBundle.size());
+      OscBundle refreshBundle = new OscBundle(); 
+      d.bundleLog.add("UBundle-C"+d.id+". Initial segment. Size: "+refreshBundle.size());
       if (frameCount%Settings.refreshInterval==d.refreshPhase) {      
-        updateBundle.add(new OscMessage("/OM/star").add(1));
-        updateBundle.add(new OscMessage("/OM/ship").add(1));
-        updateBundle.add(new OscMessage("/SC/directionIndicator").add(1));
-        updateBundle.add(new OscMessage("/OM/label35/visible").add(0));
-        updateBundle.add(new OscMessage("/FC/centreIndicator").add(1));
+        refreshBundle.add(new OscMessage("/OM/star").add(1));
+        refreshBundle.add(new OscMessage("/OM/ship").add(1));
+        refreshBundle.add(new OscMessage("/SC/directionIndicator").add(1));
+        refreshBundle.add(new OscMessage("/OM/label35/visible").add(0));
+        refreshBundle.add(new OscMessage("/FC/centreIndicator").add(1));
       }
-      d.bundleLog.add("UBundle-C"+d.id+". Refresh segment. Size: "+updateBundle.size());
-      d.sendUpdates(updateBundle);
+      d.bundleLog.add("UBundle-C"+d.id+". Refresh segment. Size: "+refreshBundle.size());
+      d.sendUpdates(refreshBundle);
     }
   }
 

@@ -1,16 +1,24 @@
 class Bullet extends Object {
   int timer=1200;
 
-  Bullet (PVector _pos, PVector _vel, float _radius) {
-    super(new PVector(_pos.x, _pos.y), new PVector(_vel.x, _vel.y), 0, _radius);
+  Bullet (PVector _pos, PVector _vel, float _radius, float _dir) {
+    super(new PVector(_pos.x, _pos.y), new PVector(_vel.x, _vel.y), _dir, _radius);
   }
 
-  void draw(PGraphics renderer) 
+  void draw(PGraphics rr) 
   {
-    renderer.fill(255, 0, 0);
-    renderer.strokeWeight(1);
-    renderer.stroke (255);
-    renderer.ellipse (pos.x, pos.y, diameter, diameter);
+    /*
+    rr.fill(255, 0, 0);
+    rr.strokeWeight(1);
+    rr.stroke (255);
+    rr.ellipse (pos.x, pos.y, diameter, diameter);
+    */
+    rr.pushMatrix();
+    rr.translate(pos.x,pos.y);
+    rr.rotate(dir);
+    rr.scale(0.2);
+    rr.image(IMGShell,-IMGShell.width/2,-IMGShell.height/2);
+    rr.popMatrix();
   }
 
   void update() {
