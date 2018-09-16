@@ -4,18 +4,21 @@
 //TODO: Try to patch in mrmr
 
 class OscHub {
+  OscDock[] dock; //Multiple docks with specific data for multiple controllers 
+  int displaySize=280; //Smallest dimension of the display
+  int longestDistance; //Farthest star
+
+  int SCturnWheelPosX=108; //Properties of the turn wheel
+  int SCturnWheelPosY=10;
+  int SCturnWheelRadius=120;
+  int SCLEDCorrectionOffset=-10; //Offset ship direction LED by this ammount (they are drawn from top-left)
+
   int OMPlanets; //TouchOSC orbital map planets count
   int OMPlanetSize=10; //Width/height of a planet on display
-  int displaySize=280; //Smallest dimension of the display
-  int OMCorrectionOffset=-5; //Offset the LEDs by this ammount (they are drawn from top-left)
   int OMCenterX=240; //Centre of the orbital map screen
   int OMCenterY=140;
   int[] OMPlanetDistances; //Distances between planets in touchOSC space
-  int longestDistance; //Farthest star
-  int turnWheelPosX=108; //Properties of the turn wheel
-  int turnWheelPosY=10;
-  int turnWheelRadius=120;
-  OscDock[] dock; //Multiple docks for multiple controllers
+  int OMLEDCorrectionOffset=-5; //Offset the planet (and ship) LEDs by this ammount 
 
   OscHub(int controllers) { //Hub that computes the messages before sending
     dock=new OscDock[controllers];
@@ -51,9 +54,9 @@ class OscHub {
 
   void OMPlanetMove(OscDock d, OscBundle outBundle, int targetPlanetIndex) {
     if (frameCount%Settings.planetLocationUpdateInterval==d.planetLocationUpdatePhase) {
-      int OMPlanetPosX=round(planets.get(targetPlanetIndex).pos.x/longestDistance+OMCenterX+OMCorrectionOffset);
+      int OMPlanetPosX=round(planets.get(targetPlanetIndex).pos.x/longestDistance+OMCenterX+OMLEDCorrectionOffset);
       outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/x").add(OMPlanetPosX));
-      int OMPlanetPosY=round(planets.get(targetPlanetIndex).pos.y/longestDistance+OMCenterY+OMCorrectionOffset);
+      int OMPlanetPosY=round(planets.get(targetPlanetIndex).pos.y/longestDistance+OMCenterY+OMLEDCorrectionOffset);
       outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/y").add(OMPlanetPosY));
     }
     d.bundleLog.add("UBundle-C"+d.id+". Planet position segment. Size: "+outBundle.size());
@@ -86,6 +89,16 @@ class OscDock {
   int refreshPhase=0;
   int planetLocationUpdatePhase=0;
 
+  int FCLEDScale=20; //Scale of the target LED
+  int FCPadX=120; //Properties of the targeting pad
+  int FCPadY=0;
+  int FCPadRadius=110;
+  int FCLEDCorrectionOffset=5; //Offset the target LED by this amount
+  boolean FCFineTune=false; //Targeting fine tune
+  boolean FCRecolorTuners=false; //Recolor tuners if fine tune state is changed
+  float FCTGTX=0.5;
+  float FCTGTY=0.5;
+
   OscDock(OscHub _hub, int _id, NetAddress _c, int port, Ship _s) {
     ex=new OscP5(this, port);
     hub=_hub;
@@ -109,6 +122,13 @@ class OscDock {
     for (int i=0; i<hub.OMPlanets; i++) startBundle.add(new OscMessage("/OM/planet"+i).add(1));     
     for (int i=hub.OMPlanets; i<Settings.maxPlanetsPerStar; i++) startBundle.add(new OscMessage("/OM/planet"+i+"/position/x").add(-30));
     startBundle.add(new OscMessage("/OM/zoom").add(0.84));
+    startBundle.add(new OscMessage("/FC/targeter/x").add(FCTGTX));
+    startBundle.add(new OscMessage("/FC/targeter/y").add(FCTGTY));
+    startBundle.add(new OscMessage("/FC/fineX").add(FCTGTX));
+    startBundle.add(new OscMessage("/FC/fineY").add(FCTGTY));
+    startBundle.add(new OscMessage("/FC/fineTune").add(0));
+    startBundle.add(new OscMessage("/FC/fineX/color").add("yellow"));
+    startBundle.add(new OscMessage("/FC/fineY/color").add("yellow"));
     startBundle.setTimetag(startBundle.now());
     bundleLog.add("StartBundle-C"+id+". Size: "+startBundle.size());
     lockScreenGreen(startBundle);
@@ -129,6 +149,10 @@ class OscDock {
           for (int i=hub.OMPlanets; i<Settings.maxPlanetsPerStar; i++) uB.add(new OscMessage("/OM/planet"+i+"/position/x").add(-30));
           for (int i=0; i<hub.OMPlanets; i++) hub.OMPlanetMove(this, uB, i);
         }
+        if (activePage==3) {
+          updateTargetBlip(uB);
+          updateTargeters(uB);
+        }
         if (changeLandingButton) {
           if (s.land!=null) uB.add(new OscMessage("/SC/planetView/color").add("green"));
           else uB.add(new OscMessage("/SC/planetView/color").add("gray"));
@@ -142,16 +166,16 @@ class OscDock {
   }
 
   public void displaceDirectionIndicator(OscBundle uB) { //Don't use alone! Adds to bundle
-    uB.add(new OscMessage("/SC/directionIndicator/position/x").add(hub.OMCorrectionOffset+round(hub.turnWheelPosX+hub.turnWheelRadius+hub.turnWheelRadius*cos(radians(s.dir)))));
-    uB.add(new OscMessage("/SC/directionIndicator/position/y").add(hub.OMCorrectionOffset+round(hub.turnWheelPosY+hub.turnWheelRadius+hub.turnWheelRadius*sin(radians(s.dir)))));
+    uB.add(new OscMessage("/SC/directionIndicator/position/x").add(hub.SCLEDCorrectionOffset+round(hub.SCturnWheelPosX+hub.SCturnWheelRadius+hub.SCturnWheelRadius*cos(radians(s.dir)))));
+    uB.add(new OscMessage("/SC/directionIndicator/position/y").add(hub.SCLEDCorrectionOffset+round(hub.SCturnWheelPosY+hub.SCturnWheelRadius+hub.SCturnWheelRadius*sin(radians(s.dir)))));
     bundleLog.add("UBundle-C"+id+". DI segment. Size: "+uB.size());
   }
 
   void OMShipMove(OscBundle uB) { //Don't use alone! Adds to bundle
-    int OMShipPosX=round(s.pos.x/hub.longestDistance+hub.OMCenterX+hub.OMCorrectionOffset);
+    int OMShipPosX=round(s.pos.x/hub.longestDistance+hub.OMCenterX+hub.OMLEDCorrectionOffset);
     if (OMShipPosX>hub.OMCenterX*2) OMShipPosX=hub.OMCenterX*2;
     else if (OMShipPosX<0) OMShipPosX=0;
-    int OMShipPosY=round(s.pos.y/hub.longestDistance+hub.OMCenterY+hub.OMCorrectionOffset);
+    int OMShipPosY=round(s.pos.y/hub.longestDistance+hub.OMCenterY+hub.OMLEDCorrectionOffset);
     if (OMShipPosY>hub.OMCenterY*2) OMShipPosY=hub.OMCenterY*2; 
     else if (OMShipPosY<0) OMShipPosY=0;
     uB.add(new OscMessage("/OM/ship/position/x").add(OMShipPosX));
@@ -194,6 +218,46 @@ class OscDock {
     bundleLog.add("UBundle-C"+id+". Lock screen clearer segment. Size: "+b.size());
   }
 
+  void updateTargetBlip(OscBundle uB) {
+    if (s.distToTarget<Settings.targetingDistance)
+    {
+      float quad=1-s.distToTarget/Settings.targetingDistance;
+      float scale=FCLEDScale*(quad*quad);
+      float targetDir=atan2(s.target.pos.y-s.pos.y, s.target.pos.x-s.pos.x);
+      uB.add(new OscMessage("/FC/hostileBlip/position/x").add(FCLEDCorrectionOffset+round(FCPadX+FCPadRadius+FCPadRadius*cos(targetDir)*(1-quad))));
+      uB.add(new OscMessage("/FC/hostileBlip/position/y").add(FCLEDCorrectionOffset+round(FCPadY+FCPadRadius+FCPadRadius*sin(targetDir)*(1-quad))));
+      uB.add(new OscMessage("/FC/hostileBlip/width").add(scale));
+      uB.add(new OscMessage("/FC/hostileBlip/height").add(scale));
+      uB.add(new OscMessage("/FC/hostileBlip/").add(quad));
+    } else {
+      uB.add(new OscMessage("/FC/hostileBlip/position/x").add(-20));
+      uB.add(new OscMessage("/FC/hostileBlip/position/y").add(0));
+    }
+    bundleLog.add("UBundle-C"+id+". Targeting segment. Size: "+uB.size());
+  }
+
+  void updateTargeters(OscBundle uB) {
+    if (FCFineTune) {
+      uB.add(new OscMessage("/FC/targeter/x").add(FCTGTX));
+      uB.add(new OscMessage("/FC/targeter/y").add(FCTGTY));
+    } else {
+      uB.add(new OscMessage("/FC/fineX").add(FCTGTX));
+      uB.add(new OscMessage("/FC/fineY").add(FCTGTY));
+    }
+    if (FCRecolorTuners)
+      if (FCFineTune) {
+        uB.add(new OscMessage("/FC/fineX/color").add("gray"));
+        uB.add(new OscMessage("/FC/fineY/color").add("gray"));
+        uB.add(new OscMessage("/FC/targeter/color").add("gray"));
+        FCRecolorTuners=false;
+      } else
+      {
+        uB.add(new OscMessage("/FC/fineX/color").add("yellow"));
+        uB.add(new OscMessage("/FC/fineY/color").add("yellow"));
+        uB.add(new OscMessage("/FC/targeter/color").add("yellow"));
+        FCRecolorTuners=false;
+      }
+  }
 
   void send(OscBundle b) {
     bundleLog.add("UBundle-C"+id+". Sending... Size: "+b.size());
@@ -228,6 +292,9 @@ class OscDock {
     ex.plug(this, "changeZoom", "/OM/zoom");
     ex.plug(this, "shoot", "/FC/fire");
     ex.plug(this, "changeAim", "/FC/targeter");
+    ex.plug(this, "fineTuneX", "/FC/fineX");
+    ex.plug(this, "fineTuneY", "/FC/fineY");
+    ex.plug(this, "switchFineTune", "/FC/fineTune");
     ex.plug(this, "switchToSC", "/SC");
     ex.plug(this, "switchToPV", "/PV");
     ex.plug(this, "switchToOM", "/OM");
@@ -299,21 +366,50 @@ class OscDock {
 
   public void changeAim(float x, float y)
   {
-    s.aimDir=atan2(y-0.5, x-0.5)-HALF_PI;
+    if (!FCFineTune) {
+      FCTGTX=x;
+      FCTGTY=y;
+      s.aimDir=atan2(y-0.5, x-0.5)-HALF_PI;
+    }
   }
-  void switchToSC() {
+
+  public void fineTuneX(float f) {
+    if (FCFineTune) {
+      FCTGTX=f;
+      s.aimDir=atan2(FCTGTY-0.5, f-0.5)-HALF_PI;
+    }
+  }
+
+  public void fineTuneY(float f) {
+    if (FCFineTune) {
+      FCTGTY=f;
+      s.aimDir=atan2(f-0.5, FCTGTX-0.5)-HALF_PI;
+    }
+  }
+
+  public void switchFineTune(float f) {
+    if (f==0) FCFineTune=false;
+    else FCFineTune=true;
+    FCRecolorTuners=true;
+  }
+
+  public void switchToSC() {
     activePage=0;
   }
-  void switchToPV() {
+
+  public void switchToPV() {
     activePage=1;
   }
-  void switchToOM() {
+
+  public void switchToOM() {
     activePage=2;
   }
-  void switchToFC() {
+
+  public void switchToFC() {
     activePage=3;
   }
-  void unlock(float f) {
+
+  public void unlock(float f) {
     unlocked=true;
   }
 }

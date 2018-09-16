@@ -89,6 +89,7 @@ void draw() {
     for (Object o : objects) {
       o.draw(screen[i]);
     }
+    ships[i].drawTarget(screen[i]);
     screen[i].endDraw();
     image(screen[i], screenSize*i, 0);
   }
@@ -102,7 +103,7 @@ void draw() {
     rect(screenSize*i+halfScreen-50, 10, 100, 10);
   }
   strokeWeight(3);
-  for (int i=1; i<screen.length; i++) line (screenSize, 0, screenSize, height);
+  for (int i=1; i<screen.length; i++) line (screenSize*i, 0, screenSize*i, height);
 
   /*if (mapScreen) {
    camera(ship.pos.x, ship.pos.y, (height/2.0) / tan(PI*30.0 / 180.0)*zoom, ship.pos.x, ship.pos.y, 0.0, 0.0, 1.0, 0.0);

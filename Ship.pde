@@ -1,4 +1,5 @@
 //TODO: Fix mapScreen, move all corresponding vars to ship object
+//TODO: Improve targeting
 
 class Ship extends Object {
   float warpSpeed=Settings.warpCap;
@@ -13,7 +14,10 @@ class Ship extends Object {
   float cooldown;
   float zoom=1;
   OscDock dock;
+  Object target;
+  float distToTarget;
 
+  //Controls and inputs
   boolean speedUp;
   boolean slowDown;
   boolean turnLeft;
@@ -77,13 +81,13 @@ class Ship extends Object {
         if (!checkCollision(land)) dock.landingChange(); //Check if drifted away
       } else {
         for (Planet p : planets) if (checkCollision(p))
-          {
-            land=p;
-            vel.x=p.vel.x;
-            vel.y=p.vel.y;
-            dock.landingChange();
-            break;
-          }
+        {
+          land=p;
+          vel.x=p.vel.x;
+          vel.y=p.vel.y;
+          dock.landingChange();
+          break;
+        }
         for (Star s : stars) if (checkCollision(s)) vel=new PVector();
       }
       if (speedUp) if (thrust<=0.99) thrust+=0.01;
@@ -95,6 +99,7 @@ class Ship extends Object {
       vel.x+=cos(radians(dir))*thrust*thrust/100;
       vel.y+=sin(radians(dir))*thrust*thrust/100;
       super.update();
+      findClosestTarget();
     }
   }
 
@@ -115,6 +120,31 @@ class Ship extends Object {
     }
   }
 
+  void findClosestTarget() {
+    float min;
+    target=objects.get(0);
+    min=this.checkDist(target);
+    for (int i=1; i<objects.size(); i++) {
+      Object chk=objects.get(i);
+      distToTarget=this.checkDist(chk);
+      if ((distToTarget<min)&&(chk!=this)&&!(chk instanceof Bullet)) 
+      {
+        target=chk; 
+        min=distToTarget;
+      }
+    }
+    distToTarget=min;
+  }
+  void drawTarget(PGraphics renderer) {
+    if (dock.activePage==3)
+    if ((distToTarget<Settings.targetingDistance)&&(target!=null)) {
+      renderer.stroke(200);
+      renderer.strokeWeight(1);
+      renderer.noFill();
+      for (int i =0; i<3; i++) for (int j=0; j<4; j++) renderer.arc(target.pos.x, target.pos.y, target.diameter*1.05+10+(target.diameter*0.05+6)*i, target.diameter*1.05+10+(target.diameter*0.05+6)*i, radians(22.5+90*j+frameCount), radians(67.5+90*j+frameCount));
+    }
+  }
+
   void spawn(int which) {
     ships[which]=this;
     super.spawn();
@@ -126,8 +156,8 @@ class Ship extends Object {
 
   void destroy() {
     //ships.remove(this);
-    radius=-10;
-    diameter=radius*2;
+    radius*=-1;
+    diameter*=-1;
     super.destroy();
   }
 }

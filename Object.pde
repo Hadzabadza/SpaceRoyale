@@ -4,7 +4,8 @@ class Object { //Superclass for physical ingame objects
   float dir;
   float radius;
   float diameter;
-  
+  boolean destroyed;
+
   Object(PVector _pos, PVector _vel, float _dir, float _radius) {
     pos=new PVector(_pos.x, _pos.y);
     vel=new PVector(_vel.x, _vel.y);
@@ -18,19 +19,23 @@ class Object { //Superclass for physical ingame objects
     if (dist(pos.x, pos.y, with.pos.x, with.pos.y)<=with.radius+radius) return true;
     else return false;
   }
+  float checkDist(Object to) {
+    return dist(pos.x, pos.y, to.pos.x, to.pos.y);
+  }
   void update()
   {
     pos.add(vel);
   }
-  void spawn(){
+  void spawn() {
     objects.add(this);
   }
-  void queueDestroy(){
+  void queueDestroy() {
     destroyees.add(this);
   }
-  void destroy(){
+  void destroy() {
     objects.remove(this);
+    destroyed=true;
   }
-  void draw(PGraphics renderer){
+  void draw(PGraphics renderer) {
   }
 }

@@ -43,7 +43,7 @@ static class Settings {
   //Generator settings
   static int minPlanetsPerStar =3;
   static int maxPlanetsPerStar =8;
-  static int ships=1;
+  static int ships=1;              // SHIPS HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
   //OSC stuff
@@ -57,22 +57,22 @@ static class Settings {
     "192.168.1.162", 
     "192.168.1.162"};
   static int[] oscInPort={
-    8000,
-    8001,
-    8002,
-    8003,
-    8004,
-    8005,
-    8006,
+    8000, 
+    8001, 
+    8002, 
+    8003, 
+    8004, 
+    8005, 
+    8006, 
     8007};
   static int[] controllerInputPort={
     9000, 
-    9001,
-    9002,
-    9003,
-    9004,
-    9005,
-    9006,
+    9001, 
+    9002, 
+    9003, 
+    9004, 
+    9005, 
+    9006, 
     9007};
   static boolean decodeOSC=true;            //For debug
   static boolean displayOSCBundleLogs=false; //
@@ -85,18 +85,19 @@ static class Settings {
   static float projectileSpeed=2; //Bullet's muzzle velocity
   static float warpCap=10; //Maximum warp speed
   static float fireCooldown=0.1;
+  static float targetingDistance=1250;
 
   //Bulletproperties
   static float bullDmg=0.1;
 
-  /*static enum ShipColors {
-   RED,
-   GREEN,
-   BLUE,
-   CYAN,
-   MAGENTA,
-   YELLOW,
-   BROWN,
-   GREY
-   }*/
+  /*enum ShipColors {
+    red, 
+      green, 
+      blue, 
+      yellow, 
+      purple, 
+      gray, 
+      orange, 
+      brown
+  }*/
 }
