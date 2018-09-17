@@ -1,5 +1,5 @@
 class Bullet extends Object {
-  int timer=1200;
+  int timer=Settings.selfDestructTimer;
 
   Bullet (PVector _pos, PVector _vel, float _radius, float _dir) {
     super(new PVector(_pos.x, _pos.y), new PVector(_vel.x, _vel.y), _dir, _radius);
@@ -9,15 +9,15 @@ class Bullet extends Object {
   {
     /*
     rr.fill(255, 0, 0);
-    rr.strokeWeight(1);
-    rr.stroke (255);
-    rr.ellipse (pos.x, pos.y, diameter, diameter);
-    */
+     rr.strokeWeight(1);
+     rr.stroke (255);
+     rr.ellipse (pos.x, pos.y, diameter, diameter);
+     */
     rr.pushMatrix();
-    rr.translate(pos.x,pos.y);
+    rr.translate(pos.x, pos.y);
     rr.rotate(dir);
-    rr.scale(0.2);
-    rr.image(IMGShell,-IMGShell.width/2,-IMGShell.height/2);
+    rr.scale(0.15);
+    rr.image(IMGShell, -IMGShell.width/2, -IMGShell.height/2);
     rr.popMatrix();
   }
 
@@ -26,29 +26,32 @@ class Bullet extends Object {
     if (timer--<=0) {
       queueDestroy();
     }
-    for (int j=asteroids.size()-1; j>=0; j--)
-    {
-      Asteroid a=asteroids.get(j);
-      if (checkCollision(a))
+    if (Settings.selfDestructTimer-timer>Settings.inactivityTimer) {
+      for (int j=asteroids.size()-1; j>=0; j--)
       {
-        a.queueDestroy();
-        queueDestroy();
+        Asteroid a=asteroids.get(j);
+        if (checkCollision(a))
+        {
+          a.queueDestroy();
+          queueDestroy();
+        }
       }
-    }
-    for (Ship s:ships)
-    {
-      if (checkCollision(s))
+      for (Ship s : ships)
       {
-        s.HP-=Settings.bullDmg;
-        queueDestroy();
+        if (checkCollision(s))
+        {
+          s.HP-=Settings.bullDmg;
+          sprinkleParticles(IMGDebris, pos, 4, 6);
+          queueDestroy();
+        }
       }
     }
   }
-  void spawn(){
+  void spawn() {
     bullets.add(this);
     super.spawn();
   }
-  void queueDestroy(){
+  void queueDestroy() {
     destroyees.add(this);
   }
   void destroy() {

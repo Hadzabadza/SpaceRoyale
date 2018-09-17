@@ -21,8 +21,8 @@ class Planet extends Object{
     mass=mas;
     distance = distS+orbitStar.radius;
     float phase=random(0, TWO_PI);
-    vel.x=sqrt(0.0001*distance)*cos(phase+PI);
-    vel.y=sqrt(0.0001*distance)*sin(phase+PI);
+    vel.x=sqrt(0.0001*distance)*cos(phase+HALF_PI);
+    vel.y=sqrt(0.0001*distance)*sin(phase+HALF_PI);
     pos.x=orbitStar.pos.x+distance*cos(phase);
     pos.y=orbitStar.pos.y+distance*sin(phase);
     spin=random(-1, 1);

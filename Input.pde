@@ -30,7 +30,7 @@ void keyReleased() {
     if ((key == 'q')||(key=='Q'))  ships[0].turnTurretLeft = false;
     if ((key == 'e')||(key=='E'))  ships[0].turnTurretRight = false;
     if (key == ' ')  ships[0].fire = false;
-    if ((key == 'x')||(key=='X'))  ships[0].warp = !ships[0].warp;
+    if ((key == 'x')||(key=='X'))  if(ships[0].warp) ships[0].stopWarp(); else ships[0].warp=true;
 
     if ((keyCode==UP)||(key==56))  ships[1].speedUp = false;
     if ((keyCode==DOWN)||(key==50))  ships[1].slowDown = false;
@@ -39,7 +39,7 @@ void keyReleased() {
     if (key == 55)  ships[1].turnTurretLeft = false;
     if (key == 57)  ships[1].turnTurretRight = false;
     if (key == 48)  ships[1].fire = false;
-    if (key == 46)  ships[1].warp = !ships[1].warp;
+    if (key == 46)  if(ships[1].warp) ships[1].stopWarp(); else ships[1].warp=true;
     if (key == 45)  ships[1].zoomOut = false;
     if (key == 43)  ships[1].zoomIn = false;
   }

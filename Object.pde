@@ -6,6 +6,8 @@ class Object { //Superclass for physical ingame objects
   float diameter;
   boolean destroyed;
 
+  private Object(){}
+
   Object(PVector _pos, PVector _vel, float _dir, float _radius) {
     pos=new PVector(_pos.x, _pos.y);
     vel=new PVector(_vel.x, _vel.y);

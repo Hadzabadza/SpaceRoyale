@@ -10,6 +10,8 @@ ArrayList<Star> stars;
 ArrayList<Planet> planets;
 ArrayList<Asteroid> asteroids;
 ArrayList<Bullet> bullets;
+ArrayList<Particle> particles;
+ArrayList<Particle> spareParticles;
 ArrayList<Object> destroyees;
 ArrayList<Object> newSpawns;
 ArrayList<Object> objects;
@@ -18,10 +20,15 @@ PGraphics[] screen;
 
 /////////////////GFX/////////////////
 PFont pixFont;
+int spareParts=0;
 
 ////////////////MISC/////////////////
+static float FMAX=3.40282347E+38;
 long seed=1;
 int gameState=0;
+
+/////?////////OSC stuff////////?/////
+OscHub osc;
 
 /////////!!!!!FIX THESE!!!!!/////////
 PVector mapScreenShift;
@@ -30,9 +37,6 @@ boolean heightColour;
 Terrain active;
 PVector cursor;
 //int tSize=50;
-
-/////?////////OSC stuff////////?/////
-OscHub osc;
 
 static class Settings {
 
@@ -44,7 +48,7 @@ static class Settings {
   //Generator settings
   static int minPlanetsPerStar =3;
   static int maxPlanetsPerStar =8;
-  static int ships=1;              // SHIPS HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  static int ships=2;              // SHIPS HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
   //OSC stuff
@@ -81,15 +85,25 @@ static class Settings {
   static int planetLocationUpdateInterval=30;
 
   //Ship properties
-  static float shipSize=7.5; //Radius of ship entities
-  static float turretGfxSize=5; //Extra radius around the ship for turret graphics
+  static float shipSize=20; //Radius of ship entities
+  static float turretGfxSize=20; //Extra radius around the ship for turret graphics
   static float projectileSpeed=2; //Bullet's muzzle velocity
   static float warpCap=10; //Maximum warp speed
   static float fireCooldown=0.1;
   static float targetingDistance=1250;
+  static float staticTurnSpeed=0.02;
+  static float assistedTurnSpeed=0.035;
+  static int turretXOffset=-2;
+  static int turretYOffset=8;
 
-  //Bulletproperties
+  //Bullet properties
   static float bullDmg=0.1;
+  static int selfDestructTimer=1200;
+  static int inactivityTimer=25;
+  
+  //Particle properties
+  static float alphaChange=-5;
+  static float scaleChange=-0.01;
 
   /*enum ShipColors {
     red, 

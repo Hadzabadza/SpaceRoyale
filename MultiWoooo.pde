@@ -1,8 +1,10 @@
 //TODO: Fix mapScreen, move all corresponding vars to ship object //<>//
-//TODO: SHIP: Improve targeting
+//TODO: SHIP: Improve targeting?
 //TODO: OSC: Find the name of the connected device and add to bundle logs.
 //TODO: OSC: Fix controller unresponsiveness after reinit
 //TODO: OSC: Try to patch in mrmr
+//TODO: Fix fetchkvetch
+//TODO: improve particle systems, maybe put into a manager class
 
 import oscP5.*;
 import netP5.*;
@@ -22,56 +24,62 @@ void init() {
   asteroids=new ArrayList<Asteroid>();
   bullets=new ArrayList<Bullet>();
   ships=new Ship[Settings.ships];
+  particles=new ArrayList<Particle>();
+  spareParticles=new ArrayList<Particle>();
   destroyees=new ArrayList<Object>();
   newSpawns=new ArrayList<Object>();
   objects=new ArrayList<Object>();
   screen= new PGraphics[Settings.ships];
+  stars.add(new Star(0, 0));
   for (int i=0; i<Settings.ships; i++) {
-    screen[i]=createGraphics(width/Settings.ships, height, P3D);
+    float startDir=TWO_PI/Settings.ships*i;
+    PVector startPos=new PVector((stars.get(0).radius+Settings.shipSize*2.5)*cos(startDir), (stars.get(0).radius+Settings.shipSize*2.5)*sin(startDir));
+    ;
+    if (Settings.ships>1) screen[i]=createGraphics(width/Settings.ships, height, P3D);
+    else screen[0]=this.g;
     switch (i) {
     case 0: 
       {
-        ships[i]=new Ship(color(255, 0, 0));
+        ships[i]=new Ship(startPos, startDir, color(255, 0, 0));
         break;
       }
     case 1: 
       {
-        ships[i]=new Ship(color(0, 255, 0));
+        ships[i]=new Ship(startPos, startDir, color(0, 255, 0));
         break;
       }
     case 2: 
       {
-        ships[i]=new Ship(color(0, 0, 255));
+        ships[i]=new Ship(startPos, startDir, color(0, 0, 255));
         break;
       }
     case 3: 
       {
-        ships[i]=new Ship(color(0, 255, 255));
+        ships[i]=new Ship(startPos, startDir, color(0, 255, 255));
         break;
       }
     case 4: 
       {
-        ships[i]=new Ship(color(255, 0, 255));
+        ships[i]=new Ship(startPos, startDir, color(255, 0, 255));
         break;
       }
     case 5: 
       {
-        ships[i]=new Ship(color(255, 255, 0));
+        ships[i]=new Ship(startPos, startDir, color(255, 255, 0));
         break;
       }
     case 6: 
       {
-        ships[i]=new Ship(color(100, 100, 0));
+        ships[i]=new Ship(startPos, startDir, color(100, 100, 0));
         break;
       }
     case 7: 
       {
-        ships[i]=new Ship(color(100));
+        ships[i]=new Ship(startPos, startDir, color(100));
         break;
       }
     }
   }
-  stars.add(new Star(0, 0));
   mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
   osc=new OscHub(Settings.ships);
@@ -82,7 +90,7 @@ void init() {
 void draw() {
   if (Settings.DEBUG) println("...................................................NEWFRAME..................................................................");
   if (gameState==0) {
-    background(0,255*(frameCount-1)/Settings.ships,0);
+    background(0, 255*(frameCount-1)/Settings.ships, 0);
     if (frameCount<=Settings.ships) osc.dock[frameCount-1]=osc.dock[frameCount-1].initializeDock();
     else gameState=1;
   }
@@ -101,6 +109,7 @@ void draw() {
         o.draw(screen[i]);
       }
       ships[i].drawTarget(screen[i]);
+      ships[i].drawAim(screen[i]);
       screen[i].endDraw();
       image(screen[i], screenSize*i, 0);
     }
@@ -155,6 +164,7 @@ void draw() {
   }
 }
 
+
 void objectUpdates() {
   for (Object o : objects) {
     o.update();
@@ -166,6 +176,65 @@ void objectUpdates() {
   for (int i=newSpawns.size()-1; i>=0; i--) {
     newSpawns.get(i).spawn();
     newSpawns.remove(i);
+  }
+}
+
+void sprinkleParticles(PImage img, PVector where, int min, int max) {
+  int n = round(random(min, max));
+  for (int i=0; i<n; i++) particles.add(new Particle(img, where));
+  //fetchParticles(n, img, where);
+}
+
+void sprinkleParticles(PImage[] imgs, PVector where, int min, int max) {
+  int n = round(random(min, max));
+  for (int i=0; i<n; i++) particles.add(new Particle(imgs[round(random(0, imgs.length-1))], where));
+  //fetchParticles(n, imgs, where);
+}
+
+void fetchParticles(int n, PImage img, PVector where) {
+  if (spareParts>n) {
+    int counter=0;
+    int searchFor=spareParts-n;
+    for (Particle p : spareParticles) {
+      if (counter>=searchFor) {
+        particles.add(p);
+        p.refresh(img, where);
+      } else counter++;
+    }
+    for (int i=spareParts-1; i>=searchFor; i--) spareParticles.remove(i);
+    spareParts=searchFor;
+  } else
+  {
+    for (Particle p : spareParticles) {
+      particles.add(p);
+      p.refresh(img, where);
+    }
+    spareParticles.clear();
+    for (int i=spareParts-1; i<n; i++) particles.add(new Particle (img, where));
+    spareParts=0;
+  }
+}
+void fetchParticles(int n, PImage[] imgs, PVector where) {
+ if (spareParts>n) {
+    int counter=0;
+    int searchFor=spareParts-n;
+    for (Particle p : spareParticles) {
+      if (counter>=searchFor) {
+        particles.add(p);
+        p.refresh(imgs[round(random(0, imgs.length-1))], where);
+      } else counter++;
+    }
+    for (int i=spareParts-1; i>=searchFor; i--) spareParticles.remove(i);
+    spareParts=searchFor;
+  } else
+  {
+    for (Particle p : spareParticles) {
+      particles.add(p);
+      p.refresh(imgs[round(random(0, imgs.length-1))], where);
+    }
+    spareParticles.clear();
+    for (int i=spareParts-1; i<n; i++) particles.add(new Particle (imgs[round(random(0, imgs.length-1))], where));
+    spareParts=0;
   }
 }
 

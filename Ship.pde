@@ -41,27 +41,38 @@ class Ship extends Object {
     turretGfxDiameter+=diameter;
     c=color(0, 255, 0);
   }
+  Ship(PVector _pos, float _dir, color _c) {
+    super(_pos, new PVector(), _dir, Settings.shipSize);
+    turretGfxDiameter+=diameter;
+    c=_c;
+    aimDir=_dir;
+  }
   void draw(PGraphics rr) {
     /*rr.stroke(c);
-    rr.fill(255);
-    rr.line(pos.x, pos.y, pos.x+100*cos(radians(dir)), pos.y+100*sin(radians(dir)));
-    rr.ellipse(pos.x, pos.y, diameter, diameter);*/
+     rr.fill(255);
+     rr.line(pos.x, pos.y, pos.x+100*cos(radians(dir)), pos.y+100*sin(radians(dir)));
+     rr.ellipse(pos.x, pos.y, diameter, diameter);*/
     rr.pushMatrix();
-    rr.translate(pos.x,pos.y);
+    rr.translate(pos.x, pos.y);
     rr.rotate(dir);
     rr.scale(0.2);
-    rr.image(IMGShip,-IMGShip.width/2,-IMGShip.height/2);
+    rr.tint(c);
+    rr.image(IMGShipStripes, -IMGShip.width/2, -IMGShip.height/2);
+    rr.noTint();
+    rr.image(IMGShip, -IMGShip.width/2, -IMGShip.height/2);
     rr.popMatrix();
     rr.noFill();
+    rr.strokeWeight(1);
     rr.stroke(200);
-    rr.line(pos.x+12*cos(aimDir), pos.y+12*sin(aimDir), pos.x+40*cos(aimDir), pos.y+40*sin(aimDir));
-    rr.arc(pos.x, pos.y, turretGfxDiameter, turretGfxDiameter, aimDir-1, aimDir+1);
-    if (warp)
-    {
-      rr.stroke(0, 0, 255);
-      rr.line(pos.x+100*cos(dir-PI)-10*sin(dir-PI), pos.y+100*sin(dir-PI)+10*cos(dir-PI), pos.x-100*cos(dir-PI)-10*sin(dir-PI), pos.y-100*sin(dir-PI)+10*cos(dir-PI));
-      rr.line(pos.x+100*cos(dir-PI)-10*sin(dir), pos.y+100*sin(dir-PI)+10*cos(dir), pos.x-100*cos(dir-PI)-10*sin(dir), pos.y-100*sin(dir-PI)+10*cos(dir));
-    }
+    PVector turretPos=new PVector(pos.x-Settings.turretXOffset*cos(dir)-Settings.turretYOffset*sin(dir), pos.y-Settings.turretXOffset*sin(dir)-Settings.turretYOffset*cos(dir+PI));
+    rr.pushMatrix();
+    rr.translate(turretPos.x, turretPos.y);
+    rr.rotate(aimDir);
+    rr.scale(0.1);
+    rr.image(IMGTurret, -IMGTurret.width/2, -IMGTurret.height/2);
+    rr.popMatrix();
+
+    if (warp) if (frameCount%2==0) particles.add(new Particle(IMGShieldWaves, new PVector(pos.x+70*cos(dir), pos.y+70*sin(dir)), new PVector(0, 0), dir, color(255,250), 0.35, -1, 0.0026, 0, 250));
   }
 
   void update() {
@@ -95,8 +106,8 @@ class Ship extends Object {
       }
       if (speedUp) if (thrust<=0.99) thrust+=0.01;
       if (slowDown)if (thrust>=0.01) thrust-=0.01;
-      if (turnLeft) dir-=0.1*thrust+0.03;
-      if (turnRight) dir+=0.1*thrust+0.03;
+      if (turnLeft) dir-=Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed;
+      if (turnRight) dir+=Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed;
       if (zoomIn) zoomIn();
       if (zoomOut) zoomOut();
       vel.x+=cos(dir)*thrust*thrust/100;
@@ -117,36 +128,49 @@ class Ship extends Object {
 
   void shoot() {
     if (cooldown<=0) {
-      float offDis=radius+turretGfxDiameter/2;
-      new Bullet(new PVector(pos.x+offDis*cos(aimDir),pos.y+offDis*sin(aimDir)),new PVector(bulSpeed*cos(aimDir)+vel.x, bulSpeed*sin(aimDir)+vel.y),aimDir, 3);
+      PVector turretPos=new PVector(pos.x-Settings.turretXOffset*cos(dir)-Settings.turretYOffset*sin(dir), pos.y-Settings.turretXOffset*sin(dir)-Settings.turretYOffset*cos(dir+PI));
+      new Bullet(new PVector(turretPos.x, turretPos.y), new PVector(bulSpeed*cos(aimDir)+vel.x, bulSpeed*sin(aimDir)+vel.y), 5, aimDir);
       cooldown=Settings.fireCooldown;
     }
   }
 
   void findClosestTarget() {
     float min;
-    target=objects.get(0);
-    min=this.checkDist(target);
-    for (int i=1; i<objects.size(); i++) {
-      Object chk=objects.get(i);
-      distToTarget=this.checkDist(chk);
-      if ((distToTarget<min)&&(chk!=this)&&!(chk instanceof Bullet)) 
+    min=FMAX;
+    for (Object o : objects) {
+      distToTarget=this.checkDist(o);
+      if ((o!=this)&&!(o instanceof Bullet)&&!(o instanceof Particle)&&(distToTarget<min)) 
       {
-        target=chk; 
+        target=o; 
         min=distToTarget;
       }
     }
     distToTarget=min;
   }
-  
-  void drawTarget(PGraphics renderer) {
+
+  void drawTarget(PGraphics rr) {
     if (dock.activePage==3)
-    if ((distToTarget<Settings.targetingDistance)&&(target!=null)) {
-      renderer.stroke(200);
-      renderer.strokeWeight(1);
-      renderer.noFill();
-      for (int i =0; i<3; i++) for (int j=0; j<4; j++) renderer.arc(target.pos.x, target.pos.y, target.diameter*1.05+10+(target.diameter*0.05+6)*i, target.diameter*1.05+10+(target.diameter*0.05+6)*i, QUARTER_PI/2+HALF_PI*j+frameCount, (QUARTER_PI+QUARTER_PI/2)+HALF_PI*j+frameCount);
+      if ((distToTarget<Settings.targetingDistance)&&(target!=null)) {
+        rr.stroke(200);
+        rr.strokeWeight(1);
+        rr.noFill();
+        for (int i =0; i<3; i++) for (int j=0; j<4; j++) rr.arc(target.pos.x, target.pos.y, target.diameter*1.05+10+(target.diameter*0.05+6)*i, target.diameter*1.05+10+(target.diameter*0.05+6)*i, QUARTER_PI/2+HALF_PI*j+radians(frameCount), (QUARTER_PI+QUARTER_PI/2)+HALF_PI*j+radians(frameCount));
+      }
+  }
+  void drawAim(PGraphics rr) {
+    if (!destroyed) {
+      PVector turretPos=new PVector(pos.x-Settings.turretXOffset*cos(dir)-Settings.turretYOffset*sin(dir), pos.y-Settings.turretXOffset*sin(dir)-Settings.turretYOffset*cos(dir+PI));
+      rr.stroke(200);
+      rr.noFill();
+      rr.strokeWeight(1);
+      rr.line(turretPos.x+turretGfxDiameter/2*cos(aimDir), turretPos.y+turretGfxDiameter/2*sin(aimDir), turretPos.x+(turretGfxDiameter/2+20)*cos(aimDir), turretPos.y+(turretGfxDiameter/2+20)*sin(aimDir));
+      rr.arc(turretPos.x, turretPos.y, turretGfxDiameter, turretGfxDiameter, aimDir-0.5, aimDir+0.5);
     }
+  }
+
+  void stopWarp() {
+    warp=false;
+    for (int i=0; i<3; i++) particles.add(new Particle(IMGShieldWaves, new PVector(pos.x+100*cos(dir+HALF_PI/3*(i-1)), pos.y+100*sin(dir+HALF_PI/3*(i-1))), new PVector(3*cos(dir+HALF_PI/3*(i-1)), 3*sin(dir+HALF_PI/3*(i-1))), dir+HALF_PI/3*(i-1), color(255), 0.54, -2, 0.01, 0, 255));
   }
 
   void spawn(int which) {

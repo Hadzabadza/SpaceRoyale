@@ -24,7 +24,6 @@ class OscHub { //<>// //<>//
     longestDistance=round(planets.get(OMPlanets-1).distance);
     longestDistance=longestDistance/100;
     for (int i=0; i<OMPlanets; i++) OMPlanetDistances[i]=round(planets.get(i).distance/longestDistance);
-    //for (OscDock d : dock) d.initializeDock(); //WIP
   }
 
   void initializeHub() { //Initializing Orbital Map data
@@ -97,7 +96,7 @@ class OscDock {
   int outPort;
 
   int FCLEDScale=20; //Scale of the target LED
-  int FCPadX=120; //Properties of the targeting pad
+  int FCPadX=80; //Properties of the targeting pad
   int FCPadY=0;
   int FCPadRadius=110;
   int FCLEDCorrectionOffset=5; //Offset the target LED by this amount
@@ -249,8 +248,8 @@ class OscDockInitialized extends OscDock {
   }
 
   public void displaceDirectionIndicator(OscBundle uB) { //Don't use alone! Adds to bundle
-    uB.add(new OscMessage("/SC/directionIndicator/position/x").add(hub.SCLEDCorrectionOffset+round(hub.SCturnWheelPosX+hub.SCturnWheelRadius+hub.SCturnWheelRadius*cos(radians(s.dir)))));
-    uB.add(new OscMessage("/SC/directionIndicator/position/y").add(hub.SCLEDCorrectionOffset+round(hub.SCturnWheelPosY+hub.SCturnWheelRadius+hub.SCturnWheelRadius*sin(radians(s.dir)))));
+    uB.add(new OscMessage("/SC/directionIndicator/position/x").add(hub.SCLEDCorrectionOffset+round(hub.SCturnWheelPosX+hub.SCturnWheelRadius+hub.SCturnWheelRadius*cos(s.dir))));
+    uB.add(new OscMessage("/SC/directionIndicator/position/y").add(hub.SCLEDCorrectionOffset+round(hub.SCturnWheelPosY+hub.SCturnWheelRadius+hub.SCturnWheelRadius*sin(s.dir))));
     bundleLog.add("UBundle-C"+id+". DI segment. Size: "+uB.size());
   }
 
@@ -389,7 +388,8 @@ class OscDockInitialized extends OscDock {
     s.thrust=f;
   }
   public void warp(float f) {
-    s.warp=!s.warp;
+    if (s.warp) s.stopWarp();
+    else s.warp=true;
   }
   public void turnLeft(float f) {
     if (!s.warp) if (f==0) s.turnLeft=false;
@@ -413,7 +413,7 @@ class OscDockInitialized extends OscDock {
   }
 
   public void turnTo(float f) {
-    if (!s.warp) s.dir+=(s.thrust+1)*f;
+    if (!s.warp) s.dir+=(s.thrust*Settings.assistedTurnSpeed+Settings.staticTurnSpeed)*f;
   }
 
   public void moveCursor(float x, float y)
@@ -440,7 +440,7 @@ class OscDockInitialized extends OscDock {
   }
 
   public void changeZoom(float f) {
-    s.zoom=0.8+8.5*(1-f)*(1-f);
+    s.zoom=0.3+9*(1-f)*(1-f);
   }
 
   public void shoot(float f) {
