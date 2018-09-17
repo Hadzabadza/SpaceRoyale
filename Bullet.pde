@@ -41,7 +41,6 @@ class Bullet extends Object {
         if (checkCollision(s))
         {
           s.HP-=Settings.bullDmg;
-          sprinkleParticles(IMGDebris, pos, 4, 6);
           queueDestroy();
         }
       }
@@ -52,6 +51,7 @@ class Bullet extends Object {
     super.spawn();
   }
   void queueDestroy() {
+    sprinkleParticles(IMGDebris, pos, 4, 6);
     destroyees.add(this);
   }
   void destroy() {

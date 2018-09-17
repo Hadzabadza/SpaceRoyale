@@ -14,10 +14,10 @@ class Particle extends Object {
     alpha=random(100, 255);
     c=color(255, alpha);
     scale=1;
-    alphaChange=random(1,Settings.alphaChange);
+    alphaChange=random(-1,Settings.alphaChange);
     scaleChange=Settings.scaleChange;
     rotation=random(-0.05, 0.05);
-    timer=240;
+    timer=Settings.defaultTimer;
   }
 
   Particle(PImage inputImg, PVector _pos) {
@@ -26,10 +26,10 @@ class Particle extends Object {
     alpha=random(100, 255);
     c=color(255, alpha);
     scale=1;
-    alphaChange=random(1,Settings.alphaChange);
+    alphaChange=random(-1,Settings.alphaChange);
     scaleChange=Settings.scaleChange;
     rotation=random(-0.05, 0.05);
-    timer=240;
+    timer=Settings.defaultTimer;
   }
 
   Particle(PImage inputImg, PVector _pos, PVector _vel) {
@@ -38,10 +38,10 @@ class Particle extends Object {
     alpha=random(100, 255);
     c=color(255, alpha);
     scale=1;
-    alphaChange=random(1,Settings.alphaChange);
+    alphaChange=random(-1,Settings.alphaChange);
     scaleChange=Settings.scaleChange;
     rotation=random(-0.05, 0.05);
-    timer=240;
+    timer=Settings.defaultTimer;
   }
 
   Particle(PImage inputImg, PVector _pos, PVector _vel, float _dir) {
@@ -50,10 +50,10 @@ class Particle extends Object {
     alpha=random(100, 255);
     c=color(255, alpha);
     scale=1;
-    alphaChange=random(1,Settings.alphaChange);
+    alphaChange=random(-1,Settings.alphaChange);
     scaleChange=Settings.scaleChange;
     rotation=random(-0.05, 0.05);
-    timer=240;
+    timer=Settings.defaultTimer;
   }
   Particle(PImage inputImg, PVector _pos, PVector _vel, float _dir, color _c) {
     super( _pos, _vel, _dir, 0);
@@ -64,7 +64,7 @@ class Particle extends Object {
     alphaChange=random(-1,Settings.alphaChange);
     scaleChange=Settings.scaleChange;
     rotation=random(-0.05, 0.05);
-    timer=240;
+    timer=Settings.defaultTimer;
   }
   Particle(PImage inputImg, PVector _pos, PVector _vel, float _dir, color _c, float _scale, float _alphaChange, float _scaleChange, float _rotation, float _timer) {
     super( _pos, _vel, _dir, 0);
@@ -110,7 +110,7 @@ class Particle extends Object {
     alphaChange=random(-1,Settings.alphaChange);
     scaleChange=Settings.scaleChange;
     rotation=random(-0.05, 0.05);
-    timer=240;
+    timer=Settings.defaultTimer;
     destroyed=false;
   }
 

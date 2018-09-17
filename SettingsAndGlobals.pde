@@ -102,9 +102,9 @@ static class Settings {
   static int inactivityTimer=25;
   
   //Particle properties
-  static float alphaChange=-5;
-  static float scaleChange=-0.01;
-
+  static float alphaChange=-1.5;
+  static float scaleChange=-0.001;
+  static float defaultTimer=255;
   /*enum ShipColors {
     red, 
       green, 

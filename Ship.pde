@@ -72,7 +72,7 @@ class Ship extends Object {
     rr.image(IMGTurret, -IMGTurret.width/2, -IMGTurret.height/2);
     rr.popMatrix();
 
-    if (warp) if (frameCount%2==0) particles.add(new Particle(IMGShieldWaves, new PVector(pos.x+70*cos(dir), pos.y+70*sin(dir)), new PVector(0, 0), dir, color(255,250), 0.35, -1, 0.0026, 0, 250));
+    if (warp) if (frameCount%2==0) particles.add(new Particle(IMGShieldWaves, new PVector(pos.x+40*cos(dir), pos.y+40*sin(dir)), new PVector(0, 0), dir, color(255, 250), 0.35, -1, 0.0026, 0, 250));
   }
 
   void update() {
@@ -170,7 +170,7 @@ class Ship extends Object {
 
   void stopWarp() {
     warp=false;
-    for (int i=0; i<3; i++) particles.add(new Particle(IMGShieldWaves, new PVector(pos.x+100*cos(dir+HALF_PI/3*(i-1)), pos.y+100*sin(dir+HALF_PI/3*(i-1))), new PVector(3*cos(dir+HALF_PI/3*(i-1)), 3*sin(dir+HALF_PI/3*(i-1))), dir+HALF_PI/3*(i-1), color(255), 0.54, -2, 0.01, 0, 255));
+    for (int i=0; i<3; i++) particles.add(new Particle(IMGShieldWaves, new PVector(pos.x+60*cos(dir+PI/3*(i-1)), pos.y+60*sin(dir+PI/3*(i-1))), new PVector(10*cos(dir+PI/3*(i-1)), 10*sin(dir+PI/3*(i-1))), dir+PI/3*(i-1), color(255), 0.54, -5, 0.05, 0, 255));
   }
 
   void spawn(int which) {
