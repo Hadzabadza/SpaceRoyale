@@ -10,6 +10,7 @@ ArrayList<Star> stars;
 ArrayList<Planet> planets;
 ArrayList<Asteroid> asteroids;
 ArrayList<Bullet> bullets;
+ArrayList<Missile> missiles;
 ArrayList<Particle> particles;
 ArrayList<Particle> spareParticles;
 ArrayList<Object> destroyees;
@@ -17,6 +18,7 @@ ArrayList<Object> newSpawns;
 ArrayList<Object> objects;
 Ship[] ships;
 PGraphics[] screen;
+ArrayList<View> view;
 
 /////////////////GFX/////////////////
 PFont pixFont;
@@ -48,7 +50,7 @@ static class Settings {
   //Generator settings
   static int minPlanetsPerStar =3;
   static int maxPlanetsPerStar =8;
-  static int ships=2;              // SHIPS HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  static int ships=3;              // SHIPS HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
   //OSC stuff
@@ -88,31 +90,43 @@ static class Settings {
   static float shipSize=20; //Radius of ship entities
   static float turretGfxSize=20; //Extra radius around the ship for turret graphics
   static float projectileSpeed=2; //Bullet's muzzle velocity
-  static float warpCap=10; //Maximum warp speed
+  static float minWarpSpeed=10; //Minimum warp speed
+  static float maxWarpSpeed=50; //Maximum warp speed
   static float fireCooldown=0.1;
   static float targetingDistance=1250;
-  static float staticTurnSpeed=0.02;
-  static float assistedTurnSpeed=0.035;
+  static float staticTurnSpeed=0.0002;
+  static float assistedTurnSpeed=0.00035;
   static int turretXOffset=-2;
   static int turretYOffset=8;
+  static int msslSlotXOffset=13;
+  static int msslSlotYOffset=-26;
+  static int msslAmount=2;
 
   //Bullet properties
   static float bullDmg=0.1;
-  static int selfDestructTimer=1200;
-  static int inactivityTimer=25;
-  
+  static int bullSelfDestructTimer=1200;
+  static int bullInactivityTimer=25;
+
+  //Missile properties
+  static float msslDmg=0.3;
+  static int msslSelfDestructTimer=1200;
+  static int msslFuel=200;
+  static int msslInactivityTimer=20;
+  static float msslMaxSpin=0.017; //2 Degrees
+  static float msslAcceleration=0.1;
+
   //Particle properties
   static float alphaChange=-1.5;
   static float scaleChange=-0.001;
   static float defaultTimer=255;
   /*enum ShipColors {
-    red, 
-      green, 
-      blue, 
-      yellow, 
-      purple, 
-      gray, 
-      orange, 
-      brown
-  }*/
+   red, 
+   green, 
+   blue, 
+   yellow, 
+   purple, 
+   gray, 
+   orange, 
+   brown
+   }*/
 }

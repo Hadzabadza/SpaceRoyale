@@ -2,6 +2,7 @@ class Object { //Superclass for physical ingame objects
   PVector pos;
   PVector vel;
   float dir;
+  float spin;
   float radius;
   float diameter;
   boolean destroyed;
@@ -27,6 +28,7 @@ class Object { //Superclass for physical ingame objects
   void update()
   {
     pos.add(vel);
+    dir+=spin;
   }
   void spawn() {
     objects.add(this);

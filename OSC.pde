@@ -3,11 +3,6 @@ class OscHub { //<>// //<>//
   int displaySize=280; //Smallest dimension of the display
   int longestDistance; //Farthest star
 
-  int SCturnWheelPosX=108+75; //Properties of the turn wheel
-  int SCturnWheelPosY=20+75;
-  int SCturnWheelRadius=45;
-  int SCLEDCorrectionOffset=-10; //Offset ship direction LED by this ammount (they are drawn from top-left)
-
   int OMPlanets; //TouchOSC orbital map planets count
   int OMPlanetSize=10; //Width/height of a planet on display
   int OMCenterX=240; //Centre of the orbital map screen
@@ -70,12 +65,7 @@ class OscHub { //<>// //<>//
 
   public void exit() {
     OscBundle exitBundle = new OscBundle();
-    exitBundle.add(new OscMessage("/OM/star").add(0));     
-    exitBundle.add(new OscMessage("/OM/ship").add(0));     
-    exitBundle.add(new OscMessage("/SC/directionIndicator").add(0));     
-    exitBundle.add(new OscMessage("/OM/label35/visible").add(1));     
-    for (int i=0; i<OMPlanets; i++) exitBundle.add(new OscMessage("/OM/planet"+i).add(0));
-    for (OscDock d : dock) d.send(exitBundle);
+    for (int i=dock.length-1; i>=0; i--) dock[i].exit(exitBundle);
   }
 }
 
@@ -94,6 +84,14 @@ class OscDock {
   int refreshPhase=0;
   int planetLocationUpdatePhase=0;
   int outPort;
+
+  int SCturnWheelPosX=77+75; //Properties of the turn wheel
+  int SCturnWheelPosY=20+65;
+  int SCturnWheelRadius=55;
+  int SCLEDCorrectionOffset=-10; //Offset ship direction LED by this ammount (they are drawn from top-left)
+  boolean SCResetMissileControls=false; //Reset missile buttons after firing
+  boolean SCUpdateWarpControls=false;   //Move warp fader and update label if warp speed changed
+  boolean SCUpdateThrustControls=false; //Move thrust fader if thrust changed
 
   int FCLEDScale=20; //Scale of the target LED
   int FCPadX=80; //Properties of the targeting pad
@@ -141,9 +139,17 @@ class OscDock {
   }
   void updateTargeters(OscBundle uB) {
   }
+  void updateMissileControls(OscBundle uB) {
+  }
+  void updateWarpControls(OscBundle uB) {
+  }
+  void updateThrustControls(OscBundle uB) {
+  }
   void send(OscBundle b) {
   }
   void send(OscMessage m) {
+  }
+  public void exit(OscBundle eB) {
   }
   void plugs() {
   }
@@ -153,11 +159,17 @@ class OscDock {
   }
   public void turnLeft(float f) {
   }
-  public void turnRight(float f, OscBundle outBundle) {
+  public void turnRight(float f) {
   }
   public void enterPlanet(float f) {
   }
   public void turnTo(float f) {
+  }
+  public void lockMissile(float f) {
+  }
+  public void fireMissile(float f) {
+  }
+  public void changeWarpSpeed(float f) {
   }
   public void moveCursor(float x, float y) {
   }
@@ -195,27 +207,59 @@ class OscDockInitialized extends OscDock {
     ex=new OscP5(this, outPort);
     plugs();
     OscBundle startBundle = new OscBundle();
-    startBundle.add(new OscMessage("/SC"));
-    startBundle.add(new OscMessage("/OM/star").add(1));     
-    startBundle.add(new OscMessage("/OM/ship").add(1));     
-    startBundle.add(new OscMessage("/SC/directionIndicator").add(1));     
-    startBundle.add(new OscMessage("/OM/label35/visible").add(0));     
-    for (int i=0; i<hub.OMPlanets; i++) startBundle.add(new OscMessage("/OM/planet"+i).add(1));     
-    for (int i=hub.OMPlanets; i<Settings.maxPlanetsPerStar; i++) startBundle.add(new OscMessage("/OM/planet"+i+"/position/x").add(-30));
-    startBundle.add(new OscMessage("/OM/zoom").add(0.84));
-    startBundle.add(new OscMessage("/FC/targeter/x").add(FCTGTX));
-    startBundle.add(new OscMessage("/FC/targeter/y").add(FCTGTY));
-    startBundle.add(new OscMessage("/FC/fineX").add(FCTGTX));
-    startBundle.add(new OscMessage("/FC/fineY").add(FCTGTY));
-    startBundle.add(new OscMessage("/FC/fineTune").add(0));
-    startBundle.add(new OscMessage("/FC/fineX/color").add("yellow"));
-    startBundle.add(new OscMessage("/FC/fineY/color").add("yellow"));
     startBundle.add(new OscMessage("/vibrate"));
     startBundle.setTimetag(startBundle.now());
     bundleLog.add("StartBundle-C"+id+". Size: "+startBundle.size());
     lockScreenGreen(startBundle);
     send(startBundle);
   }
+
+  void lockScreenGreen(OscBundle b) {
+    b.add(new OscMessage("/SC"));
+    b.add(new OscMessage("/SC/connectionStatus/visible").add(1));
+    b.add(new OscMessage("/SC/connectionStatus").add("Connection established"));
+    b.add(new OscMessage("/SC/connectionStatus/color").add("green"));
+    b.add(new OscMessage("/SC/screenBlock/visible").add(1));
+    b.add(new OscMessage("/SC/screenBlock/color").add("green"));
+    b.add(new OscMessage("/SC/tapHint/visible").add(1));
+    b.add(new OscMessage("/SC/tapHint/position/y").add(202));
+    bundleLog.add("UBundle-C"+id+". Lock screen update segment. Size: "+b.size());
+  }
+
+  void lockScreenClear(OscBundle b) {
+    cleared=true;
+    b.add(new OscMessage("/SC/connectionStatus/visible").add(0));
+    b.add(new OscMessage("/SC/screenBlock/visible").add(0));
+    b.add(new OscMessage("/SC/tapHint/visible").add(0));
+    b.add(new OscMessage("/SC/label41/color").add("green"));
+    b.add(new OscMessage("/SC/lockLabel").add("Lock target"));
+    b.add(new OscMessage("/SC/lockMissile").add(0));
+    b.add(new OscMessage("/SC/fireLabel").add("No lock"));
+    b.add(new OscMessage("/SC/fireLabel/color").add("gray"));
+    s.missileAiming=false;
+    b.add(new OscMessage("/SC/label41/color").add("green"));
+    b.add(new OscMessage("/SC/label41/color").add("gray"));
+    b.add(new OscMessage("/SC/directionIndicator").add(1));   
+    b.add(new OscMessage("/SC/warpSpeedLabel").add(Settings.minWarpSpeed));   
+    b.add(new OscMessage("/SC/warpSpeed").add(0));   
+    b.add(new OscMessage("/SC/throttle").add(0));   
+    b.add(new OscMessage("/OM/star").add(1));     
+    b.add(new OscMessage("/OM/ship").add(1));     
+    b.add(new OscMessage("/OM/label35/visible").add(0));     
+    for (int i=0; i<hub.OMPlanets; i++) b.add(new OscMessage("/OM/planet"+i).add(1));     
+    for (int i=hub.OMPlanets; i<Settings.maxPlanetsPerStar; i++) b.add(new OscMessage("/OM/planet"+i+"/position/x").add(-30));
+    b.add(new OscMessage("/OM/zoom").add(0.88));
+    b.add(new OscMessage("/FC/targeter/x").add(FCTGTX));
+    b.add(new OscMessage("/FC/targeter/y").add(FCTGTY));
+    b.add(new OscMessage("/FC/fineX").add(FCTGTX));
+    b.add(new OscMessage("/FC/fineY").add(FCTGTY));
+    b.add(new OscMessage("/FC/fineTune").add(0));
+    b.add(new OscMessage("/FC/fineX/color").add("yellow"));
+    b.add(new OscMessage("/FC/fineY/color").add("yellow"));
+    b.add(new OscMessage("/FC/targeter/color").add("yellow"));
+    bundleLog.add("UBundle-C"+id+". Lock screen clearer segment. Size: "+b.size());
+  }
+
   void sendUpdates(OscBundle uB) {
     if (!activated) lockScreenGreen(uB);
     else
@@ -224,6 +268,9 @@ class OscDockInitialized extends OscDock {
         if (!cleared) lockScreenClear(uB);
         if (activePage==0) {
           displaceDirectionIndicator(uB);
+          updateMissileControls(uB);
+          if (SCUpdateWarpControls) updateWarpControls(uB);
+          if (SCUpdateThrustControls) updateThrustControls(uB);
         }
         if (activePage==2) {
           for (int i=0; i<hub.OMPlanets; i++) uB.add(new OscMessage("/OM/planet"+i).add(1));
@@ -248,17 +295,17 @@ class OscDockInitialized extends OscDock {
   }
 
   public void displaceDirectionIndicator(OscBundle uB) { //Don't use alone! Adds to bundle
-    uB.add(new OscMessage("/SC/directionIndicator/position/x").add(hub.SCLEDCorrectionOffset+round(hub.SCturnWheelPosX+hub.SCturnWheelRadius+hub.SCturnWheelRadius*cos(s.dir))));
-    uB.add(new OscMessage("/SC/directionIndicator/position/y").add(hub.SCLEDCorrectionOffset+round(hub.SCturnWheelPosY+hub.SCturnWheelRadius+hub.SCturnWheelRadius*sin(s.dir))));
+    uB.add(new OscMessage("/SC/directionIndicator/position/x").add(SCLEDCorrectionOffset+round(SCturnWheelPosX+SCturnWheelRadius+SCturnWheelRadius*cos(s.dir))));
+    uB.add(new OscMessage("/SC/directionIndicator/position/y").add(SCLEDCorrectionOffset+round(SCturnWheelPosY+SCturnWheelRadius+SCturnWheelRadius*sin(s.dir))));
     bundleLog.add("UBundle-C"+id+". DI segment. Size: "+uB.size());
   }
 
   void OMShipMove(OscBundle uB) { //Don't use alone! Adds to bundle
     int OMShipPosX=round(s.pos.x/hub.longestDistance+hub.OMCenterX+hub.OMLEDCorrectionOffset);
-    if (OMShipPosX>hub.OMCenterX*2) OMShipPosX=hub.OMCenterX*2;
+    if (OMShipPosX>round(hub.OMCenterX*1.9)) OMShipPosX=round(hub.OMCenterX*1.9);
     else if (OMShipPosX<0) OMShipPosX=0;
     int OMShipPosY=round(s.pos.y/hub.longestDistance+hub.OMCenterY+hub.OMLEDCorrectionOffset);
-    if (OMShipPosY>hub.OMCenterY*2) OMShipPosY=hub.OMCenterY*2; 
+    if (OMShipPosY>round(hub.OMCenterY*1.9)) OMShipPosY=round(hub.OMCenterY*1.9); 
     else if (OMShipPosY<0) OMShipPosY=0;
     uB.add(new OscMessage("/OM/ship/position/x").add(OMShipPosX));
     uB.add(new OscMessage("/OM/ship/position/y").add(OMShipPosY));
@@ -277,27 +324,6 @@ class OscDockInitialized extends OscDock {
       print("addrpattern: "+theOscMessage.addrPattern());
       println(" typetag: "+theOscMessage.typetag());
     }
-  }
-
-  void lockScreenGreen(OscBundle b) {
-    b.add(new OscMessage("/SC/connectionStatus/visible").add(1));
-    b.add(new OscMessage("/SC/connectionStatus").add("Connection established"));
-    b.add(new OscMessage("/SC/connectionStatus/color").add("green"));
-    b.add(new OscMessage("/SC/screenBlock/visible").add(1));
-    b.add(new OscMessage("/SC/screenBlock/color").add("green"));
-    b.add(new OscMessage("/SC/label41/color").add("gray"));
-    b.add(new OscMessage("/SC/tapHint/visible").add(1));
-    b.add(new OscMessage("/SC/tapHint/position/y").add(202));
-    bundleLog.add("UBundle-C"+id+". Lock screen update segment. Size: "+b.size());
-  }
-
-  void lockScreenClear(OscBundle b) {
-    cleared=true;
-    b.add(new OscMessage("/SC/connectionStatus/visible").add(0));
-    b.add(new OscMessage("/SC/screenBlock/visible").add(0));
-    b.add(new OscMessage("/SC/tapHint/visible").add(0));
-    b.add(new OscMessage("/SC/label41/color").add("green"));
-    bundleLog.add("UBundle-C"+id+". Lock screen clearer segment. Size: "+b.size());
   }
 
   void updateTargetBlip(OscBundle uB) {
@@ -341,6 +367,50 @@ class OscDockInitialized extends OscDock {
       }
   }
 
+  void updateMissileControls(OscBundle uB) {
+    if (SCResetMissileControls) {
+      uB.add(new OscMessage("/SC/lockLabel").add("Lock target"));
+      uB.add(new OscMessage("/SC/lockMissile").add(0));
+      uB.add(new OscMessage("/SC/fireLabel").add("No lock"));
+      uB.add(new OscMessage("/SC/fireLabel/color").add("gray"));
+      SCResetMissileControls=false;
+    }
+    if (s.missileAiming) {
+      if (s.target!=null) {
+        if (s.mssls>0) {
+          uB.add(new OscMessage("/SC/fireLabel").add("FIRE"));
+          uB.add(new OscMessage("/SC/fireLabel/color").add("red"));
+        } else
+        {
+          uB.add(new OscMessage("/SC/fireLabel").add("No missiles"));
+          uB.add(new OscMessage("/SC/fireLabel/color").add("gray"));
+        }
+      } else
+      {
+        uB.add(new OscMessage("/SC/fireLabel").add("No target"));
+        uB.add(new OscMessage("/SC/fireLabel/color").add("gray"));
+      }
+    } else
+    {
+      uB.add(new OscMessage("/SC/fireLabel").add("No lock"));
+      uB.add(new OscMessage("/SC/fireLabel/color").add("gray"));
+    }
+    bundleLog.add("UBundle-C"+id+". Missile control segment. Size: "+uB.size());
+  }
+
+  void updateWarpControls(OscBundle uB) {
+    uB.add(new OscMessage("/SC/warpSpeedLabel").add((int)s.warpSpeed));
+    uB.add(new OscMessage("/SC/warpSpeed").add((s.warpSpeed-Settings.minWarpSpeed)/(Settings.maxWarpSpeed-Settings.minWarpSpeed)));
+    SCUpdateWarpControls=false;
+    bundleLog.add("UBundle-C"+id+". Warp speed label segment. Size: "+uB.size());
+  }
+
+  void updateThrustControls(OscBundle uB) {
+    uB.add(new OscMessage("/SC/throttle").add(s.thrust));
+    SCUpdateThrustControls=false;
+    bundleLog.add("UBundle-C"+id+". Throttle segment. Size: "+uB.size());
+  }
+
   void send(OscBundle b) {
     bundleLog.add("UBundle-C"+id+". Sending... Size: "+b.size());
     if (Settings.displayOSCBundleLogs) for (String s : bundleLog) println(s);
@@ -353,6 +423,15 @@ class OscDockInitialized extends OscDock {
 
   void send(OscMessage m) {
     ex.send(m, c);
+  }
+
+  public void exit(OscBundle eB) {
+    eB.add(new OscMessage("/OM/star").add(0));     
+    eB.add(new OscMessage("/OM/ship").add(0));     
+    eB.add(new OscMessage("/SC/directionIndicator").add(0));     
+    eB.add(new OscMessage("/OM/label35/visible").add(1));     
+    for (int i=0; i<hub.OMPlanets; i++) eB.add(new OscMessage("/OM/planet"+i).add(0));
+    ex.dispose();
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -368,6 +447,9 @@ class OscDockInitialized extends OscDock {
     ex.plug(this, "turnRight", "/SC/turnRight");
     ex.plug(this, "enterPlanet", "/SC/planetView");
     ex.plug(this, "turnTo", "/SC/turnWheel");
+    ex.plug(this, "lockMissile", "/SC/lockMissile");
+    ex.plug(this, "fireMissile", "/SC/fireMissile");
+    ex.plug(this, "changeWarpSpeed", "/SC/warpSpeed");
     ex.plug(this, "moveCursor", "/PV/locator");
     ex.plug(this, "placeVolcano", "/PV/placeVolcano");
     ex.plug(this, "heightView", "/PV/heightView");
@@ -395,7 +477,7 @@ class OscDockInitialized extends OscDock {
     if (!s.warp) if (f==0) s.turnLeft=false;
     else s.turnLeft=true;
   }
-  public void turnRight(float f, OscBundle outBundle) {
+  public void turnRight(float f) {
     if (!s.warp) if (f==0) s.turnRight=false;
     else s.turnRight=true;
   }
@@ -413,7 +495,36 @@ class OscDockInitialized extends OscDock {
   }
 
   public void turnTo(float f) {
-    if (!s.warp) s.dir+=(s.thrust*Settings.assistedTurnSpeed+Settings.staticTurnSpeed)*f;
+    if (!s.warp)
+      if (f>0) {
+        s.turnWheelInput++; 
+        s.turnRight=true;
+        s.turnRight(0.1);
+        s.turnLeft=false;
+      } else if (f<0) {
+        s.turnWheelInput++; 
+        s.turnLeft=true;
+        s.turnLeft(0.1);
+        s.turnRight=false;
+      } //s.spin+=(s.thrust*Settings.assistedTurnSpeed+Settings.staticTurnSpeed)*f*2;
+  }
+
+  public void lockMissile(float f) {
+    if (f==0)s.missileAiming=false;
+    else s.missileAiming=true;
+  }
+
+  public void fireMissile(float f) {
+    if (s.missileAiming) {
+      s.fireMissile();
+      s.missileAiming=false;
+      SCResetMissileControls=true;
+    }
+  }
+
+  public void changeWarpSpeed(float f) {
+    if (!s.warp) s.warpSpeed=Settings.minWarpSpeed+f*(Settings.maxWarpSpeed-Settings.minWarpSpeed);
+    SCUpdateWarpControls=true;
   }
 
   public void moveCursor(float x, float y)
@@ -440,7 +551,7 @@ class OscDockInitialized extends OscDock {
   }
 
   public void changeZoom(float f) {
-    s.zoom=0.3+9*(1-f)*(1-f);
+    s.zoom=0.2+48.8*(1-f)*(1-f);
   }
 
   public void shoot(float f) {

@@ -1,5 +1,7 @@
 //TODO: Fix mapScreen, move all corresponding vars to ship object //<>//
-//TODO: SHIP: Improve targeting?
+//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP
+//TODO: SHIP: Improve targeting!
+//TODO: MISSILE: Improve targeting!!!!
 //TODO: OSC: Find the name of the connected device and add to bundle logs.
 //TODO: OSC: Fix controller unresponsiveness after reinit
 //TODO: OSC: Try to patch in mrmr
@@ -15,14 +17,18 @@ void setup() {
   pixFont=createFont("Minecraftia-Regular.ttf", 120, true);
   textFont(pixFont, 12);
   frameRate(Settings.FPS);
+  loadImages();
   init();
 }
 
 void init() {
+  gameState=0;
+  frameCount=0;
   stars=new ArrayList<Star>();
   planets=new ArrayList<Planet>();
   asteroids=new ArrayList<Asteroid>();
   bullets=new ArrayList<Bullet>();
+  missiles=new ArrayList<Missile>();
   ships=new Ship[Settings.ships];
   particles=new ArrayList<Particle>();
   spareParticles=new ArrayList<Particle>();
@@ -30,13 +36,12 @@ void init() {
   newSpawns=new ArrayList<Object>();
   objects=new ArrayList<Object>();
   screen= new PGraphics[Settings.ships];
+  view= new ArrayList<View>();
   stars.add(new Star(0, 0));
   for (int i=0; i<Settings.ships; i++) {
     float startDir=TWO_PI/Settings.ships*i;
     PVector startPos=new PVector((stars.get(0).radius+Settings.shipSize*2.5)*cos(startDir), (stars.get(0).radius+Settings.shipSize*2.5)*sin(startDir));
-    ;
-    if (Settings.ships>1) screen[i]=createGraphics(width/Settings.ships, height, P3D);
-    else screen[0]=this.g;
+    screen[i]=createGraphics(width/Settings.ships, height, P3D);
     switch (i) {
     case 0: 
       {
@@ -82,9 +87,13 @@ void init() {
   }
   mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
+  if (osc!=null) {
+    osc.exit();
+    osc=null; 
+    System.gc();
+  }
   osc=new OscHub(Settings.ships);
   println("Setting up..................");
-  loadImages();
 }
 
 void draw() {
@@ -103,8 +112,11 @@ void draw() {
     for (int i=0; i<screen.length; i++)
     {
       screen[i].beginDraw();
+      float cameraZ=((screen[i].height/2.0) / tan(PI*60.0/360.0));
+      screen[i].perspective(PI/3.0, float(screen[i].width)/float(screen[i].height), cameraZ/100.0, cameraZ*100.0) ;
       screen[i].background(Settings.backgroundColor);
-      screen[i].camera(ships[i].pos.x, ships[i].pos.y, ships[i].zoom*600, ships[i].pos.x, ships[i].pos.y, 0.0, 0.0, 1.0, 0.0);
+      if (ships[i].warp) screen[i].camera(ships[i].pos.x+random(-ships[i].warpSpeed/2, ships[i].warpSpeed/2), ships[i].pos.y+random(-ships[i].warpSpeed/2, ships[i].warpSpeed/2), ships[i].zoom*600, ships[i].pos.x+random(-ships[i].warpSpeed, ships[i].warpSpeed), ships[i].pos.y+random(-ships[i].warpSpeed, ships[i].warpSpeed), 0.0, 0.0, 1.0, 0.0);
+      else screen[i].camera(ships[i].pos.x, ships[i].pos.y, ships[i].zoom*600, ships[i].pos.x, ships[i].pos.y, 0.0, 0.0, 1.0, 0.0);
       for (Object o : objects) {
         o.draw(screen[i]);
       }
@@ -119,10 +131,21 @@ void draw() {
     {
       fill(60+195*(1-ships[i].HP), 60+195*ships[i].HP, 0);
       rect(screenSize*i+halfScreen-50, 10, 100*ships[i].HP, 10);
+      fill(100, 150, 255);
+      rect(screenSize*i+halfScreen-50, 25, ships[i].warpSpeed*2, 10);
       noFill();
       rect(screenSize*i+halfScreen-50, 10, 100, 10);
+      rect(screenSize*i+halfScreen-50, 25, 100, 10);
+    }
+    int xPos=1;
+    for (View v:view) {
+      v.pos.x=xPos;
+      v.pos.y=height-1-v.dimension.y;
+      v.draw(this.g);
+      xPos+=v.dimension.x+1;
     }
     strokeWeight(3);
+    stroke(255);
     for (int i=1; i<screen.length; i++) line (screenSize*i, 0, screenSize*i, height);
 
     /*if (mapScreen) {
@@ -215,7 +238,7 @@ void fetchParticles(int n, PImage img, PVector where) {
   }
 }
 void fetchParticles(int n, PImage[] imgs, PVector where) {
- if (spareParts>n) {
+  if (spareParts>n) {
     int counter=0;
     int searchFor=spareParts-n;
     for (Particle p : spareParticles) {
