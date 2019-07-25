@@ -1,10 +1,9 @@
-//TODO: Fix mapScreen, move all corresponding vars to ship object //<>//
+//TODO: Fix mapScreen, move all corresponding vars to ship object //<>// //<>//
 //TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP
 //TODO: SHIP: Improve targeting!
 //TODO: MISSILE: Improve targeting!!!!
 //TODO: OSC: Find the name of the connected device and add to bundle logs.
 //TODO: OSC: Fix controller unresponsiveness after reinit
-//TODO: OSC: Try to patch in mrmr
 //TODO: Fix fetchkvetch
 //TODO: improve particle systems, maybe put into a manager class
 
@@ -12,7 +11,7 @@ import oscP5.*;
 import netP5.*;
 
 void setup() {
-  size(1300, 650, P3D);
+  size(1300, 650, P2D);
   surface.setLocation((displayWidth-1300)/2, (displayHeight-650)/2);
   pixFont=createFont("Minecraftia-Regular.ttf", 120, true);
   textFont(pixFont, 12);
@@ -38,6 +37,7 @@ void init() {
   screen= new PGraphics[Settings.ships];
   view= new ArrayList<View>();
   stars.add(new Star(0, 0));
+  
   for (int i=0; i<Settings.ships; i++) {
     float startDir=TWO_PI/Settings.ships*i;
     PVector startPos=new PVector((stars.get(0).radius+Settings.shipSize*2.5)*cos(startDir), (stars.get(0).radius+Settings.shipSize*2.5)*sin(startDir));

@@ -115,10 +115,14 @@ class Ship extends Object {
         }
         for (Star s : stars) if (checkCollision(s)) vel=new PVector();
       }
-      if (speedUp) if (thrust<=0.99) {thrust+=0.01;dock.SCUpdateThrustControls=true;}
-      if (slowDown)if (thrust>=0.01) {thrust-=0.01;dock.SCUpdateThrustControls=true;}
-      if (incWarpSpeed) if (warpSpeed<=Settings.maxWarpSpeed-1) {warpSpeed++;dock.SCUpdateWarpControls=true;}
-      if (decWarpSpeed) if (warpSpeed>=Settings.minWarpSpeed+1) {warpSpeed--;dock.SCUpdateWarpControls=true;}
+      if (speedUp) if (thrust<=0.99) {
+        thrust+=0.01;
+        dock.SCUpdateThrustControls=true;
+      }
+      if (slowDown)if (thrust>=0.01) {
+        thrust-=0.01;
+        dock.SCUpdateThrustControls=true;
+      }
       if (turnLeft) turnLeft();
       else if (turnRight) turnRight();
       else if (turnWheelInput==0) killSpin();
@@ -128,9 +132,22 @@ class Ship extends Object {
         turnLeft=false; 
         turnRight=false;
       }
-      vel.x+=cos(dir)*thrust*thrust/100;
+      vel.x+=cos(dir)*thrust*thrust/100; //THRUST APPLICATION
       vel.y+=sin(dir)*thrust*thrust/100;
-      super.update();
+
+      if (vel.mag()>Settings.shipSpeedLimit) { //SPEED LIMIT
+        vel=vel.normalize().mult(Settings.shipSpeedLimit);
+      }
+
+      super.update(); //OBJECT UPDATE
+    }
+    if (incWarpSpeed) if (warpSpeed<=Settings.maxWarpSpeed-1) {
+      warpSpeed++;
+      dock.SCUpdateWarpControls=true;
+    }
+    if (decWarpSpeed) if (warpSpeed>=Settings.minWarpSpeed+1) {
+      warpSpeed--;
+      dock.SCUpdateWarpControls=true;
     }
     if (zoomIn) zoomIn();
     if (zoomOut) zoomOut();
@@ -144,7 +161,7 @@ class Ship extends Object {
   void turnRight() {
     spin+=Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed;
   };
-  
+
   void turnLeft(float assistPower) {
     spin-=(assistPower*Settings.assistedTurnSpeed)*thrust+Settings.staticTurnSpeed;
   };
@@ -179,7 +196,7 @@ class Ship extends Object {
     if (mssls>0) {
       PVector msslSlotPos=new PVector(pos.x-Settings.msslSlotYOffset*sin(dir)/5*mssls, pos.y-Settings.msslSlotYOffset*cos(dir+PI)/5*mssls);
       Missile ms=new Missile(new PVector(msslSlotPos.x, msslSlotPos.y), new PVector(vel.x, vel.y), 5, dir, target);
-      ms.followerScreen=new View(new PVector (100,100), new PVector(), "View "+missiles.size(), missiles.size(), ms);
+      ms.followerScreen=new View(new PVector (100, 100), new PVector(), "View "+missiles.size(), missiles.size(), ms);
       mssls--;
     }
   }

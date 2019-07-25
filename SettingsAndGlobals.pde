@@ -19,7 +19,7 @@ ArrayList<Object> objects;
 Ship[] ships;
 PGraphics[] screen;
 ArrayList<View> view;
-
+ 
 /////////////////GFX/////////////////
 PFont pixFont;
 int spareParts=0;
@@ -29,7 +29,7 @@ static float FMAX=3.40282347E+38;
 long seed=1;
 int gameState=0;
 
-/////?////////OSC stuff////////?/////
+//////////////OSC stuff//////////////
 OscHub osc;
 
 /////////!!!!!FIX THESE!!!!!/////////
@@ -50,13 +50,13 @@ static class Settings {
   //Generator settings
   static int minPlanetsPerStar =3;
   static int maxPlanetsPerStar =8;
-  static int ships=3;              // SHIPS HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  static int ships=2;              // SHIPS HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
   //OSC stuff
   static String[] controllerIP={
-    "192.168.1.162", 
-    "192.168.1.162", 
+    "192.168.0.100", 
+    "192.168.0.105", 
     "192.168.1.162", 
     "192.168.1.162", 
     "192.168.1.162", 
@@ -81,7 +81,7 @@ static class Settings {
     9005, 
     9006, 
     9007};
-  static boolean decodeOSC=false;            //For debug
+  static boolean decodeOSC=true;            //For debug
   static boolean displayOSCBundleLogs=false; //
   static int refreshInterval=120;
   static int planetLocationUpdateInterval=30;
@@ -89,9 +89,10 @@ static class Settings {
   //Ship properties
   static float shipSize=20; //Radius of ship entities
   static float turretGfxSize=20; //Extra radius around the ship for turret graphics
-  static float projectileSpeed=2; //Bullet's muzzle velocity
+  static float projectileSpeed=6; //Bullet's muzzle velocity
   static float minWarpSpeed=10; //Minimum warp speed
   static float maxWarpSpeed=50; //Maximum warp speed
+  static float shipSpeedLimit=3;
   static float fireCooldown=0.1;
   static float targetingDistance=1250;
   static float staticTurnSpeed=0.0002;

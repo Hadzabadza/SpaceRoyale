@@ -5,9 +5,6 @@ class OscHub { //<>// //<>//
 
   int OMPlanets; //TouchOSC orbital map planets count
   int OMPlanetSize=10; //Width/height of a planet on display
-  int OMCenterX=240; //Centre of the orbital map screen
-  int OMCenterY=140;
-  int[] OMPlanetDistances; //Distances between planets in touchOSC space
   int OMLEDCorrectionOffset=-5; //Offset the planet (and ship) LEDs by this ammount 
 
   OscHub(int controllers) { //Hub that computes the messages before sending
@@ -15,10 +12,8 @@ class OscHub { //<>// //<>//
     for (int i=0; i<controllers; i++) dock[i]=new OscDock(this, i, new NetAddress(Settings.controllerIP[i], Settings.controllerInputPort[i]), Settings.oscInPort[i], ships[i]);
     //initializeHub();
     OMPlanets=planets.size();
-    OMPlanetDistances=new int[OMPlanets];
     longestDistance=round(planets.get(OMPlanets-1).distance);
     longestDistance=longestDistance/100;
-    for (int i=0; i<OMPlanets; i++) OMPlanetDistances[i]=round(planets.get(i).distance/longestDistance);
   }
 
   void initializeHub() { //Initializing Orbital Map data
@@ -52,17 +47,6 @@ class OscHub { //<>// //<>//
     }
   }
 
-  void OMPlanetMove(OscDock d, OscBundle outBundle, int targetPlanetIndex) {
-    if (frameCount%Settings.planetLocationUpdateInterval==d.planetLocationUpdatePhase) {
-      int OMPlanetPosX=round(planets.get(targetPlanetIndex).pos.x/longestDistance+OMCenterX+OMLEDCorrectionOffset);
-      outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/x").add(OMPlanetPosX));
-      int OMPlanetPosY=round(planets.get(targetPlanetIndex).pos.y/longestDistance+OMCenterY+OMLEDCorrectionOffset);
-      outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/y").add(OMPlanetPosY));
-    }
-    d.bundleLog.add("UBundle-C"+d.id+". Planet position segment. Size: "+outBundle.size());
-  }
-
-
   public void exit() {
     OscBundle exitBundle = new OscBundle();
     for (int i=dock.length-1; i>=0; i--) dock[i].exit(exitBundle);
@@ -93,6 +77,10 @@ class OscDock {
   boolean SCUpdateWarpControls=false;   //Move warp fader and update label if warp speed changed
   boolean SCUpdateThrustControls=false; //Move thrust fader if thrust changed
 
+  int OMCenterX=240; //Centre of the orbital map screen
+  int OMCenterY=140;
+  int[] OMPlanetDistances; //Distances between planets in touchOSC space
+
   int FCLEDScale=20; //Scale of the target LED
   int FCPadX=80; //Properties of the targeting pad
   int FCPadY=0;
@@ -114,6 +102,8 @@ class OscDock {
     id=_id;
     outPort=port;
     bundleLog=new ArrayList<String>();
+    OMPlanetDistances=new int[hub.OMPlanets];
+    for (int i=0; i<hub.OMPlanets; i++) OMPlanetDistances[i]=round(planets.get(i).distance/hub.longestDistance);
     refreshPhase=Settings.refreshInterval/Settings.ships*id;
     planetLocationUpdatePhase=Settings.planetLocationUpdateInterval/Settings.ships*id;
   }
@@ -199,6 +189,10 @@ class OscDock {
   }  
   public void unlock(float f) {
   }
+  public void isIP4(float f) {
+  }
+  public void isIP5(float f) {
+  }
 }
 
 class OscDockInitialized extends OscDock {
@@ -215,21 +209,24 @@ class OscDockInitialized extends OscDock {
   }
 
   void lockScreenGreen(OscBundle b) {
-    b.add(new OscMessage("/SC"));
-    b.add(new OscMessage("/SC/connectionStatus/visible").add(1));
-    b.add(new OscMessage("/SC/connectionStatus").add("Connection established"));
-    b.add(new OscMessage("/SC/connectionStatus/color").add("green"));
-    b.add(new OscMessage("/SC/screenBlock/visible").add(1));
-    b.add(new OscMessage("/SC/screenBlock/color").add("green"));
-    b.add(new OscMessage("/SC/tapHint/visible").add(1));
-    b.add(new OscMessage("/SC/tapHint/position/y").add(202));
-    bundleLog.add("UBundle-C"+id+". Lock screen update segment. Size: "+b.size());
+      b.add(new OscMessage("/SC"));
+      b.add(new OscMessage("/SC/connectionStatus/visible").add(1));
+      b.add(new OscMessage("/SC/connectionStatus").add("Connection established"));
+      b.add(new OscMessage("/SC/connectionStatus/color").add("green"));
+      b.add(new OscMessage("/SC/screenBlock/visible").add(1));
+      b.add(new OscMessage("/SC/screenBlockIP5/visible").add(1));
+      b.add(new OscMessage("/SC/screenBlock/color").add("green"));
+      b.add(new OscMessage("/SC/screenBlockIP5/color").add("green"));
+      b.add(new OscMessage("/SC/tapHint/visible").add(1));
+      b.add(new OscMessage("/SC/tapHint/position/y").add(202));
+      bundleLog.add("UBundle-C"+id+". Lock screen update segment. Size: "+b.size());
   }
 
   void lockScreenClear(OscBundle b) {
     cleared=true;
     b.add(new OscMessage("/SC/connectionStatus/visible").add(0));
     b.add(new OscMessage("/SC/screenBlock/visible").add(0));
+    b.add(new OscMessage("/SC/screenBlockIP5/visible").add(0));
     b.add(new OscMessage("/SC/tapHint/visible").add(0));
     b.add(new OscMessage("/SC/label41/color").add("green"));
     b.add(new OscMessage("/SC/lockLabel").add("Lock target"));
@@ -275,7 +272,7 @@ class OscDockInitialized extends OscDock {
         if (activePage==2) {
           for (int i=0; i<hub.OMPlanets; i++) uB.add(new OscMessage("/OM/planet"+i).add(1));
           for (int i=hub.OMPlanets; i<Settings.maxPlanetsPerStar; i++) uB.add(new OscMessage("/OM/planet"+i+"/position/x").add(-30));
-          for (int i=0; i<hub.OMPlanets; i++) hub.OMPlanetMove(this, uB, i);
+          for (int i=0; i<hub.OMPlanets; i++) OMPlanetMove(uB, i);
           OMShipMove(uB);
         }
         if (activePage==3) {
@@ -294,6 +291,16 @@ class OscDockInitialized extends OscDock {
     send(uB);
   }
 
+  void OMPlanetMove(OscBundle outBundle, int targetPlanetIndex) {
+    if (frameCount%Settings.planetLocationUpdateInterval==planetLocationUpdatePhase) {
+      int OMPlanetPosX=round(planets.get(targetPlanetIndex).pos.x/hub.longestDistance+OMCenterX+hub.OMLEDCorrectionOffset);
+      outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/x").add(OMPlanetPosX));
+      int OMPlanetPosY=round(planets.get(targetPlanetIndex).pos.y/hub.longestDistance+OMCenterY+hub.OMLEDCorrectionOffset);
+      outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/y").add(OMPlanetPosY));
+    }
+    bundleLog.add("UBundle-C"+id+". Planet position segment. Size: "+outBundle.size());
+  }
+
   public void displaceDirectionIndicator(OscBundle uB) { //Don't use alone! Adds to bundle
     uB.add(new OscMessage("/SC/directionIndicator/position/x").add(SCLEDCorrectionOffset+round(SCturnWheelPosX+SCturnWheelRadius+SCturnWheelRadius*cos(s.dir))));
     uB.add(new OscMessage("/SC/directionIndicator/position/y").add(SCLEDCorrectionOffset+round(SCturnWheelPosY+SCturnWheelRadius+SCturnWheelRadius*sin(s.dir))));
@@ -301,11 +308,11 @@ class OscDockInitialized extends OscDock {
   }
 
   void OMShipMove(OscBundle uB) { //Don't use alone! Adds to bundle
-    int OMShipPosX=round(s.pos.x/hub.longestDistance+hub.OMCenterX+hub.OMLEDCorrectionOffset);
-    if (OMShipPosX>round(hub.OMCenterX*1.9)) OMShipPosX=round(hub.OMCenterX*1.9);
+    int OMShipPosX=round(s.pos.x/hub.longestDistance+OMCenterX+hub.OMLEDCorrectionOffset);
+    if (OMShipPosX>round(OMCenterX*1.9)) OMShipPosX=round(OMCenterX*1.9);
     else if (OMShipPosX<0) OMShipPosX=0;
-    int OMShipPosY=round(s.pos.y/hub.longestDistance+hub.OMCenterY+hub.OMLEDCorrectionOffset);
-    if (OMShipPosY>round(hub.OMCenterY*1.9)) OMShipPosY=round(hub.OMCenterY*1.9); 
+    int OMShipPosY=round(s.pos.y/hub.longestDistance+OMCenterY+hub.OMLEDCorrectionOffset);
+    if (OMShipPosY>round(OMCenterY*1.9)) OMShipPosY=round(OMCenterY*1.9); 
     else if (OMShipPosY<0) OMShipPosY=0;
     uB.add(new OscMessage("/OM/ship/position/x").add(OMShipPosX));
     uB.add(new OscMessage("/OM/ship/position/y").add(OMShipPosY));
@@ -463,7 +470,10 @@ class OscDockInitialized extends OscDock {
     ex.plug(this, "switchToPV", "/PV");
     ex.plug(this, "switchToOM", "/OM");
     ex.plug(this, "switchToFC", "/FC");
-    ex.plug(this, "unlock", "/SC/screenBlock");
+    //ex.plug(this, "unlock", "/SC/screenBlock");
+    //ex.plug(this, "unlock", "/SC/screenBlockIP5");
+    ex.plug(this, "isIP4", "/SC/screenBlock");
+    ex.plug(this, "isIP5", "/SC/screenBlockIP5");
   }
 
   public void changeThrottle(float f) {
@@ -523,7 +533,8 @@ class OscDockInitialized extends OscDock {
   }
 
   public void changeWarpSpeed(float f) {
-    if (!s.warp) s.warpSpeed=Settings.minWarpSpeed+f*(Settings.maxWarpSpeed-Settings.minWarpSpeed);
+    //if (!s.warp) 
+    s.warpSpeed=Settings.minWarpSpeed+f*(Settings.maxWarpSpeed-Settings.minWarpSpeed);
     SCUpdateWarpControls=true;
   }
 
@@ -603,7 +614,17 @@ class OscDockInitialized extends OscDock {
     activePage=3;
   }
 
-  public void unlock(float f) {
+  //public void unlock(float f) {
+
+  //}
+  public void isIP4(float f) {
     unlocked=true;
+  }
+  public void isIP5(float f) {
+    unlocked=true;
+    SCturnWheelPosX=172;
+    OMCenterX=284;
+    FCPadX=140; //Properties of the targeting pad
+    println("poot");
   }
 }
