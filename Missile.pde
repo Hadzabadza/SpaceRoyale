@@ -52,19 +52,23 @@ class Missile extends Object {
      estimatedBoostTime=0;
      }
      }*/
-    if (inactivityTimer>0) boost(1);
-    else if (inactivityTimer<0) turnToTarget();
-    vel.add(accel);
-    super.update();
     if (timer--<=0) queueDestroy();
-    if (target!=null) if (target.checkCollision(this)) {
-      if (target instanceof Ship) { 
-        Ship s= (Ship)target;
-        s.HP-=Settings.msslDmg;
+    if (target!=null) {
+      if (inactivityTimer>0) boost(1);
+      else if (inactivityTimer<0) turnToTarget();
+      vel.add(accel);
+      if (target.checkCollision(this)) {
+        if (target instanceof Ship) { 
+          Ship s= (Ship)target;
+          s.HP-=Settings.msslDmg;
+        }
+        if (target instanceof Asteroid) target.queueDestroy();
+        queueDestroy();
       }
-      if (target instanceof Asteroid) target.queueDestroy();
-      queueDestroy();
+    } else {
+      boost(1);
     }
+    super.update();
   }
 
   void turnToTarget() { //MONSTROUS WIP

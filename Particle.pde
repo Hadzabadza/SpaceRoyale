@@ -6,6 +6,7 @@ class Particle extends Object {
   float scaleChange;
   float rotation;
   float timer;
+  float largerSide;
   PImage sprt = null;
 
   Particle(PImage inputImg) {
@@ -18,6 +19,7 @@ class Particle extends Object {
     scaleChange=Settings.scaleChange;
     rotation=random(-0.05, 0.05);
     timer=Settings.defaultTimer;
+    findLargerSide();
   }
 
   Particle(PImage inputImg, PVector _pos) {
@@ -30,6 +32,7 @@ class Particle extends Object {
     scaleChange=Settings.scaleChange;
     rotation=random(-0.05, 0.05);
     timer=Settings.defaultTimer;
+    findLargerSide();
   }
 
   Particle(PImage inputImg, PVector _pos, PVector _vel) {
@@ -42,6 +45,7 @@ class Particle extends Object {
     scaleChange=Settings.scaleChange;
     rotation=random(-0.05, 0.05);
     timer=Settings.defaultTimer;
+    findLargerSide();
   }
 
   Particle(PImage inputImg, PVector _pos, PVector _vel, float _dir) {
@@ -54,7 +58,9 @@ class Particle extends Object {
     scaleChange=Settings.scaleChange;
     rotation=random(-0.05, 0.05);
     timer=Settings.defaultTimer;
+    findLargerSide();
   }
+  
   Particle(PImage inputImg, PVector _pos, PVector _vel, float _dir, color _c) {
     super( _pos, _vel, _dir, 0);
     sprt = inputImg;
@@ -65,7 +71,9 @@ class Particle extends Object {
     scaleChange=Settings.scaleChange;
     rotation=random(-0.05, 0.05);
     timer=Settings.defaultTimer;
+    findLargerSide();
   }
+  
   Particle(PImage inputImg, PVector _pos, PVector _vel, float _dir, color _c, float _scale, float _alphaChange, float _scaleChange, float _rotation, float _timer) {
     super( _pos, _vel, _dir, 0);
     sprt = inputImg;
@@ -76,12 +84,14 @@ class Particle extends Object {
     scaleChange=_scaleChange;
     rotation=_rotation;
     timer=_timer;
+    findLargerSide();
   }
 
   void update() {
     alpha+=alphaChange;
     scale+=scaleChange;
     dir+=rotation;
+    radius=largerSide*scale;
     super.update();
     timer--;
     if ((scale<=0)||(alpha<=0)||(timer<=0)) queueDestroy();
@@ -112,6 +122,11 @@ class Particle extends Object {
     rotation=random(-0.05, 0.05);
     timer=Settings.defaultTimer;
     destroyed=false;
+  }
+
+  void findLargerSide(){
+    if (sprt.height>sprt.width) largerSide=sprt.height;
+    else largerSide=sprt.width;
   }
 
   void spawn() {

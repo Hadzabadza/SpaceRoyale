@@ -14,6 +14,7 @@ class Ship extends Object {
   Object target;
   float distToTarget;
   int mssls=Settings.msslAmount;
+  boolean displayPlanetMap;
 
   //Controls and inputs
   boolean speedUp;
@@ -61,7 +62,7 @@ class Ship extends Object {
     rr.translate(pos.x, pos.y);
     rr.rotate(dir);
     rr.scale(0.2);
-    rr.tint(c, 150+100*cos(radians(frameCount)));
+    rr.tint(c, 150+100*cos(gameTime));
     rr.image(IMGShipStripes, -IMGShip.width/2, -IMGShip.height/2);
     rr.noTint();
     rr.image(IMGShip, -IMGShip.width/2, -IMGShip.height/2);
@@ -75,15 +76,13 @@ class Ship extends Object {
     rr.strokeWeight(1);
     rr.stroke(200);
     PVector turretPos=new PVector(pos.x-Settings.turretXOffset*cos(dir)-Settings.turretYOffset*sin(dir), pos.y-Settings.turretXOffset*sin(dir)-Settings.turretYOffset*cos(dir+PI));
+    if (Settings.DEBUG) rr.line(pos.x,pos.y,pos.x+vel.x*Settings.FPS,pos.y+vel.y*Settings.FPS);
     rr.pushMatrix();
     rr.translate(turretPos.x, turretPos.y);
     rr.rotate(aimDir);
     rr.scale(0.1);
     rr.image(IMGTurret, -IMGTurret.width/2, -IMGTurret.height/2);
     rr.popMatrix();
-    if (warp) {
-      if (frameCount%2==0) particles.add(new Particle(IMGShieldWaves, new PVector(pos.x+40*cos(dir), pos.y+40*sin(dir)), new PVector(0, 0), dir, color(255, 250), 0.35, -1, 0.0026, 0, 250));
-    } else if (thrust>0) if (frameCount%3==0) particles.add(new Particle(IMGExhaustSmoke, new PVector(pos.x-45*cos(dir), pos.y-45*sin(dir)), new PVector(vel.x-2*cos(dir), vel.y-2*sin(dir)), random(-PI, PI), color(255, 255*thrust), 0.2, -1, 0.006, random(-0.0005, 0.0005), 250));
   }
 
   void update() {
@@ -100,12 +99,22 @@ class Ship extends Object {
         dock.landingChange();
         land=null;
       }
+      /*Warp effects spawner*/ if (frameCount%2==0) particles.add(new Particle(IMGShieldWaves, new PVector(pos.x+40*cos(dir), pos.y+40*sin(dir)), new PVector(0, 0), dir, color(255, 250), 0.35, -1, 0.0026, 0, 250));
     } else
     {
       if (land!=null) { //Check if landed
-        if (!checkCollision(land)) dock.landingChange(); //Check if drifted away
+        if (!checkCollision(land)) //Check if drifted away
+        {
+          displayPlanetMap=false;
+          land=null;
+          dock.landingChange(); 
+        }
+        else {
+          vel.x=land.vel.x;
+          vel.y=land.vel.y;
+        }
       } else {
-        for (Planet p : planets) if (checkCollision(p))
+        for (Planet p : planets) if (checkCollision(p)) //Find which planet collided with (landed on), if any
         {
           land=p;
           vel.x=p.vel.x;
@@ -113,7 +122,7 @@ class Ship extends Object {
           dock.landingChange();
           break;
         }
-        for (Star s : stars) if (checkCollision(s)) vel=new PVector();
+        for (Star s : stars) if (checkCollision(s)) vel=new PVector(); 
       }
       if (speedUp) if (thrust<=0.99) {
         thrust+=0.01;
@@ -135,10 +144,10 @@ class Ship extends Object {
       vel.x+=cos(dir)*thrust*thrust/100; //THRUST APPLICATION
       vel.y+=sin(dir)*thrust*thrust/100;
 
-      if (vel.mag()>Settings.shipSpeedLimit) { //SPEED LIMIT
+      /*if (vel.mag()>Settings.shipSpeedLimit) { //SPEED LIMIT
         vel=vel.normalize().mult(Settings.shipSpeedLimit);
-      }
-
+      }*/
+      /*Thrust exhaust spawner*/ if (thrust>0) if (frameCount%3==0) particles.add(new Particle(IMGExhaustSmoke, new PVector(pos.x-45*cos(-dir), pos.y-45*sin(dir)), new PVector(vel.x-2*cos(dir), vel.y-2*sin(dir)), random(-PI, PI), color(255, 255*thrust), 0.2, -1, 0.006, random(-0.0005, 0.0005), 250));
       super.update(); //OBJECT UPDATE
     }
     if (incWarpSpeed) if (warpSpeed<=Settings.maxWarpSpeed-1) {
@@ -196,7 +205,7 @@ class Ship extends Object {
     if (mssls>0) {
       PVector msslSlotPos=new PVector(pos.x-Settings.msslSlotYOffset*sin(dir)/5*mssls, pos.y-Settings.msslSlotYOffset*cos(dir+PI)/5*mssls);
       Missile ms=new Missile(new PVector(msslSlotPos.x, msslSlotPos.y), new PVector(vel.x, vel.y), 5, dir, target);
-      ms.followerScreen=new View(new PVector (100, 100), new PVector(), "View "+missiles.size(), missiles.size(), ms);
+      ms.followerScreen=new View(new PVector (100, 100), new PVector(), "Missile "+missiles.size(), missiles.size(), ms);
       mssls--;
     }
   }
@@ -222,7 +231,7 @@ class Ship extends Object {
         rr.stroke(200);
         rr.strokeWeight(1);
         rr.noFill();
-        for (int i =0; i<3; i++) for (int j=0; j<4; j++) rr.arc(target.pos.x, target.pos.y, target.diameter*1.05+10+(target.diameter*0.05+6)*i, target.diameter*1.05+10+(target.diameter*0.05+6)*i, QUARTER_PI/2+HALF_PI*j+radians(frameCount), (QUARTER_PI+QUARTER_PI/2)+HALF_PI*j+radians(frameCount));
+        for (int i =0; i<3; i++) for (int j=0; j<4; j++) rr.arc(target.pos.x, target.pos.y, target.diameter*1.05+10+(target.diameter*0.05+6)*i, target.diameter*1.05+10+(target.diameter*0.05+6)*i, QUARTER_PI/2+HALF_PI*j+gameTime, (QUARTER_PI+QUARTER_PI/2)+HALF_PI*j+gameTime);
       }
   }
   void drawAim(PGraphics rr) {

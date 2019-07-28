@@ -10,30 +10,30 @@ class Asteroid extends Object{
     mass=mas;
     distance = distS+orbitStar.radius;
     float phase=random(0, TWO_PI);
-    vel.x=sqrt(0.0001*distance)*cos(phase+HALF_PI);
-    vel.y=sqrt(0.0001*distance)*sin(phase+HALF_PI);
+    vel.x=sqrt(Settings.celestialPull*distance)*cos(phase+HALF_PI);
+    vel.y=sqrt(Settings.celestialPull*distance)*sin(phase+HALF_PI);
     pos.x=orbitStar.pos.x+distance*cos(phase);
     pos.y=orbitStar.pos.y+distance*sin(phase);
   }
 
-  void draw(PGraphics rr) 
-  {
+  void softDraw(PGraphics rr){
     rr.pushMatrix();
     rr.translate(0, 0, -1);
-    rr.stroke(255, 105+55*cos(radians(frameCount)),105+55*cos(radians(frameCount)),125+75*cos(radians(frameCount)));
+    rr.stroke(145, 75+35*cos(gameTime),75+35*cos(gameTime),105+35*cos(gameTime));
     rr.noFill();
     rr.ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
-    rr.line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
+    //rr.line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
     rr.popMatrix();
+  }
 
+  void draw(PGraphics rr) 
+  {
+    softDraw(rr);
     rr.pushMatrix();
     rr.translate(0, 0, 1);
     rr.fill(200,20,100);
-    rr.strokeWeight(3);
-    rr.ellipse (pos.x, pos.y, diameter, diameter);
     rr.strokeWeight(1);
-    rr.noFill();
-    rr.ellipse (pos.x,pos.y,diameter*10,diameter*10);
+    rr.ellipse (pos.x, pos.y, diameter, diameter);
     rr.popMatrix();
   }
 
@@ -42,7 +42,7 @@ class Asteroid extends Object{
     grav.x=-(pos.x-orbitStar.pos.x);
     grav.y=-(pos.y-orbitStar.pos.y);
     grav.normalize();
-    grav.mult(0.0001);
+    grav.mult(Settings.celestialPull);
     vel.add(grav);
     super.update();
   }

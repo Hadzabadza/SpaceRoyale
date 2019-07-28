@@ -1,4 +1,4 @@
-//TODO: Fix mapScreen, move all corresponding vars to ship object //<>// //<>//
+//TODO: Fix mapScreen, move all corresponding vars to ship object //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
 //TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP
 //TODO: SHIP: Improve targeting!
 //TODO: MISSILE: Improve targeting!!!!
@@ -11,79 +11,92 @@ import oscP5.*;
 import netP5.*;
 
 void setup() {
-  size(1300, 650, P2D);
-  surface.setLocation((displayWidth-1300)/2, (displayHeight-650)/2);
-  pixFont=createFont("Minecraftia-Regular.ttf", 120, true);
-  textFont(pixFont, 12);
-  frameRate(Settings.FPS);
-  loadImages();
-  init();
+  size(1300, 650, P3D); //Screen size, can't be dynamically adjusted
+  surface.setLocation((displayWidth-1300)/2, (displayHeight-650)/2); //Location of the game window on screen
+  
+  pixFont=createFont("Minecraftia-Regular.ttf", 120, true); //The font used throughout the game
+  textFont(pixFont, 12); 
+  
+  frameRate(Settings.FPS); //For testing purposes
+  
+  loadImages(); //Loader for all the game's sprites. Defined on "Sprites" tab.
+  
+  init(); //Initialiser. Useful for game restarting
 }
 
-void init() {
-  gameState=0;
-  frameCount=0;
-  stars=new ArrayList<Star>();
+void init() { //Initialiser. Useful for game restarting
+  gameState=0; 
+  
+  frameCount=0; //Framecount restarter
+  
+  stars=new ArrayList<Star>();  //Resets all tracked object lists.
   planets=new ArrayList<Planet>();
   asteroids=new ArrayList<Asteroid>();
-  bullets=new ArrayList<Bullet>();
+  bullets=new ArrayList<Bullet>(); 
   missiles=new ArrayList<Missile>();
-  ships=new Ship[Settings.ships];
-  particles=new ArrayList<Particle>();
-  spareParticles=new ArrayList<Particle>();
-  destroyees=new ArrayList<Object>();
-  newSpawns=new ArrayList<Object>();
+  ships=new Ship[Settings.ships]; 
   objects=new ArrayList<Object>();
+  
+  particles=new ArrayList<Particle>(); //Particle buffers
+  spareParticles=new ArrayList<Particle>();
+  
+  destroyees=new ArrayList<Object>(); //Object destruction and construction queues
+  newSpawns=new ArrayList<Object>();
+  
   screen= new PGraphics[Settings.ships];
   view= new ArrayList<View>();
   stars.add(new Star(0, 0));
   
   for (int i=0; i<Settings.ships; i++) {
-    float startDir=TWO_PI/Settings.ships*i;
-    PVector startPos=new PVector((stars.get(0).radius+Settings.shipSize*2.5)*cos(startDir), (stars.get(0).radius+Settings.shipSize*2.5)*sin(startDir));
+    float startDir=random(TWO_PI);
+    float startDist=random(stars.get(0).gravWellRadius*0.4,stars.get(0).gravWellRadius);
+    PVector startPos=new PVector(startDist*cos(startDir), startDist*sin(startDir));
     screen[i]=createGraphics(width/Settings.ships, height, P3D);
     switch (i) {
     case 0: 
       {
-        ships[i]=new Ship(startPos, startDir, color(255, 0, 0));
+        ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 0, 0));
         break;
       }
     case 1: 
       {
-        ships[i]=new Ship(startPos, startDir, color(0, 255, 0));
+        ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 255, 0));
         break;
       }
     case 2: 
       {
-        ships[i]=new Ship(startPos, startDir, color(0, 0, 255));
+        ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 0, 255));
         break;
       }
     case 3: 
       {
-        ships[i]=new Ship(startPos, startDir, color(0, 255, 255));
+        ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 255, 255));
         break;
       }
     case 4: 
       {
-        ships[i]=new Ship(startPos, startDir, color(255, 0, 255));
+        ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 0, 255));
         break;
       }
     case 5: 
       {
-        ships[i]=new Ship(startPos, startDir, color(255, 255, 0));
+        ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 255, 0));
         break;
       }
     case 6: 
       {
-        ships[i]=new Ship(startPos, startDir, color(100, 100, 0));
+        ships[i]=new Ship(startPos, startDir+HALF_PI, color(100, 100, 0));
         break;
       }
     case 7: 
       {
-        ships[i]=new Ship(startPos, startDir, color(100));
+        ships[i]=new Ship(startPos, startDir+HALF_PI, color(100));
         break;
       }
     }
+    ships[i].vel.x=stars.get(0).gravPull*120*cos(startDir+HALF_PI);
+    ships[i].vel.y=stars.get(0).gravPull*120*sin(startDir+HALF_PI);
+    ships[i].zoom=1;
   }
   mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
@@ -97,7 +110,8 @@ void init() {
 }
 
 void draw() {
-  if (Settings.DEBUG) println("...................................................NEWFRAME..................................................................");
+  gameTime=float(millis())/1000;
+  //if (Settings.DEBUG) println("...................................................NEWFRAME..................................................................");
   if (gameState==0) {
     background(0, 255*(frameCount-1)/Settings.ships, 0);
     if (frameCount<=Settings.ships) osc.dock[frameCount-1]=osc.dock[frameCount-1].initializeDock();
@@ -115,15 +129,35 @@ void draw() {
       float cameraZ=((screen[i].height/2.0) / tan(PI*60.0/360.0));
       screen[i].perspective(PI/3.0, float(screen[i].width)/float(screen[i].height), cameraZ/100.0, cameraZ*100.0) ;
       screen[i].background(Settings.backgroundColor);
+      
+      /*screen[i].strokeWeight(3); //ATTEMPT TO MAKE A STAR FIELD
+      screen[i].stroke(255);
+      for (int x=round(ships[i].pos.x)-screen[i].width/2; x<round(ships[i].pos.x)+screen[i].width/2;x+=10){
+        for (int y=round(ships[i].pos.y)-screen[i].height/2; y<round(ships[i].pos.y)+screen[i].height/2;y+=10){
+          if (noise(x,y)>0.76) screen[i].point(x,y);
+        }
+      }*/
+      
       if (ships[i].warp) screen[i].camera(ships[i].pos.x+random(-ships[i].warpSpeed/2, ships[i].warpSpeed/2), ships[i].pos.y+random(-ships[i].warpSpeed/2, ships[i].warpSpeed/2), ships[i].zoom*600, ships[i].pos.x+random(-ships[i].warpSpeed, ships[i].warpSpeed), ships[i].pos.y+random(-ships[i].warpSpeed, ships[i].warpSpeed), 0.0, 0.0, 1.0, 0.0);
       else screen[i].camera(ships[i].pos.x, ships[i].pos.y, ships[i].zoom*600, ships[i].pos.x, ships[i].pos.y, 0.0, 0.0, 1.0, 0.0);
-      for (Object o : objects) {
-        o.draw(screen[i]);
+      
+      for (Object o : objects) { //DRAWS ALL OBJECTS ON SHIP'S SCREEN!!
+        if (Settings.drawObjectsOnlyInRange){
+          float distToScreenCorner=dist(0,0,screen[i].height,screen[i].width)*ships[i].zoom/2;
+          if (dist(ships[i].pos.x, ships[i].pos.y, o.pos.x, o.pos.y)-o.diameter<distToScreenCorner) o.draw(screen[i]); 
+          else o.softDraw(screen[i]);
+        } else o.draw(screen[i]);
       }
-      ships[i].drawTarget(screen[i]);
-      ships[i].drawAim(screen[i]);
+
+      ships[i].drawTarget(screen[i]); //Draws missile target
+      ships[i].drawAim(screen[i]); //Draws turret aiming direction
       screen[i].endDraw();
       image(screen[i], screenSize*i, 0);
+      if (ships[i].displayPlanetMap&&ships[i].land!=null)
+      {
+        Map mp=ships[i].land.surfaceScreen;
+        mp.draw(this.g,ships[i],new PVector((screen[i].width-mp.dimension.x)/2,(screen[i].height-mp.dimension.y)/2));
+      }
     }
     stroke (255);
     strokeWeight(1);
@@ -133,6 +167,15 @@ void draw() {
       rect(screenSize*i+halfScreen-50, 10, 100*ships[i].HP, 10);
       fill(100, 150, 255);
       rect(screenSize*i+halfScreen-50, 25, ships[i].warpSpeed*2, 10);
+      if (Settings.DEBUG) {
+        fill(130+50*sin(gameTime),0,0);
+        text("DEBUG", screenSize*i+20, 20);
+        if (ships[i].displayPlanetMap)
+          fill(0,130+50*sin(gameTime),0);
+        else
+          fill(130+50*sin(gameTime),0,0);
+        text("LAND", screenSize*i+24, 30);
+      }
       noFill();
       rect(screenSize*i+halfScreen-50, 10, 100, 10);
       rect(screenSize*i+halfScreen-50, 25, 100, 10);
@@ -147,43 +190,6 @@ void draw() {
     strokeWeight(3);
     stroke(255);
     for (int i=1; i<screen.length; i++) line (screenSize*i, 0, screenSize*i, height);
-
-    /*if (mapScreen) {
-     camera(ship.pos.x, ship.pos.y, (height/2.0) / tan(PI*30.0 / 180.0)*zoom, ship.pos.x, ship.pos.y, 0.0, 0.0, 1.0, 0.0);
-     pushMatrix();
-     translate(ship.pos.x-width/2*zoom+mapScreenShift.x*zoom, ship.pos.y-height/2*zoom+mapScreenShift.y*zoom, 2);
-     scale(zoom);
-     rectMode(CENTER);
-     if (ship.land!=null) {
-     for (Terrain t : ship.land.terrain)
-     {
-     t.draw();
-     }
-     Terrain selected=ship.land.pickTile();
-     if (selected!=null)
-     {
-     fill(255);
-     text("Current: "+selected.elevation, 50, -40);
-     text("Deepness: "+selected.depth, 250, -40);
-     text("Index: "+selected.index, 50, -20);
-     }
-     fill(255);
-     textAlign(CENTER);
-     text("Avg: "+ship.land.avgHeight, 50, -60);
-     text("Max: "+ship.land.maxHeight, 250, -60);
-     text("Min: "+ship.land.minHeight, 450, -60);
-     if (heightColour)
-     text("Height Colouring: ON", 450, -40);
-     else
-     text("Height Colouring: OFF", 450, -40);
-     text("Total Height: "+ship.land.totalHeight, 250, -20);
-     //image(ship.land.map, -mapScreenShift.x+(width-ship.land.map.width)/4, -mapScreenShift.y+(height-ship.land.map.height)/4);
-     popMatrix();
-     } else
-     {
-     mapScreen=false;
-     }
-     }*/
   }
 }
 

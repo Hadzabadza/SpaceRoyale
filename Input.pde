@@ -28,6 +28,10 @@ void keyPressed() {
 }
 
 void keyReleased() {
+  if ((key == 'o')||(key=='O')) Settings.DEBUG=!Settings.DEBUG;
+  if (Settings.DEBUG){
+    if ((key == 'p')||(key=='P')) Settings.drawObjectsOnlyInRange=!Settings.drawObjectsOnlyInRange;
+  }
   if ((keyCode==ENTER)||(keyCode==RETURN)) init();
   if (!mapScreen) {
     if ((key == 'w')||(key=='W'))  ships[0].speedUp = false;

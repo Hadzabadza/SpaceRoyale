@@ -1,4 +1,4 @@
-class OscHub { //<>// //<>//
+class OscHub { //<>// //<>// //<>// //<>// //<>//
   OscDock[] dock; //Multiple docks with specific data for multiple controllers 
   int displaySize=280; //Smallest dimension of the display
   int longestDistance; //Farthest star
@@ -319,7 +319,7 @@ class OscDockInitialized extends OscDock {
   }
 
   void landingChange() {
-    changeLandingButton=true;
+    changeLandingButton=!changeLandingButton;
   }
 
   void oscEvent(OscMessage theOscMessage) { //Print the address pattern and the typetag of the received OscMessage
@@ -493,12 +493,12 @@ class OscDockInitialized extends OscDock {
   }
 
   public void enterPlanet(float f) {
-    if (mapScreen==true)  
+    if (s.displayPlanetMap==true)  
     {
-      mapScreen=false;
+      s.displayPlanetMap=false;
       active=null;
     } else if (s.land!=null) {
-      mapScreen=true;
+      s.displayPlanetMap=true;
       s.thrust=0;
       ex.send(new OscMessage("/PV"));
     }
@@ -541,10 +541,10 @@ class OscDockInitialized extends OscDock {
   public void moveCursor(float x, float y)
   {
     if (s.land!=null) {
-      int xOffset=(width-s.land.map.width)/2;
-      int yOffset=(height-s.land.map.height)/2;
-      cursor.x=xOffset+x*ships[0].land.map.width;
-      cursor.y=yOffset+y*ships[0].land.map.height;
+      int xOffset=(width-s.land.surfaceImage.width)/2;
+      int yOffset=(height-s.land.surfaceImage.height)/2;
+      cursor.x=xOffset+x*ships[0].land.surfaceImage.width;
+      cursor.y=yOffset+y*ships[0].land.surfaceImage.height;
     }
   }
 

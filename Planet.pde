@@ -1,6 +1,7 @@
-class Planet extends Object{
+class Planet extends Object {
   PImage surface;
-  PImage map;
+  PImage surfaceImage;
+  Map surfaceScreen;
   float mass;
   float distance;
   float spin;
@@ -8,6 +9,9 @@ class Planet extends Object{
   float minHeight=255;
   float maxHeight=0;
   float totalHeight=0;
+  int gravWellRadius;
+  int gravWellDiameter;
+  float gravPull;
   int mapRes;
   int orbitNumber;
   PVector grav;
@@ -16,21 +20,88 @@ class Planet extends Object{
   Star orbitStar;
 
   Planet(Star s, float mas, float distS, int number) {
-    super(new PVector(),new PVector(),0,sqrt(mas)*5);
+    super(new PVector(), new PVector(), 0, sqrt(mas)*5);
     orbitStar=s;
     mass=mas;
     distance = distS+orbitStar.radius;
+    gravPull=mass/10000;
+    gravWellRadius=round(radius*Settings.gravityWellRadiusMultiplier);
+    gravWellDiameter=gravWellRadius*2;
     float phase=random(0, TWO_PI);
-    vel.x=sqrt(0.0001*distance)*cos(phase+HALF_PI);
-    vel.y=sqrt(0.0001*distance)*sin(phase+HALF_PI);
+    vel.x=sqrt(Settings.celestialPull*distance)*cos(phase+HALF_PI);
+    vel.y=sqrt(Settings.celestialPull*distance)*sin(phase+HALF_PI);
     pos.x=orbitStar.pos.x+distance*cos(phase);
     pos.y=orbitStar.pos.y+distance*sin(phase);
     spin=random(-1, 1);
     orbitNumber=number;
     surface=createImage((int)radius*4, (int)radius*4, ARGB);
     terrain=new Terrain[surface.width*surface.height];
-    mapRes=floor(width/(surface.width+20));
+    if (height<width)
+      mapRes=floor(height/(surface.height+20));
+    else
+      mapRes=floor(width/(surface.width+20));
     surface.loadPixels();
+    createMap();
+  }
+
+  void softDraw(PGraphics rr){
+    rr.pushMatrix();
+    rr.translate(0, 0, -1);
+    rr.stroke(255, 125+75*cos(gameTime));
+    rr.noFill();
+    rr.ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
+    rr.line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
+    rr.popMatrix();
+
+    rr.pushMatrix();
+    rr.translate(0, 0, 1);
+    rr.noFill();
+    rr.strokeWeight(1);
+    rr.ellipse (pos.x, pos.y, diameter, diameter);
+    rr.ellipse (pos.x, pos.y, gravWellDiameter, gravWellDiameter);
+    rr.popMatrix();
+  }
+
+  void draw(PGraphics rr) 
+  {
+    softDraw(rr);
+    rr.pushMatrix();
+    rr.translate(pos.x, pos.y);
+    rr.rotate((gameTime)/4*spin);
+    rr.image(surface, 0-surface.width/(surface.width/radius), 0-surface.height/(surface.height/radius), surface.width/2, surface.height/2);
+    rr.popMatrix();
+  }
+
+  void update() {
+    orbitalMovement();
+    pullObjects();
+    super.update();
+    if (frameCount%5==0) updateMapInfo();
+  }
+
+  void orbitalMovement(){
+    grav=new PVector();
+    grav.x=-(pos.x-orbitStar.pos.x);
+    grav.y=-(pos.y-orbitStar.pos.y);
+    grav.normalize();
+    grav.mult(Settings.celestialPull);
+    vel.add(grav);
+  }
+
+  void pullObjects() {
+    float currDist;
+    for (Ship s : ships) { //Gravitational pull
+      if (!s.warp) {
+        currDist=dist(s.pos.x, s.pos.y, pos.x, pos.y);
+        if (currDist<gravWellRadius&&currDist>radius) {
+          s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull*(1-currDist/gravWellRadius)));
+        }
+      }
+    }
+  }
+
+  void createMap() { //Creates a surface map for the planet
+    surfaceScreen=new Map(new PVector(surface.height*mapRes,surface.width*mapRes), this);
     float seaLevel=random(40, 180);
     float noiseOffset=orbitNumber*10000;
     float prevT=seaLevel;
@@ -63,13 +134,13 @@ class Planet extends Object{
       }
     }
     surface.updatePixels();
-    map=createImage(surface.width*mapRes, surface.height*mapRes, ARGB);
-    map.loadPixels();
+    surfaceImage=createImage(surface.width*mapRes, surface.height*mapRes, ARGB);
+    surfaceImage.loadPixels();
     for (int y = 0; y < surface.height; y++) {
       for (int x = 0; x < surface.width; x++) {
         for (int ry = 0; ry < mapRes; ry++) {
           for (int rx=0; rx < mapRes; rx++) {
-            map.pixels[x * mapRes + rx + y * mapRes * map.height + ry * map.height] = surface.pixels[x + y * surface.height];
+            surfaceImage.pixels[x * mapRes + rx + y * mapRes * surfaceImage.height + ry * surfaceImage.height] = surface.pixels[x + y * surface.height];
           }
         }
       }
@@ -84,67 +155,30 @@ class Planet extends Object{
         }
       }
     }
-    map.updatePixels();
+    surfaceImage.updatePixels();
   }
 
-  void draw(PGraphics rr) 
-  {
-    rr.pushMatrix();
-    rr.translate(0, 0, -1);
-    rr.stroke(255, 125+75*cos(radians(frameCount)));
-    rr.noFill();
-    rr.ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
-    rr.line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
-    rr.popMatrix();
-
-    rr.pushMatrix();
-    rr.translate(0, 0, 1);
-    rr.noFill();
-    rr.strokeWeight(3);
-    rr.ellipse (pos.x, pos.y, diameter, diameter);
-    rr.strokeWeight(1);
-    rr.ellipse (pos.x,pos.y,diameter*10,diameter*10);
-    rr.popMatrix();
-
-    rr.pushMatrix();
-    rr.translate(pos.x, pos.y);
-    rr.rotate((radians(frameCount))/4*spin);
-    rr.image(surface, 0-surface.width/(surface.width/radius), 0-surface.height/(surface.height/radius), surface.width/2, surface.height/2);
-    rr.popMatrix();
-  }
-
-  void update() {
-    grav=new PVector();
-    grav.x=-(pos.x-orbitStar.pos.x);
-    grav.y=-(pos.y-orbitStar.pos.y);
-    grav.normalize();
-    grav.mult(0.0001);
-    vel.add(grav);
-    super.update();
-    
-    if (frameCount%5==0)
-    {
-      totalHeight=0;
-      minHeight=99999;
-      maxHeight=-99999;
-      for (int y=0; y<surface.height; y++)
+  void updateMapInfo() { //A fairly expensive updater for map info
+    totalHeight=0;
+    minHeight=99999;
+    maxHeight=-99999;
+    for (int y=0; y<surface.height; y++)
+    { 
+      for (int x=0; x<surface.width; x++)
       { 
-        for (int x=0; x<surface.width; x++)
-        { 
-          totalHeight+=terrain[x+y*surface.height].elevation;
-          avgHeight=(avgHeight+terrain[x+y*surface.height].elevation)/2;
-          if (minHeight>terrain[x+y*surface.height].elevation)
-            minHeight=terrain[x+y*surface.height].elevation;
-          if (maxHeight<terrain[x+y*surface.height].elevation)
-            maxHeight=terrain[x+y*surface.height].elevation;
-        }
+        totalHeight+=terrain[x+y*surface.height].elevation;
+        avgHeight=(avgHeight+terrain[x+y*surface.height].elevation)/2;
+        if (minHeight>terrain[x+y*surface.height].elevation)
+          minHeight=terrain[x+y*surface.height].elevation;
+        if (maxHeight<terrain[x+y*surface.height].elevation)
+          maxHeight=terrain[x+y*surface.height].elevation;
       }
     }
   }
 
   Terrain pickTile() {
-    int xOffset=(width-map.width)/2;
-    int yOffset=(height-map.height)/2;
+    int xOffset=round(width-surfaceScreen.dimension.x)/2;
+    int yOffset=round(height-surfaceScreen.dimension.y)/2;
     float halfRes=mapRes/2;
     if (cursor.x>xOffset-halfRes&&cursor.x<width-xOffset-halfRes&&cursor.y>yOffset-halfRes&&cursor.y<height-yOffset-halfRes) {
       int x=round((cursor.x-xOffset)/mapRes);
@@ -158,14 +192,14 @@ class Planet extends Object{
       return null;
     }
   }
-  void spawn(){
+  void spawn() {
     planets.add(this);
     super.spawn();
   }
-  void queueDestroy(){
+  void queueDestroy() {
     destroyees.add(this);
   }
-  void destroy(){
+  void destroy() {
     planets.remove(this);
     super.destroy();
   }

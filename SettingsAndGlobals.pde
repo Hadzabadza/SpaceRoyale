@@ -26,6 +26,7 @@ int spareParts=0;
 
 ////////////////MISC/////////////////
 static float FMAX=3.40282347E+38;
+float gameTime=0;
 long seed=1;
 int gameState=0;
 
@@ -45,17 +46,21 @@ static class Settings {
   //Game settings
   static int backgroundColor=50;
   static int FPS=60;          //For debug
-  static boolean DEBUG=false; //
+  static boolean DEBUG=true; //
+  static boolean drawObjectsOnlyInRange=false;
 
   //Generator settings
   static int minPlanetsPerStar =3;
   static int maxPlanetsPerStar =8;
-  static int ships=2;              // SHIPS HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  static int minAsteroidsPerChain =1;
+  static int maxAsteroidsPerChain =8;
+  static float celestialPull=0.00008;
+  static int ships=1;              // SHIPS HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
   //OSC stuff
   static String[] controllerIP={
-    "192.168.0.100", 
+    "192.168.0.102", 
     "192.168.0.105", 
     "192.168.1.162", 
     "192.168.1.162", 
@@ -86,8 +91,11 @@ static class Settings {
   static int refreshInterval=120;
   static int planetLocationUpdateInterval=30;
 
+  //Planet properties
+  static float gravityWellRadiusMultiplier=10;
+  
   //Ship properties
-  static float shipSize=20; //Radius of ship entities
+  static float shipSize=22; //Radius of ship entities
   static float turretGfxSize=20; //Extra radius around the ship for turret graphics
   static float projectileSpeed=6; //Bullet's muzzle velocity
   static float minWarpSpeed=10; //Minimum warp speed

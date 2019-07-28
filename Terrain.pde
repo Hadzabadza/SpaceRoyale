@@ -32,40 +32,40 @@ class Terrain {
     }
   }
   */
-  void draw() {
+  void draw(PGraphics rr) {
     if (heightColour)
     {
       if (water)
       {
-        if (1-abs(cos(radians(frameCount)))<depth||depth>0.6)
+        if (1-abs(cos(gameTime))<depth||depth>0.6)
         {
-          fill(fill);
+          rr.fill(fill);
         } else
         {
-          fill(color(map(elevation, p.minHeight, p.maxHeight, 255, 0), map(elevation, p.minHeight, p.maxHeight, 0, 255), 0));
+          rr.fill(color(map(elevation, p.minHeight, p.maxHeight, 255, 0), map(elevation, p.minHeight, p.maxHeight, 0, 255), 0));
         }
       } else
       {
-        fill(fill);
+        rr.fill(fill);
       }
     } else
     {
       if (water)
       {
-        if (1-abs(cos(radians(frameCount)))<depth||depth>0.7)
+        if (1-abs(cos(gameTime))<depth||depth>0.7)
         {
-          fill(fill);
+          rr.fill(fill);
         } else
         {
-          fill(elevation);
+          rr.fill(elevation);
         }
       } else
       {
-        fill(elevation);
+        rr.fill(elevation);
       }
       if (lava!=0)
       {
-        fill(50+lava*3, lava, 0);
+        rr.fill(50+lava*3, lava, 0);
       }
     }
 
@@ -92,33 +92,48 @@ class Terrain {
       }
     }
 
-    noStroke();
-    rect(x*p.mapRes-mapScreenShift.x+(width-p.map.width)/2, y*p.mapRes-mapScreenShift.y+(height-p.map.height)/2, p.mapRes, p.mapRes);
+    rr.noStroke();
+    rr.rect(x*p.mapRes, y*p.mapRes, p.mapRes, p.mapRes);
+    //rr.rect(x*p.mapRes-mapScreenShift.x+(width-p.surfaceImage.width)/2, y*p.mapRes-mapScreenShift.y+(height-p.surfaceImage.height)/2, p.mapRes, p.mapRes);
+
     /*
     point(x*p.mapRes-mapScreenShift.x+(width-p.map.width)/2, y*p.mapRes-mapScreenShift.y+(height-p.map.height)/2);
      */
      if (p.selected==this)
      {
-       drawSelection(ships[0]);
+       drawSelection(rr, ships[0]);
      }
   };
+
   void build() {
   }
-  void drawSelection(Ship ship){
-      strokeWeight(1);
+
+  void drawSelection(PGraphics rr, Ship ship){
+      rr.strokeWeight(1);
       //pushMatrix();
       //translate(0, 0, 1);
-      stroke(130,150,0);
-      line(-width,y*ship.land.mapRes-mapScreenShift.y+(height-p.map.height)/2,width,y*ship.land.mapRes-mapScreenShift.y+(height-p.map.height)/2);
-      line(x*ship.land.mapRes-mapScreenShift.x+(width-p.map.width)/2,-height,x*ship.land.mapRes-mapScreenShift.x+(width-p.map.width)/2,height);
-      stroke(100+50*cos(frameCount/2), 0, 0);
-      strokeWeight(ship.land.mapRes);
-      point((x-1)*ship.land.mapRes-mapScreenShift.x+(width-p.map.width)/2, y*ship.land.mapRes-mapScreenShift.y+(height-p.map.height)/2);
-      point((x+1)*ship.land.mapRes-mapScreenShift.x+(width-p.map.width)/2, y*ship.land.mapRes-mapScreenShift.y+(height-p.map.height)/2);
-      point(x*ship.land.mapRes-mapScreenShift.x+(width-p.map.width)/2, (y-1)*ship.land.mapRes-mapScreenShift.y+(height-p.map.height)/2);
-      point(x*ship.land.mapRes-mapScreenShift.x+(width-p.map.width)/2, (y+1)*ship.land.mapRes-mapScreenShift.y+(height-p.map.height)/2);
+      rr.stroke(ship.c);
+      /*
+      rr.line(-width,y*ship.land.mapRes-mapScreenShift.y+(height-p.surfaceImage.height)/2,width,y*ship.land.mapRes-mapScreenShift.y+(height-p.surfaceImage.height)/2);
+      rr.line(x*ship.land.mapRes-mapScreenShift.x+(width-p.surfaceImage.width)/2,-height,x*ship.land.mapRes-mapScreenShift.x+(width-p.surfaceImage.width)/2,height);
+      rr.stroke(100+50*cos(gameTime), 0, 0);
+      rr.strokeWeight(ship.land.mapRes);
+      rr.point((x-1)*ship.land.mapRes-mapScreenShift.x+(width-p.surfaceImage.width)/2, y*ship.land.mapRes-mapScreenShift.y+(height-p.surfaceImage.height)/2);
+      rr.point((x+1)*ship.land.mapRes-mapScreenShift.x+(width-p.surfaceImage.width)/2, y*ship.land.mapRes-mapScreenShift.y+(height-p.surfaceImage.height)/2);
+      rr.point(x*ship.land.mapRes-mapScreenShift.x+(width-p.surfaceImage.width)/2, (y-1)*ship.land.mapRes-mapScreenShift.y+(height-p.surfaceImage.height)/2);
+      rr.point(x*ship.land.mapRes-mapScreenShift.x+(width-p.surfaceImage.width)/2, (y+1)*ship.land.mapRes-mapScreenShift.y+(height-p.surfaceImage.height)/2);*/
+      
+      rr.line(-width,y*p.mapRes,width,y*p.mapRes);
+      rr.line(x*p.mapRes,-height,x*p.mapRes,height);
+      rr.stroke(100+50*cos(gameTime), 0, 0);
+      rr.strokeWeight(ship.land.mapRes);
+      rr.point((x-1)*p.mapRes, y*p.mapRes);
+      rr.point((x+1)*p.mapRes, y*p.mapRes);
+      rr.point(x*p.mapRes, (y-1)*p.mapRes);
+      rr.point(x*p.mapRes, (y+1)*p.mapRes);
       //popMatrix();
   }
+
   void volcanize() {
     volcanoTime=300;
   }

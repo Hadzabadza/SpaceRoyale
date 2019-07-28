@@ -40,6 +40,8 @@ class Object { //Superclass for physical ingame objects
     destroyed=true;
     objects.remove(this);
   }
+  void softDraw(PGraphics renderer){
+  }
   void draw(PGraphics renderer) {
   }
 }
