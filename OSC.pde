@@ -1,4 +1,4 @@
-class OscHub { //<>// //<>// //<>// //<>// //<>//
+class OscHub { //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
   OscDock[] dock; //Multiple docks with specific data for multiple controllers 
   int displaySize=280; //Smallest dimension of the display
   int longestDistance; //Farthest star
@@ -541,10 +541,10 @@ class OscDockInitialized extends OscDock {
   public void moveCursor(float x, float y)
   {
     if (s.land!=null) {
-      int xOffset=(width-s.land.surfaceImage.width)/2;
-      int yOffset=(height-s.land.surfaceImage.height)/2;
-      cursor.x=xOffset+x*ships[0].land.surfaceImage.width;
-      cursor.y=yOffset+y*ships[0].land.surfaceImage.height;
+      int xOffset=(width-s.land.surface.width)/2;
+      int yOffset=(height-s.land.surface.height)/2;
+      cursor.x=xOffset+x*ships[0].land.surface.width;
+      cursor.y=yOffset+y*ships[0].land.surface.height;
     }
   }
 

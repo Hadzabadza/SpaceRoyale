@@ -50,13 +50,12 @@ static class Settings {
   static boolean drawObjectsOnlyInRange=false;
 
   //Generator settings
+  static int ships=1;              // SHIPS HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
   static int minPlanetsPerStar =3;
   static int maxPlanetsPerStar =8;
   static int minAsteroidsPerChain =1;
   static int maxAsteroidsPerChain =8;
   static float celestialPull=0.00008;
-  static int ships=1;              // SHIPS HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 
   //OSC stuff
   static String[] controllerIP={

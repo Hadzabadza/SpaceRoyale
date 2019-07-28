@@ -77,10 +77,10 @@ void mouseWheel(MouseEvent e) {
 
 
 void mouseReleased() {
-  if (mouseButton==RIGHT) if (mapScreen) heightColour=!heightColour;
+  if (mouseButton==RIGHT) if (ships[0].displayPlanetMap) heightColour=!heightColour;
   if (mouseButton==LEFT)
   {
-    if (mapScreen) 
+    if (ships[0].displayPlanetMap) 
     {
       Terrain t=ships[0].land.pickTile();
       if (t!=null)
@@ -90,15 +90,21 @@ void mouseReleased() {
       }
       if (t==null)
       {
-        mapScreen=false;
+        ships[0].displayPlanetMap=false;
+        ships[0].land.updateSurfaceImagery();
         active=null;
       }
     } else if (ships[0].land!=null) {
-      mapScreen=true;
+      ships[0].displayPlanetMap=true;
       ships[0].thrust=0;
     }
   }
-  if (mouseButton==CENTER) ships[0].zoom=1;
+  if (mouseButton==CENTER) if (ships[0].displayPlanetMap) {
+    Terrain t=ships[0].land.pickTile();
+    if (t!=null) t.plopLava();
+    else ships[0].zoom=1;
+  }
+  else ships[0].zoom=1;
 }
 
 void mouseMoved() {

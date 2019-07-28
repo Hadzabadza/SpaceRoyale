@@ -29,24 +29,47 @@ class Map {
     }
     screen.endDraw();
     Terrain selected=ship.land.pickTile();
-    if (selected!=null)
-    {
+    if (height<width) {
+      if (selected!=null)
+      {
+        rr.fill(255);
+        rr.text("Index: "+selected.index, pos.x+dimension.x+40, pos.y+20);
+        rr.text("Current height: "+selected.totalOre, pos.x+dimension.x+40, pos.y+40);
+        rr.text("Depth: "+selected.depth, pos.x+dimension.x+40, pos.y+60);
+      }
       rr.fill(255);
-      rr.text("Current: "+selected.elevation, 50, -40);
-      rr.text("Depth: "+selected.depth, 250, -40);
-      rr.text("Index: "+selected.index, 50, -20);
+      rr.textAlign(LEFT);
+      rr.text("Avg: "+ship.land.avgHeight, 50, pos.y+40);
+      rr.text("Max: "+ship.land.maxHeight, 50, pos.y+60);
+      rr.text("Min: "+ship.land.minHeight, 50, pos.y+80);
+      if (heightColour)
+        rr.text("Height Colouring: ON", 50, pos.y+20);
+      else
+        rr.text("Height Colouring: OFF", 50, pos.y+20);
+      rr.text("Total Height: "+ship.land.totalHeight, 50, pos.y+100);
+      rr.text("Sea level: "+ship.land.waterLevel, 50, pos.y+120);
+      //image(ship.land.map, -mapScreenShift.x+(width-ship.land.map.width)/4, -mapScreenShift.y+(height-ship.land.map.height)/4);
+    } else {
+      if (selected!=null)
+      {
+        rr.fill(255);
+        rr.text("Current: "+selected.totalOre, pos.x+50, pos.y+40);
+        rr.text("Depth: "+selected.depth, pos.x+250, pos.y+40);
+        rr.text("Index: "+selected.index, pos.x+50, pos.y+20);
+      }
+      rr.fill(255);
+      rr.textAlign(CENTER);
+      rr.text("Avg: "+ship.land.avgHeight, pos.x+50, pos.y+60);
+      rr.text("Max: "+ship.land.maxHeight, pos.x+250, pos.y+60);
+      rr.text("Min: "+ship.land.minHeight, pos.x+450, pos.y+60);
+      if (heightColour)
+        rr.text("Height Colouring: ON", pos.x+450, pos.y+40);
+      else
+        rr.text("Height Colouring: OFF", pos.x+450, pos.y+40);
+      rr.text("Total Height: "+ship.land.totalHeight, pos.x+250, pos.y+20);
+      rr.text("Sea level: "+ship.land.waterLevel, pos.x+250, pos.y+40);
+      //image(ship.land.map, -mapScreenShift.x+(width-ship.land.map.width)/4, -mapScreenShift.y+(height-ship.land.map.height)/4);
     }
-    rr.fill(255);
-    rr.textAlign(CENTER);
-    rr.text("Avg: "+ship.land.avgHeight, 50, -60);
-    rr.text("Max: "+ship.land.maxHeight, 250, -60);
-    rr.text("Min: "+ship.land.minHeight, 450, -60);
-    if (heightColour)
-      rr.text("Height Colouring: ON", 450, -40);
-    else
-      rr.text("Height Colouring: OFF", 450, -40);
-    rr.text("Total Height: "+ship.land.totalHeight, 250, -20);
-    //image(ship.land.map, -mapScreenShift.x+(width-ship.land.map.width)/4, -mapScreenShift.y+(height-ship.land.map.height)/4);
     rr.strokeWeight(1);
     rr.stroke(255);
     rr.noFill();

@@ -97,6 +97,7 @@ class Ship extends Object {
       pos.y+=warpSpeed*sin(dir);
       if (land!=null) {
         dock.landingChange();
+        land.updateSurfaceImagery();
         land=null;
       }
       /*Warp effects spawner*/ if (frameCount%2==0) particles.add(new Particle(IMGShieldWaves, new PVector(pos.x+40*cos(dir), pos.y+40*sin(dir)), new PVector(0, 0), dir, color(255, 250), 0.35, -1, 0.0026, 0, 250));
@@ -106,6 +107,7 @@ class Ship extends Object {
         if (!checkCollision(land)) //Check if drifted away
         {
           displayPlanetMap=false;
+          land.updateSurfaceImagery();
           land=null;
           dock.landingChange(); 
         }

@@ -1,4 +1,4 @@
-//TODO: Fix mapScreen, move all corresponding vars to ship object //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
+//TODO: Fix mapScreen, move all corresponding vars to ship object //<>// //<>// //<>// //<>// //<>// //<>// //<>//
 //TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP
 //TODO: SHIP: Improve targeting!
 //TODO: MISSILE: Improve targeting!!!!
@@ -55,12 +55,12 @@ void init() { //Initialiser. Useful for game restarting
     switch (i) {
     case 0: 
       {
-        ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 0, 0));
+        ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 255, 0));
         break;
       }
     case 1: 
       {
-        ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 255, 0));
+        ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 0, 0));
         break;
       }
     case 2: 
@@ -107,6 +107,8 @@ void init() { //Initialiser. Useful for game restarting
   }
   osc=new OscHub(Settings.ships);
   println("Setting up..................");
+  ships[0].pos.x=planets.get(0).pos.x;
+  ships[0].pos.y=planets.get(0).pos.y;
 }
 
 void draw() {
