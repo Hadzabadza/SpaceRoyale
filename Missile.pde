@@ -14,63 +14,6 @@ class Missile extends Object {
     target=_target;
   }
 
-  void draw(PGraphics rr) 
-  {
-    rr.strokeWeight(1);
-    rr.stroke(255*fuel/Settings.msslFuel);
-    rr.noFill();
-    rr.ellipse(pos.x, pos.y, 100, 100);
-    rr.pushMatrix();
-    rr.translate(pos.x, pos.y);
-    rr.rotate(dir);
-    rr.scale(0.1);
-    rr.noTint();
-    rr.image(IMGMissile, -IMGMissile.width/2, -IMGMissile.height/2);
-    if (boostIntensity>0) {    
-      rr.tint(255, boostIntensity*255);
-      rr.image(IMGMissileExhaust, -IMGMissile.width/2, -IMGMissile.height/2);
-    }
-    rr.popMatrix();
-  }
-
-  void update() {
-    boostIntensity=0;
-    accel.x=0;
-    accel.y=0;
-    inactivityTimer--;
-    /*if (inactivityTimer>0) {
-     boost(1);
-     } else {
-     if (inactivityTimer==0) {
-     if (target!=null) turnToTarget(); 
-     else boost(1);
-     } else if (inactivityTimer<0) if (estimatedBoostTime>=1) {
-     boost(1);
-     estimatedBoostTime--;
-     } else if (estimatedBoostTime>0) {
-     boost(estimatedBoostTime);
-     estimatedBoostTime=0;
-     }
-     }*/
-    if (timer--<=0) queueDestroy();
-    if (target!=null) {
-      if (inactivityTimer>0) boost(1);
-      else if (inactivityTimer<0) turnToTarget();
-      vel.add(accel);
-      if (target.checkCollision(this)) {
-        if (target instanceof Ship) { 
-          Ship s= (Ship)target;
-          s.HP-=Settings.msslDmg;
-        }
-        if (target instanceof Asteroid) target.queueDestroy();
-        queueDestroy();
-      }
-    } else {
-      boost(1);
-    }
-    super.update();
-  }
-
   void turnToTarget() { //MONSTROUS WIP
     /*PVector tempVel=new PVector(vel.x,vel.y);
      PVector targetVel=new PVector(target.vel.x,target.vel.y);
@@ -113,6 +56,64 @@ class Missile extends Object {
     }
   }
 
+
+  void update() {
+    boostIntensity=0;
+    accel.x=0;
+    accel.y=0;
+    inactivityTimer--;
+    /*if (inactivityTimer>0) {
+     boost(1);
+     } else {
+     if (inactivityTimer==0) {
+     if (target!=null) turnToTarget(); 
+     else boost(1);
+     } else if (inactivityTimer<0) if (estimatedBoostTime>=1) {
+     boost(1);
+     estimatedBoostTime--;
+     } else if (estimatedBoostTime>0) {
+     boost(estimatedBoostTime);
+     estimatedBoostTime=0;
+     }
+     }*/
+    if (timer--<=0) queueDestroy();
+    if (target!=null) {
+      if (inactivityTimer>0) boost(1);
+      else if (inactivityTimer<0) turnToTarget();
+      vel.add(accel);
+      if (target.checkCollision(this)) {
+        if (target instanceof Ship) { 
+          Ship s= (Ship)target;
+          s.HP-=Settings.msslDmg;
+        }
+        if (target instanceof Asteroid) target.queueDestroy();
+        queueDestroy();
+      }
+    } else {
+      boost(1);
+    }
+    super.update();
+  }
+
+  void draw(PGraphics rr) 
+  {
+    rr.strokeWeight(1);
+    rr.stroke(255*fuel/Settings.msslFuel);
+    rr.noFill();
+    rr.ellipse(pos.x, pos.y, 100, 100);
+    rr.pushMatrix();
+    rr.translate(pos.x, pos.y);
+    rr.rotate(dir);
+    rr.scale(0.1);
+    rr.noTint();
+    rr.image(IMGMissile, -IMGMissile.width/2, -IMGMissile.height/2);
+    if (boostIntensity>0) {    
+      rr.tint(255, boostIntensity*255);
+      rr.image(IMGMissileExhaust, -IMGMissile.width/2, -IMGMissile.height/2);
+    }
+    rr.popMatrix();
+  }
+  
   void spawn() {
     missiles.add(this);
     super.spawn();

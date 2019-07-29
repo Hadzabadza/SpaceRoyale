@@ -26,7 +26,7 @@ class Planet extends Object {
     orbitStar=s;
     mass=mas;
     distance = distS+orbitStar.radius;
-    gravPull=mass/10000;
+    gravPull=mass/5000;
     gravWellRadius=round(radius*Settings.gravityWellRadiusMultiplier);
     gravWellDiameter=gravWellRadius*2;
     waterLevel=random(0.1, 0.9);
@@ -46,41 +46,6 @@ class Planet extends Object {
     createMap();
   }
 
-  void softDraw(PGraphics rr) {
-    rr.pushMatrix();
-    rr.translate(0, 0, -1);
-    rr.stroke(255, 125+75*cos(gameTime));
-    rr.noFill();
-    rr.ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
-    rr.line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
-    rr.popMatrix();
-
-    rr.pushMatrix();
-    rr.translate(0, 0, 1);
-    rr.noFill();
-    rr.strokeWeight(1);
-    rr.ellipse (pos.x, pos.y, diameter, diameter);
-    rr.ellipse (pos.x, pos.y, gravWellDiameter, gravWellDiameter);
-    rr.popMatrix();
-  }
-
-  void draw(PGraphics rr) 
-  {
-    softDraw(rr);
-    rr.pushMatrix();
-    rr.translate(pos.x, pos.y);
-    rr.rotate((gameTime)/4*spin);
-    rr.image(surface, 0-surface.width/(surface.width/radius), 0-surface.height/(surface.height/radius), surface.width/2, surface.height/2);
-    rr.popMatrix();
-  }
-
-  void update() {
-    orbitalMovement();
-    pullObjects();
-    super.update();
-    if (frameCount%5==0) updateMapInfo();
-  }
-
   void orbitalMovement() {
     grav=new PVector();
     grav.x=-(pos.x-orbitStar.pos.x);
@@ -90,13 +55,13 @@ class Planet extends Object {
     vel.add(grav);
   }
 
-  void pullObjects() {
-    float currDist;
-    for (Ship s : ships) { //Gravitational pull
+  void pullObjects() { //Gravitational pull
+  float currDist;
+    for (Ship s : ships) { 
       if (!s.warp) {
-        currDist=dist(s.pos.x, s.pos.y, pos.x, pos.y);
+        currDist=getDistTo(s);
         if (currDist<gravWellRadius&&currDist>radius) {
-          s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull*(1-currDist/gravWellRadius)));
+          s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull*(1-pow(currDist/gravWellRadius,2))));
         }
       }
     }
@@ -215,6 +180,42 @@ class Planet extends Object {
       return null;
     }
   }
+
+  void update() {
+    orbitalMovement();
+    pullObjects();
+    super.update();
+    if (frameCount%5==0) updateMapInfo();
+  }
+
+  void softDraw(PGraphics rr) {
+    rr.pushMatrix();
+    rr.translate(0, 0, -1);
+    rr.stroke(255, 125+75*cos(gameTime));
+    rr.noFill();
+    rr.ellipse(orbitStar.pos.x, orbitStar.pos.y, distance*2, distance*2);
+    rr.line(pos.x, pos.y, orbitStar.pos.x, orbitStar.pos.y);
+    rr.popMatrix();
+
+    rr.pushMatrix();
+    rr.translate(0, 0, 1);
+    rr.noFill();
+    rr.strokeWeight(1);
+    rr.ellipse (pos.x, pos.y, diameter, diameter);
+    rr.ellipse (pos.x, pos.y, gravWellDiameter, gravWellDiameter);
+    rr.popMatrix();
+  }
+
+  void draw(PGraphics rr) 
+  {
+    softDraw(rr);
+    rr.pushMatrix();
+    rr.translate(pos.x, pos.y);
+    rr.rotate((gameTime)/4*spin);
+    rr.image(surface, 0-surface.width/(surface.width/radius), 0-surface.height/(surface.height/radius), surface.width/2, surface.height/2);
+    rr.popMatrix();
+  }
+
   void spawn() {
     planets.add(this);
     super.spawn();

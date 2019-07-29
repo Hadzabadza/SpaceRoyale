@@ -3,6 +3,8 @@ class Star extends Object {
   int gravWellRadius;
   int gravWellDiameter;
   float gravPull;
+  color c;
+  float surfaceTemp;
 
   Star() {
     super(new PVector(), new PVector(), 0, 0);
@@ -15,13 +17,11 @@ class Star extends Object {
   }
 
   void starInit() {
-    mass=random(300, 800);
-    radius=mass;
+    mass=random(Settings.minStarMass, Settings.maxStarMass);
+    c=recalculateTemp(Settings.minStarTemp*pow(2, mass/Settings.minStarMass-1));
+    radius=sqrt(mass);
     diameter=radius*2;
-    gravPull=mass/10000;
-    gravWellRadius=round(radius*Settings.gravityWellRadiusMultiplier);
-    gravWellDiameter=gravWellRadius*2;
-    float distS=random(300, 600)+gravWellRadius+mass;
+    float distS=random(300, 600)+gravWellRadius;//+mass;
     int isAsteroid=round(random(0, 100));
     for (int i=0; i<round(random(Settings.minPlanetsPerStar, Settings.maxPlanetsPerStar)); i++) {
       if (isAsteroid>40) {
@@ -31,9 +31,89 @@ class Star extends Object {
       }
       isAsteroid=round(random(0, 100));
       float pMass=random(10, 100);
-      distS+=random(100, 1000)+sqrt(pMass)*5*2;
+      distS+=random(2000, 5000)+round(sqrt(pMass)*20*Settings.gravityWellRadiusMultiplier);
       planets.add(new Planet(this, pMass, distS, i+1));
     }
+    gravWellRadius=round(distS+radius);
+    gravPull=mass/10;
+    //gravWellRadius=round(radius*Settings.gravityWellRadiusMultiplier);
+    gravWellDiameter=gravWellRadius*2;
+  }
+
+  void pullObjects() { //Gravitational pull
+    float currDist;
+    for (Ship s : ships) { 
+      if (!s.warp) {
+        currDist=getDistTo(s);
+        if (currDist<gravWellRadius&&currDist>radius) {
+          s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
+        }
+      }
+    }
+    for (Particle p : particles) { 
+      currDist=getDistTo(p);
+      if (currDist<gravWellRadius&&currDist>radius) {
+        p.vel.add(new PVector(pos.x-p.pos.x, pos.y-p.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
+      }
+    }
+  }
+
+  void heatObjects() { //HOTHOTHOT
+    float currDist;
+    float heatIntensity;
+    for (Ship s : ships) {
+      currDist=getDistTo(s);
+      if (currDist<gravWellRadius) {
+        heatIntensity=pow(1-currDist/gravWellRadius,2);
+        s.heatUpSide(s.getDirTo(this), surfaceTemp, heatIntensity);
+      }
+    }
+  }
+
+  color recalculateTemp(float temp) {
+    surfaceTemp=temp;
+    temp/=100;
+    float red;
+    float green;
+    float blue;
+    //Calculate Red:
+    if (temp <= 66) red = 255;
+    else {
+      red = temp - 60;
+      red = 329.698727446 * pow(red, -0.1332047592);
+      if (red < 0)  red = 0;
+      else if (red > 255) red = 255;
+    }
+
+    //Calculate Green:
+    if (temp <= 66) {
+      green = temp;
+      green = 99.4708025861 * log(green) - 161.1195681661;
+      if (green < 0) green = 0;
+      else if (green > 255) green = 255;
+    } else { 
+      green = temp - 60;
+      green = 288.1221695283 * pow(green, -0.0755148492);
+      if (green < 0) green = 0;
+      else if (green > 255) green = 255;
+    }
+
+    //Calculate Blue:
+    if (temp >= 66) blue = 255;
+    else if (temp <= 19) blue = 0;
+    else {
+      blue = temp - 10;
+      blue = 138.5177312231 * log(blue) - 305.0447927307;
+      if (blue < 0) blue = 0;
+      if (blue > 255) blue = 255;
+    }
+    return color(red, green, blue);
+  }   
+
+
+  void update() {
+    pullObjects();
+    heatObjects();
   }
 
   void softDraw(PGraphics rr) {
@@ -42,42 +122,24 @@ class Star extends Object {
     rr.noFill();
     rr.strokeWeight(1);
     float blink=gameTime;
-    rr.stroke(150+50*sin(blink), 150+50*sin(blink), 0);
-    rr.ellipse (pos.x, pos.y, diameter, diameter);
-    blink=cos(blink%HALF_PI);
+    rr.stroke(c);
+    blink=cos(gameTime/4%HALF_PI);
+    float blink2=cos((gameTime/4+HALF_PI/3)%HALF_PI);
+    float blink3=cos((gameTime/4+HALF_PI/3*2)%HALF_PI);
     rr.ellipse (pos.x, pos.y, gravWellDiameter*(blink), gravWellDiameter*(blink));
+    rr.ellipse (pos.x, pos.y, gravWellDiameter*(blink2), gravWellDiameter*(blink2));
+    rr.ellipse (pos.x, pos.y, gravWellDiameter*(blink3), gravWellDiameter*(blink3));
     rr.ellipse (pos.x, pos.y, gravWellDiameter, gravWellDiameter);
+    rr.ellipse (pos.x, pos.y, diameter, diameter);
     rr.popMatrix();
-  }
-
-  void update() {
-    pullObjects();
   }
 
   void draw(PGraphics rr)
   {
     softDraw(rr);
     rr.stroke(0);
-    rr.fill(255, 200, 40);
+    rr.fill(c);
     rr.ellipse (pos.x, pos.y, diameter, diameter);
-  }
-
-  void pullObjects() { //Gravitational pull
-    float currDist;
-    for (Ship s : ships) { 
-      if (!s.warp) {
-        currDist=dist(s.pos.x, s.pos.y, pos.x, pos.y);
-        if (currDist<gravWellRadius&&currDist>radius) {
-          s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull*(1-pow(currDist/gravWellRadius,2))));
-        }
-      }
-    }
-    for (Particle p : particles) { 
-      currDist=dist(p.pos.x, p.pos.y, pos.x, pos.y);
-      if (currDist<gravWellRadius&&currDist>radius) {
-        p.vel.add(new PVector(pos.x-p.pos.x, pos.y-p.pos.y).normalize().mult(gravPull*(1-currDist/gravWellRadius)));
-      }
-    }
   }
 
   void spawn() {

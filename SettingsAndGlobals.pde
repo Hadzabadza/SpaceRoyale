@@ -29,6 +29,7 @@ static float FMAX=3.40282347E+38;
 float gameTime=0;
 long seed=1;
 int gameState=0;
+color backgroundColour= color(0);
 
 //////////////OSC stuff//////////////
 OscHub osc;
@@ -59,7 +60,7 @@ static class Settings {
 
   //OSC stuff
   static String[] controllerIP={
-    "192.168.0.102", 
+    "10.0.50.20", 
     "192.168.0.105", 
     "192.168.1.162", 
     "192.168.1.162", 
@@ -90,6 +91,12 @@ static class Settings {
   static int refreshInterval=120;
   static int planetLocationUpdateInterval=30;
 
+  //Star properties
+  static float minStarMass=2000000;
+  static float maxStarMass=16000000;
+  static float minStarTemp=1000;
+  //static float temperatureFalloff=
+
   //Planet properties
   static float gravityWellRadiusMultiplier=10;
   
@@ -109,6 +116,9 @@ static class Settings {
   static int msslSlotXOffset=13;
   static int msslSlotYOffset=-26;
   static int msslAmount=2;
+  static float heatRadiationRate=0.999;
+  static float heatConductivityRate=0.03;
+  static int hullMeltingPoint=2200;
 
   //Bullet properties
   static float bullDmg=0.1;
@@ -127,14 +137,4 @@ static class Settings {
   static float alphaChange=-1.5;
   static float scaleChange=-0.001;
   static float defaultTimer=255;
-  /*enum ShipColors {
-   red, 
-   green, 
-   blue, 
-   yellow, 
-   purple, 
-   gray, 
-   orange, 
-   brown
-   }*/
 }

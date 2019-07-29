@@ -22,13 +22,23 @@ class Object { //Superclass for physical ingame objects
     if (dist(pos.x, pos.y, with.pos.x, with.pos.y)<=with.radius+radius) return true;
     else return false;
   }
-  float checkDist(Object to) {
+  float getDistTo(Object to) {
     return dist(pos.x,pos.y,to.pos.x, to.pos.y);
+  }
+  float getDirTo(Object to) {
+    PVector checker=new PVector(to.pos.x-pos.x,to.pos.y-pos.y);
+    float direction=checker.heading();
+    if (checker.y<0) direction=TWO_PI+direction;
+    return direction; 
   }
   void update()
   {
     pos.add(vel);
     dir+=spin;
+  }
+  void softDraw(PGraphics renderer){
+  }
+  void draw(PGraphics renderer) {
   }
   void spawn() {
     objects.add(this);
@@ -39,9 +49,5 @@ class Object { //Superclass for physical ingame objects
   void destroy() {
     destroyed=true;
     objects.remove(this);
-  }
-  void softDraw(PGraphics renderer){
-  }
-  void draw(PGraphics renderer) {
   }
 }

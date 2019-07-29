@@ -11,7 +11,7 @@ import oscP5.*;
 import netP5.*;
 
 void setup() {
-  size(1300, 650, P3D); //Screen size, can't be dynamically adjusted
+  size(1300, 700, P3D); //Screen size, can't be dynamically adjusted
   surface.setLocation((displayWidth-1300)/2, (displayHeight-650)/2); //Location of the game window on screen
   
   pixFont=createFont("Minecraftia-Regular.ttf", 120, true); //The font used throughout the game
@@ -96,7 +96,7 @@ void init() { //Initialiser. Useful for game restarting
     }
     ships[i].vel.x=stars.get(0).gravPull*120*cos(startDir+HALF_PI);
     ships[i].vel.y=stars.get(0).gravPull*120*sin(startDir+HALF_PI);
-    ships[i].zoom=1;
+    ships[i].zoom=100;
   }
   mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
@@ -121,7 +121,7 @@ void draw() {
   }
   if (gameState==1) {
     objectUpdates();
-    background(0);
+    background(backgroundColour);
     osc.update();
     int screenSize=width/screen.length;
     int halfScreen=screenSize/2;
@@ -153,6 +153,7 @@ void draw() {
 
       ships[i].drawTarget(screen[i]); //Draws missile target
       ships[i].drawAim(screen[i]); //Draws turret aiming direction
+      ships[i].drawHeat(this.g,new PVector(screen[i].width/2+screen[i].width*i,screen[i].height/2));
       screen[i].endDraw();
       image(screen[i], screenSize*i, 0);
       if (ships[i].displayPlanetMap&&ships[i].land!=null)

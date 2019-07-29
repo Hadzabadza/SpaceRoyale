@@ -32,67 +32,7 @@ class Terrain {
     this.index=index;
   }
 
-  void update() {
-    if (!water)
-    {
-      fill=color(map(totalOre, p.minHeight, p.maxHeight, 255, 0), map(totalOre, p.minHeight, p.maxHeight, 0, 255), 0);
-    } else
-    {
-      //fill=color(0, 0, map(totalOre, p.minHeight*0.5, (p.minHeight+(p.avgHeight-p.minHeight)*0.4)*1.3+50, 0, 255));
-      fill=color(0, 0, round(250-200*depth));
-    }
-    //propagateLava();
-    //depth=map(totalOre, p.minHeight, p.minHeight+(p.maxHeight-p.avgHeight)*p.waterLevel, 1, 0);
-    depth=map(totalOre, p.minHeight, (p.minHeight+(p.avgHeight-p.minHeight)*p.waterLevel), 1, 0);
-    if (depth>0)
-    {
-      water=true;
-      waterColour=255*(1-depth);
-      fill=color(0, 0, waterColour);
-    } else
-    {
-      water=false;
-      depth=0;
-    }
-  }
-  void draw(PGraphics rr) {
-    //totalOre=stone+solane+perditium+etramite+omnitium;
-    if (heightColour)
-    {
-      /*
-      if (water) rr.fill(color(map(totalOre, p.minHeight, p.maxHeight, 255, 0), map(totalOre, p.minHeight, p.maxHeight, 0, 255), 0));
-       else rr.fill(fill);*/
-      rr.fill(colouriseByHeight(totalOre, p.minHeight, p.maxHeight, p.waterLevel));
-    } else
-    {
-      if (water) rr.fill(0, 0, waterColour/2+waterColour/3+waterColour/3*(cos(gameTime)));
-      else rr.fill(totalOre);
-      if (lava!=0) 
-        if (lava>2) rr.fill(50+lava*3, lava, 0);
-        else if (depth<=0) rr.fill(25*lava+(1-lava/2)*totalOre, 0, 0);
-        else rr.fill(32.6*lava, 20.6*lava, 220*(1-depth));
-    }
-
-    rr.noStroke();
-    rr.rect(x*p.mapRes, y*p.mapRes, p.mapRes, p.mapRes);
-    if (p.selected==this) drawSelection(rr, ships[0]); //TODO: Multiple ships
-    if (frameCount%5==0) update();
-  };
-
   void build() {
-  }
-
-  void drawSelection(PGraphics rr, Ship ship) {
-    rr.strokeWeight(1);
-    rr.stroke(ship.c);
-    rr.line(-width, y*p.mapRes, width, y*p.mapRes);
-    rr.line(x*p.mapRes, -height, x*p.mapRes, height);
-    rr.stroke(100+50*cos(gameTime), 0, 0);
-    rr.strokeWeight(ship.land.mapRes);
-    rr.point((x-1)*p.mapRes, y*p.mapRes);
-    rr.point((x+1)*p.mapRes, y*p.mapRes);
-    rr.point(x*p.mapRes, (y-1)*p.mapRes);
-    rr.point(x*p.mapRes, (y+1)*p.mapRes);
   }
 
   void volcanize() {
@@ -113,70 +53,17 @@ class Terrain {
     bottom=top;
     top=top+(max-top)*0.5;
     if (hgt<top) {
-       return color(round(map(hgt, bottom, top, 220, 100)), round(map(hgt, bottom, top, 255, 50)), 0);
+      return color(round(map(hgt, bottom, top, 220, 100)), round(map(hgt, bottom, top, 255, 50)), 0);
     }
     bottom=top;
     top=top+(max-top)*0.3;
     if (hgt<top) {
-       return color(round(map(hgt, bottom, top, 100, 220)), round(map(hgt, bottom, top, 50, 100)), round(map(hgt, bottom, max, 0, 100)));
+      return color(round(map(hgt, bottom, top, 100, 220)), round(map(hgt, bottom, top, 50, 100)), round(map(hgt, bottom, max, 0, 100)));
     }
     bottom=top;
     return color(round(map(hgt, bottom, max, 220, 255)), round(map(hgt, bottom, max, 100, 255)), round(map(hgt, bottom, max, 0, 255)));
   }
 
-  /*void propagateLava() {
-   if (volcanoTime>0)
-   {
-   float lavaIncrement=300-lava;
-   for (Terrain t : p.terrain) {
-   t.totalOre=-lavaIncrement/p.terrain.length;
-   t.stone-=lavaIncrement/p.terrain.length;
-   }
-   lava+=lavaIncrement;
-   volcanoTime--;
-   }
-   if (lava!=0)
-   {
-   if (lava-lava*0.1>=1)
-   {
-   stone+=lava*0.1;
-   totalOre+=lava*0.1;
-   lava*=0.9;
-   float activeSubstance=lava+totalOre;
-   Terrain[] propags=new Terrain[4];
-   float[] propagProportions=new float[4];
-   float[] activeSubsts=new float[4];
-   float maxDrop=0; //Maximum difference in lava+totalOre compared to this tile.
-   float minDrop=FMAX;
-   float totalDrainPower=0;
-   int count=0;
-   float subDiff=0;
-   for (int deg=0; deg<360; deg+=90) {
-   propags[count]=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
-   activeSubsts[count]=propags[count].lava+propags[count].totalOre;
-   subDiff=activeSubstance-activeSubsts[count];
-   if (subDiff>0) {
-   if (subDiff>maxDrop) maxDrop=subDiff;
-   if (subDiff<minDrop) minDrop=subDiff;
-   totalDrainPower+=subDiff;
-   propagProportions[count]=subDiff;
-   } else propagProportions[count]=0;
-   count+=1;
-   }
-   if (maxDrop>=lava) maxDrop=lava;
-   for (count=0; count<4; count++) {
-   println(count);
-   propags[count].lava+=maxDrop*(propagProportions[count]/totalDrainPower);
-   }
-   lava-=maxDrop;
-   } else
-   {
-   totalOre+=lava;
-   stone+=lava;
-   lava=0;
-   }
-   }
-   }*/
   void propagateLava() {  
     if (volcanoTime>0)
     {
@@ -266,4 +153,65 @@ class Terrain {
     } else neighX=p.surface.width+neighX;
     return(p.terrain[neighX+neighY*p.surface.width]);
   }
+  
+  void update() {
+    if (!water)
+    {
+      fill=color(map(totalOre, p.minHeight, p.maxHeight, 255, 0), map(totalOre, p.minHeight, p.maxHeight, 0, 255), 0);
+    } else
+    {
+      //fill=color(0, 0, map(totalOre, p.minHeight*0.5, (p.minHeight+(p.avgHeight-p.minHeight)*0.4)*1.3+50, 0, 255));
+      fill=color(0, 0, round(250-200*depth));
+    }
+    //propagateLava();
+    //depth=map(totalOre, p.minHeight, p.minHeight+(p.maxHeight-p.avgHeight)*p.waterLevel, 1, 0);
+    depth=map(totalOre, p.minHeight, (p.minHeight+(p.avgHeight-p.minHeight)*p.waterLevel), 1, 0);
+    if (depth>0)
+    {
+      water=true;
+      waterColour=255*(1-depth);
+      fill=color(0, 0, waterColour);
+    } else
+    {
+      water=false;
+      depth=0;
+    }
+  }
+
+  void drawSelection(PGraphics rr, Ship ship) {
+    rr.strokeWeight(1);
+    rr.stroke(ship.c);
+    rr.line(-width, y*p.mapRes, width, y*p.mapRes);
+    rr.line(x*p.mapRes, -height, x*p.mapRes, height);
+    rr.stroke(100+50*cos(gameTime), 0, 0);
+    rr.strokeWeight(ship.land.mapRes);
+    rr.point((x-1)*p.mapRes, y*p.mapRes);
+    rr.point((x+1)*p.mapRes, y*p.mapRes);
+    rr.point(x*p.mapRes, (y-1)*p.mapRes);
+    rr.point(x*p.mapRes, (y+1)*p.mapRes);
+  }
+
+  void draw(PGraphics rr) {
+    //totalOre=stone+solane+perditium+etramite+omnitium;
+    if (heightColour)
+    {
+      /*
+      if (water) rr.fill(color(map(totalOre, p.minHeight, p.maxHeight, 255, 0), map(totalOre, p.minHeight, p.maxHeight, 0, 255), 0));
+       else rr.fill(fill);*/
+      rr.fill(colouriseByHeight(totalOre, p.minHeight, p.maxHeight, p.waterLevel));
+    } else
+    {
+      if (water) rr.fill(0, 0, waterColour/2+waterColour/3+waterColour/3*(cos(gameTime)));
+      else rr.fill(totalOre);
+      if (lava!=0) 
+        if (lava>2) rr.fill(50+lava*3, lava, 0);
+        else if (depth<=0) rr.fill(25*lava+(1-lava/2)*totalOre, 0, 0);
+        else rr.fill(32.6*lava, 20.6*lava, 220*(1-depth));
+    }
+
+    rr.noStroke();
+    rr.rect(x*p.mapRes, y*p.mapRes, p.mapRes, p.mapRes);
+    if (p.selected==this) drawSelection(rr, ships[0]); //TODO: Multiple ships
+    if (frameCount%5==0) update();
+  };
 }
