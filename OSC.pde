@@ -11,8 +11,8 @@ class OscHub { //<>// //<>// //<>// //<>// //<>// //<>// //<>//
     dock=new OscDock[controllers];
     for (int i=0; i<controllers; i++) dock[i]=new OscDock(this, i, new NetAddress(Settings.controllerIP[i], Settings.controllerInputPort[i]), Settings.oscInPort[i], ships[i]);
     //initializeHub();
-    OMPlanets=planets.size();
-    longestDistance=round(planets.get(OMPlanets-1).distance);
+    OMPlanets=stars.get(0).planets.size();
+    longestDistance=round(stars.get(0).planets.get(OMPlanets-1).distance);
     longestDistance=longestDistance/100;
   }
 
@@ -103,7 +103,7 @@ class OscDock {
     outPort=port;
     bundleLog=new ArrayList<String>();
     OMPlanetDistances=new int[hub.OMPlanets];
-    for (int i=0; i<hub.OMPlanets; i++) OMPlanetDistances[i]=round(planets.get(i).distance/hub.longestDistance);
+    for (int i=0; i<hub.OMPlanets; i++) OMPlanetDistances[i]=round(stars.get(0).planets.get(i).distance/hub.longestDistance);
     refreshPhase=Settings.refreshInterval/Settings.ships*id;
     planetLocationUpdatePhase=Settings.planetLocationUpdateInterval/Settings.ships*id;
   }
@@ -293,9 +293,9 @@ class OscDockInitialized extends OscDock {
 
   void OMPlanetMove(OscBundle outBundle, int targetPlanetIndex) {
     if (frameCount%Settings.planetLocationUpdateInterval==planetLocationUpdatePhase) {
-      int OMPlanetPosX=round(planets.get(targetPlanetIndex).pos.x/hub.longestDistance+OMCenterX+hub.OMLEDCorrectionOffset);
+      int OMPlanetPosX=round(stars.get(0).planets.get(targetPlanetIndex).pos.x/hub.longestDistance+OMCenterX+hub.OMLEDCorrectionOffset);
       outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/x").add(OMPlanetPosX));
-      int OMPlanetPosY=round(planets.get(targetPlanetIndex).pos.y/hub.longestDistance+OMCenterY+hub.OMLEDCorrectionOffset);
+      int OMPlanetPosY=round(stars.get(0).planets.get(targetPlanetIndex).pos.y/hub.longestDistance+OMCenterY+hub.OMLEDCorrectionOffset);
       outBundle.add(new OscMessage("/OM/planet"+targetPlanetIndex+"/position/y").add(OMPlanetPosY));
     }
     bundleLog.add("UBundle-C"+id+". Planet position segment. Size: "+outBundle.size());

@@ -1,5 +1,4 @@
-//TODO: Fix mapScreen, move all corresponding vars to ship object //<>// //<>// //<>// //<>// //<>// //<>// //<>//
-//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP
+//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP //<>//
 //TODO: SHIP: Improve targeting!
 //TODO: MISSILE: Improve targeting!!!!
 //TODO: OSC: Find the name of the connected device and add to bundle logs.
@@ -13,6 +12,7 @@ import netP5.*;
 void setup() {
   size(1300, 700, P3D); //Screen size, can't be dynamically adjusted
   surface.setLocation((displayWidth-1300)/2, (displayHeight-650)/2); //Location of the game window on screen
+  randomSeed(seed);
   
   pixFont=createFont("Minecraftia-Regular.ttf", 120, true); //The font used throughout the game
   textFont(pixFont, 12); 
@@ -30,7 +30,6 @@ void init() { //Initialiser. Useful for game restarting
   frameCount=0; //Framecount restarter
   
   stars=new ArrayList<Star>();  //Resets all tracked object lists.
-  planets=new ArrayList<Planet>();
   asteroids=new ArrayList<Asteroid>();
   bullets=new ArrayList<Bullet>(); 
   missiles=new ArrayList<Missile>();
@@ -107,8 +106,8 @@ void init() { //Initialiser. Useful for game restarting
   }
   osc=new OscHub(Settings.ships);
   println("Setting up..................");
-  ships[0].pos.x=planets.get(0).pos.x;
-  ships[0].pos.y=planets.get(0).pos.y;
+  ships[0].pos.x=stars.get(0).planets.get(0).pos.x;
+  ships[0].pos.y=stars.get(0).planets.get(0).pos.y;
 }
 
 void draw() {

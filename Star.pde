@@ -5,6 +5,7 @@ class Star extends Object {
   float gravPull;
   color c;
   float surfaceTemp;
+  ArrayList<Planet> planets;
 
   Star() {
     super(new PVector(), new PVector(), 0, 0);
@@ -17,11 +18,13 @@ class Star extends Object {
   }
 
   void starInit() {
+    planets=new ArrayList<Planet>();
     mass=random(Settings.minStarMass, Settings.maxStarMass);
     c=recalculateTemp(Settings.minStarTemp*pow(2, mass/Settings.minStarMass-1));
     radius=sqrt(mass);
     diameter=radius*2;
-    float distS=random(300, 600)+gravWellRadius;//+mass;
+        gravPull=mass;
+    float distS=random(300, 600)+gravWellRadius+surfaceTemp;//+mass;
     int isAsteroid=round(random(0, 100));
     for (int i=0; i<round(random(Settings.minPlanetsPerStar, Settings.maxPlanetsPerStar)); i++) {
       if (isAsteroid>40) {
@@ -35,8 +38,6 @@ class Star extends Object {
       planets.add(new Planet(this, pMass, distS, i+1));
     }
     gravWellRadius=round(distS+radius);
-    gravPull=mass/10;
-    //gravWellRadius=round(radius*Settings.gravityWellRadiusMultiplier);
     gravWellDiameter=gravWellRadius*2;
   }
 
@@ -64,7 +65,8 @@ class Star extends Object {
     for (Ship s : ships) {
       currDist=getDistTo(s);
       if (currDist<gravWellRadius) {
-        heatIntensity=pow(1-currDist/gravWellRadius,2);
+        heatIntensity=surfaceTemp*s.radius/(PI*currDist);
+        //println(heatIntensity);
         s.heatUpSide(s.getDirTo(this), surfaceTemp, heatIntensity);
       }
     }

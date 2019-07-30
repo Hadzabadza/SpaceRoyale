@@ -33,14 +33,8 @@ class Planet extends Object {
     gravWellDiameter=gravWellRadius*2;
     waterLevel=random(0.1, 0.9);
     float phase=random(0, TWO_PI);
-    if (random(0,1)<0.98){
-      vel.x=sqrt(starPull*distance)*cos(phase+HALF_PI);
-      vel.y=sqrt(starPull*distance)*sin(phase+HALF_PI);
-    } else
-    {
-      vel.x=sqrt(starPull*distance)*cos(phase-HALF_PI);
-      vel.y=sqrt(starPull*distance)*sin(phase-HALF_PI);
-    }
+    vel.x=sqrt(Settings.celestialPull*distance)*cos(phase+HALF_PI);
+    vel.y=sqrt(Settings.celestialPull*distance)*sin(phase+HALF_PI);
     pos.x=orbitStar.pos.x+distance*cos(phase);
     pos.y=orbitStar.pos.y+distance*sin(phase);
     spin=random(-1, 1);

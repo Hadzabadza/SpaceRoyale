@@ -7,7 +7,7 @@
 
 ///////////Instance lists////////////
 ArrayList<Star> stars;
-ArrayList<Planet> planets;
+//ArrayList<Planet> planets; //MOVED INTO STAR
 ArrayList<Asteroid> asteroids;
 ArrayList<Bullet> bullets;
 ArrayList<Missile> missiles;
@@ -27,7 +27,7 @@ int spareParts=0;
 ////////////////MISC/////////////////
 static float FMAX=3.40282347E+38;
 float gameTime=0;
-long seed=1;
+long seed=400;
 int gameState=0;
 color backgroundColour= color(0);
 
@@ -99,6 +99,7 @@ static class Settings {
 
   //Planet properties
   static float gravityWellRadiusMultiplier=10;
+  static int planetScaler=4;
   
   //Ship properties
   static float shipSize=22; //Radius of ship entities
@@ -119,6 +120,7 @@ static class Settings {
   static float heatRadiationRate=0.999;
   static float heatConductivityRate=0.03;
   static int hullMeltingPoint=2200;
+  static float hullPieceMass=100;
 
   //Bullet properties
   static float bullDmg=0.1;

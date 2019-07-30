@@ -1,5 +1,5 @@
 void keyPressed() { 
-  if (!mapScreen) {
+  if (!ships[0].displayPlanetMap) {
     if ((key == 'w')||(key=='W'))  ships[0].speedUp = true;
     if ((key == 's')||(key=='S'))  ships[0].slowDown = true;
     if ((key == 'a')||(key=='A'))  ships[0].turnLeft = true;
@@ -10,8 +10,8 @@ void keyPressed() {
     if ((key == 'e')||(key=='E'))  ships[0].turnTurretRight = true;
     if (key == ' ')  ships[0].fire = true;
     if ((key == 'z')||(key=='Z')) ships[0].missileAiming=true;
-
-
+  }
+  if (ships.length>1&&!ships[1].displayPlanetMap) {
     if ((keyCode==UP)||(key==56))  ships[1].speedUp = true;
     if ((keyCode==DOWN)||(key==50))  ships[1].slowDown = true;
     if ((keyCode==LEFT)||(key==52))  ships[1].turnLeft = true;
@@ -29,11 +29,11 @@ void keyPressed() {
 
 void keyReleased() {
   if ((key == 'o')||(key=='O')) Settings.DEBUG=!Settings.DEBUG;
-  if (Settings.DEBUG){
+  if (Settings.DEBUG) {
     if ((key == 'p')||(key=='P')) Settings.drawObjectsOnlyInRange=!Settings.drawObjectsOnlyInRange;
   }
   if ((keyCode==ENTER)||(keyCode==RETURN)) init();
-  if (!mapScreen) {
+  if (!ships[0].displayPlanetMap) {
     if ((key == 'w')||(key=='W'))  ships[0].speedUp = false;
     if ((key == 's')||(key=='S'))  ships[0].slowDown = false;
     if ((key == 'a')||(key=='A'))  ships[0].turnLeft = false;
@@ -49,7 +49,8 @@ void keyReleased() {
       ships[0].fireMissile();
       ships[0].missileAiming=false;
     }
-
+  }
+  if (ships.length>1&&!ships[1].displayPlanetMap) {
     if ((keyCode==UP)||(key==56))  ships[1].speedUp = false;
     if ((keyCode==DOWN)||(key==50))  ships[1].slowDown = false;
     if ((keyCode==LEFT)||(key==52))  ships[1].turnLeft = false;
@@ -103,8 +104,7 @@ void mouseReleased() {
     Terrain t=ships[0].land.pickTile();
     if (t!=null) t.plopLava();
     else ships[0].zoom=1;
-  }
-  else ships[0].zoom=1;
+  } else ships[0].zoom=1;
 }
 
 void mouseMoved() {

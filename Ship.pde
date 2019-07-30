@@ -101,12 +101,13 @@ class Ship extends Object {
     }
   }
 
-  void heatUpSide(float rad, float temp, float intensity) {
-      if (dir>rad) rad+=TWO_PI;
-      rad=(rad-dir)%TWO_PI;
-      int index=floor(rad/(QUARTER_PI/4)); 
-      //println(intensity);
-      if (temp>heatArray[index]) heatArray[index]+=(temp-heatArray[index])*intensity/Settings.FPS;
+  void heatUpSide(float rad, float temp, float energy) {
+    if (dir>rad) rad+=TWO_PI;
+    rad=(rad-dir)%TWO_PI;
+    int index=floor(rad/(QUARTER_PI/4)); 
+    if (index<0) index=heatArray.length-index;
+    heatArray[index]+=energy*(pow(1-heatArray[index]/temp,2));
+    //if (temp>heatArray[index]) heatArray[index]+=(temp-heatArray[index])*energy/Settings.FPS;
   }
 
   void turnLeft() {
@@ -142,7 +143,7 @@ class Ship extends Object {
   void shoot() {
     if (cooldown<=0) {
       PVector turretPos=new PVector(pos.x-Settings.turretXOffset*cos(dir)-Settings.turretYOffset*sin(dir), pos.y-Settings.turretXOffset*sin(dir)-Settings.turretYOffset*cos(dir+PI));
-      new Bullet(new PVector(turretPos.x, turretPos.y), new PVector(bulSpeed*cos(aimDir)+vel.x, bulSpeed*sin(aimDir)+vel.y), 5, aimDir);
+      new Bullet(new PVector(turretPos.x+vel.x, turretPos.y+vel.y), new PVector(bulSpeed*cos(aimDir)+vel.x, bulSpeed*sin(aimDir)+vel.y), 5, aimDir);
       cooldown=Settings.fireCooldown;
     }
   }
@@ -196,7 +197,7 @@ class Ship extends Object {
     for (int i=0; i<3; i++) particles.add(new Particle(IMGShieldWaves, new PVector(pos.x+60*cos(dir+PI/3*(i-1)), pos.y+60*sin(dir+PI/3*(i-1))), new PVector(warpSpeed*cos(dir+PI/3*(i-1)), warpSpeed*sin(dir+PI/3*(i-1))), dir+PI/3*(i-1), color(255), 0.54, -5, 0.05, 0, 255));
   }
 
-void update() {
+  void update() {
     if (dir<0) dir=TWO_PI+dir;
     else if (dir>0) dir=dir%TWO_PI;
     if (cooldown>0) cooldown-=0.01;
@@ -228,7 +229,7 @@ void update() {
           vel.y=land.vel.y;
         }
       } else {
-        for (Planet p : planets) if (checkCollision(p)) //Find which planet collided with (landed on), if any
+        for (Planet p : stars.get(0).planets) if (checkCollision(p)) //Find which planet collided with (landed on), if any
         {
           land=p;
           vel.x=p.vel.x;
@@ -261,7 +262,7 @@ void update() {
       /*if (vel.mag()>Settings.shipSpeedLimit) { //SPEED LIMIT
        vel=vel.normalize().mult(Settings.shipSpeedLimit);
        }*/
-      /*Thrust exhaust spawner*/      if (thrust>0) if (frameCount%3==0) particles.add(new Particle(IMGExhaustSmoke, new PVector(pos.x-45*cos(-dir), pos.y-45*sin(dir)), new PVector(vel.x-2*cos(dir), vel.y-2*sin(dir)), random(-PI, PI), color(255, 255*thrust), 0.2, -1, 0.006, random(-0.0005, 0.0005), 250));
+      /*Thrust exhaust spawner*/      if (thrust>0) if (frameCount%3==0) particles.add(new Particle(IMGExhaustSmoke, new PVector(pos.x+vel.x-45*cos(-dir), pos.y+vel.y-45*sin(dir)), new PVector(vel.x-2*cos(dir), vel.y-2*sin(dir)), random(-PI, PI), color(255, 255*thrust), 0.2, -1, 0.006, random(-0.0005, 0.0005), 250));
       super.update(); //OBJECT UPDATE
     }
     if (incWarpSpeed) if (warpSpeed<=Settings.maxWarpSpeed-1) {
@@ -279,22 +280,24 @@ void update() {
   }
 
   void drawHeat(PGraphics rr, PVector _pos) {
-    float startOffset=150;
-    float lineArcWidth=0.1;
-    float lineStep=4;
-    int maxLines=0;
-    rr.strokeWeight(1);
-    rr.stroke(0, 0, 200);
-    rr.line(_pos.x, _pos.y, _pos.x+100*cos(dir), _pos.y+100*sin(dir));
-    for (int i=0; i<heatArray.length; i++) {
-      if (heatArray[i]>Settings.hullMeltingPoint) maxLines=Settings.hullMeltingPoint/100;
-      else maxLines=round(heatArray[i]/100);
-      for (int j=0; j<maxLines; j++)
-      {
-        if (j==21) rr.strokeWeight=3;
-        else rr.strokeWeight=1;
-        rr.stroke (map(j, 6, 22, 100, 255), map(j,10, 20, 255, 50), 0, 140+cos(gameTime)*50);
-        rr.line(_pos.x+(startOffset+lineStep*j)*cos(i*QUARTER_PI/4+lineArcWidth+dir), _pos.y+(startOffset+lineStep*j)*sin(i*QUARTER_PI/4+lineArcWidth+dir), _pos.x+(startOffset+lineStep*j)*cos(i*QUARTER_PI/4-lineArcWidth+dir), _pos.y+(startOffset+lineStep*j)*sin(i*QUARTER_PI/4-lineArcWidth+dir));
+    if (!displayPlanetMap) {
+      float startOffset=150;
+      float lineArcWidth=0.1;
+      float lineStep=4;
+      int maxLines=0;
+      rr.strokeWeight(1);
+      rr.stroke(0, 0, 200);
+      rr.line(_pos.x, _pos.y, _pos.x+100*cos(dir), _pos.y+100*sin(dir));
+      for (int i=0; i<heatArray.length; i++) {
+        if (heatArray[i]>Settings.hullMeltingPoint) maxLines=Settings.hullMeltingPoint/100;
+        else maxLines=round(heatArray[i]/100);
+        for (int j=0; j<maxLines; j++)
+        {
+          if (j==21) rr.strokeWeight=3;
+          else rr.strokeWeight=1;
+          rr.stroke (map(j, 6, 22, 100, 255), map(j, 10, 20, 255, 50), 0, 140+cos(gameTime)*50);
+          rr.line(_pos.x+(startOffset+lineStep*j)*cos(i*QUARTER_PI/4+lineArcWidth+dir), _pos.y+(startOffset+lineStep*j)*sin(i*QUARTER_PI/4+lineArcWidth+dir), _pos.x+(startOffset+lineStep*j)*cos(i*QUARTER_PI/4-lineArcWidth+dir), _pos.y+(startOffset+lineStep*j)*sin(i*QUARTER_PI/4-lineArcWidth+dir));
+        }
       }
     }
   }
