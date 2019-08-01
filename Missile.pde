@@ -52,7 +52,7 @@ class Missile extends Object {
       accel.x=Settings.msslAcceleration*cos(dir)*intensity;
       accel.y=Settings.msslAcceleration*sin(dir)*intensity;
       boostIntensity=intensity;
-      particles.add(new Particle(IMGExhaustSmoke, new PVector(pos.x-25*cos(dir), pos.y-25*sin(dir)), new PVector(vel.x-2*cos(dir), vel.y-2*sin(dir)), random(-PI, PI), color(255, 255*intensity), 0.2, -1, 0.006, random(-0.0005, 0.0005), 250));
+      particles.add(new Particle(sprites.ExhaustSmoke, new PVector(pos.x-25*cos(dir), pos.y-25*sin(dir)), new PVector(vel.x-2*cos(dir), vel.y-2*sin(dir)), random(-PI, PI), color(255, 255*intensity), 0.2, -1, 0.006, random(-0.0005, 0.0005), 250, false));
     }
   }
 
@@ -106,10 +106,10 @@ class Missile extends Object {
     rr.rotate(dir);
     rr.scale(0.1);
     rr.noTint();
-    rr.image(IMGMissile, -IMGMissile.width/2, -IMGMissile.height/2);
+    rr.image(sprites.Missile, -sprites.Missile.width/2, -sprites.Missile.height/2);
     if (boostIntensity>0) {    
       rr.tint(255, boostIntensity*255);
-      rr.image(IMGMissileExhaust, -IMGMissile.width/2, -IMGMissile.height/2);
+      rr.image(sprites.MissileExhaust, -sprites.Missile.width/2, -sprites.Missile.height/2);
     }
     rr.popMatrix();
   }
@@ -121,7 +121,7 @@ class Missile extends Object {
 
   void queueDestroy() {
     int n = round(random(50, 60));
-    for (int i=0; i<n; i++) particles.add(new Particle(IMGDebris[round(random(0, debrisImages-1))], pos, new PVector(random(-1, 1), random(-1, 1)), random(0, TWO_PI), color(255), 0.35, -1, -0.0001, random(-0.5, 0.5), 255));
+    for (int i=0; i<n; i++) particles.add(new Particle(sprites.Debris[round(random(0, sprites.debrisImages-1))], pos, new PVector(random(-1, 1), random(-1, 1)), random(0, TWO_PI), color(255), 0.35, -1, -0.0001, random(-0.5, 0.5), 255, true));
     destroyees.add(this);
   }
 

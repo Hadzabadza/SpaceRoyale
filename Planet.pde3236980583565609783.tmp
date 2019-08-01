@@ -23,23 +23,29 @@ class Planet extends Object {
   float starPull;
 
   Planet(Star s, float mas, float distS, int number) {
-    super(new PVector(), new PVector(), 0, sqrt(mas)*5*Settings.planetScaler);
+    super(new PVector(), new PVector(), 0, sqrt(mas)*Settings.planetScaler);
     orbitStar=s;
     mass=mas;
     distance = distS+orbitStar.radius;
     starPull=s.gravPull/pow(distance, 2);
-    gravPull=mass/5000;
+    gravPull=mass;
     gravWellRadius=round(radius*Settings.gravityWellRadiusMultiplier);
     gravWellDiameter=gravWellRadius*2;
     waterLevel=random(0.1, 0.9);
     float phase=random(0, TWO_PI);
-    vel.x=sqrt(Settings.celestialPull*distance)*cos(phase+HALF_PI);
-    vel.y=sqrt(Settings.celestialPull*distance)*sin(phase+HALF_PI);
+    if (random(0,1)<0.98){
+      vel.x=sqrt(starPull*distance)*cos(phase+HALF_PI);
+      vel.y=sqrt(starPull*distance)*sin(phase+HALF_PI);
+    } else
+    {
+      vel.x=sqrt(starPull*distance)*cos(phase-HALF_PI);
+      vel.y=sqrt(starPull*distance)*sin(phase-HALF_PI);
+    }
     pos.x=orbitStar.pos.x+distance*cos(phase);
     pos.y=orbitStar.pos.y+distance*sin(phase);
-    spin=random(-1, 1);
+    spin=random(-1,1)*TWO_PI/Settings.FPS/60; //Speed of planet's rotation, determined as revelations per minute.
     orbitNumber=number;
-    surface=createImage((int)radius, (int)radius, ARGB);
+    surface=createImage((int)radius/Settings.planetScaler, (int)radius/Settings.planetScaler, ARGB);
     terrain=new Terrain[surface.width*surface.height];
     if (height<width)
       mapRes=floor(height/(surface.height+20));
@@ -63,8 +69,8 @@ class Planet extends Object {
     for (Ship s : ships) { 
       if (!s.warp) {
         currDist=getDistTo(s);
-        if (currDist<gravWellRadius&&currDist>radius) {
-          s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull*(1-pow(currDist/gravWellRadius, 2))));
+        if (currDist<gravWellRadius&&currDist>radius){//&&currDist>radius*0.98) {
+          s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
         }
       }
     }
@@ -74,7 +80,8 @@ class Planet extends Object {
     surface.loadPixels();
     surfaceScreen=new Map(new PVector(surface.height*mapRes, surface.width*mapRes), this);
     float seaLevel=random(40, 180);
-    float noiseOffset=orbitNumber*10000;
+    noiseDetail(8);
+    float noiseOffset=orbitNumber*9321+random(-500,500);
     float prevT=seaLevel;
     for (int y=0; y<surface.height; y++)
     { 
@@ -172,8 +179,8 @@ class Planet extends Object {
     int yOffset=round(height-surfaceScreen.dimension.y)/2;
     float halfRes=mapRes/2;
     if (cursor.x>xOffset-halfRes&&cursor.x<width-xOffset-halfRes&&cursor.y>yOffset-halfRes&&cursor.y<height-yOffset-halfRes) {
-      int x=round((cursor.x-xOffset)/mapRes);
-      int y=round((cursor.y-yOffset)/mapRes);
+      int x=floor((cursor.x-xOffset)/mapRes);
+      int y=floor((cursor.y-yOffset)/mapRes);
       selected=terrain[x+y*surface.height];
 
       return selected;
@@ -187,6 +194,7 @@ class Planet extends Object {
   void update() {
     orbitalMovement();
     pullObjects();
+    dir=(dir+spin)%TWO_PI;
     super.update();
     if (frameCount%5==0) updateMapInfo();
   }
@@ -214,7 +222,7 @@ class Planet extends Object {
     softDraw(rr);
     rr.pushMatrix();
     rr.translate(pos.x, pos.y);
-    rr.rotate((gameTime)/4*spin);
+    rr.rotate(dir);
     rr.imageMode(CENTER);
     rr.image(surface, 0, 0, surface.width/2*Settings.planetScaler, surface.height/2*Settings.planetScaler);
     rr.popMatrix();

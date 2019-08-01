@@ -1,4 +1,4 @@
-//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
+//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP //<>// //<>// //<>// //<>// //<>//
 //TODO: SHIP: Improve targeting!
 //TODO: MISSILE: Improve targeting!!!!
 //TODO: OSC: Find the name of the connected device and add to bundle logs.
@@ -149,9 +149,8 @@ void draw() {
           image(IMGStarryBack, backX+ships[0].pos.x%IMGStarryBack.width, backY+ships[0].pos.y%IMGStarryBack.height, -10);
       */
       
-      //if (ships[i].warp) screen[i].camera(ships[i].pos.x+random(-ships[i].warpSpeed/2, ships[i].warpSpeed/2), ships[i].pos.y+random(-ships[i].warpSpeed/2, ships[i].warpSpeed/2), ships[i].zoom*600, ships[i].pos.x+random(-ships[i].warpSpeed, ships[i].warpSpeed), ships[i].pos.y+random(-ships[i].warpSpeed, ships[i].warpSpeed), 0.0, 0.0, 1.0, 0.0);
-      //else 
-      screen[i].camera(ships[i].pos.x, ships[i].pos.y, ships[i].zoom*600, ships[i].pos.x, ships[i].pos.y, 0.0, 0.0, 1.0, 0.0);
+      if (ships[i].warp) screen[i].camera(ships[i].pos.x+random(-ships[i].warpSpeed/2, ships[i].warpSpeed/2), ships[i].pos.y+random(-ships[i].warpSpeed/2, ships[i].warpSpeed/2), ships[i].zoom*600, ships[i].pos.x+random(-ships[i].warpSpeed, ships[i].warpSpeed), ships[i].pos.y+random(-ships[i].warpSpeed, ships[i].warpSpeed), 0.0, 0.0, 1.0, 0.0);
+      else screen[i].camera(ships[i].pos.x, ships[i].pos.y, ships[i].zoom*600, ships[i].pos.x, ships[i].pos.y, 0.0, 0.0, 1.0, 0.0);
       
       for (Object o : objects) { //DRAWS ALL OBJECTS ON SHIP'S SCREEN!!
         if (Settings.drawObjectsOnlyInRange){
@@ -160,11 +159,10 @@ void draw() {
           else o.softDraw(screen[i]);
         } else o.draw(screen[i]);
       }
-      if (!ships[i].destroyed){
-        ships[i].drawTarget(screen[i]); //Draws missile target
-        ships[i].drawAim(screen[i]); //Draws turret aiming direction
-        ships[i].drawHeat(this.g,new PVector(screen[i].width/2+screen[i].width*i,screen[i].height/2));
-      }
+
+      ships[i].drawTarget(screen[i]); //Draws missile target
+      ships[i].drawAim(screen[i]); //Draws turret aiming direction
+      ships[i].drawHeat(this.g,new PVector(screen[i].width/2+screen[i].width*i,screen[i].height/2));
       screen[i].endDraw();
       image(screen[i], screenSize*i, 0);
       if (ships[i].displayPlanetMap&&ships[i].land!=null)

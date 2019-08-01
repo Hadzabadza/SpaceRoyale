@@ -45,7 +45,7 @@ class Planet extends Object {
     pos.y=orbitStar.pos.y+distance*sin(phase);
     spin=random(-1,1)*TWO_PI/Settings.FPS/60; //Speed of planet's rotation, determined as revelations per minute.
     orbitNumber=number;
-    surface=createImage((int)radius/Settings.planetScaler, (int)radius/Settings.planetScaler, ARGB);
+    surface=createImage((int)radius, (int)radius, ARGB);
     terrain=new Terrain[surface.width*surface.height];
     if (height<width)
       mapRes=floor(height/(surface.height+20));
@@ -81,7 +81,7 @@ class Planet extends Object {
     surfaceScreen=new Map(new PVector(surface.height*mapRes, surface.width*mapRes), this);
     float seaLevel=random(40, 180);
     noiseDetail(8);
-    float noiseOffset=orbitNumber*9321+random(-500,500);
+    float noiseOffset=orbitNumber*9321+random(500,1000);
     float prevT=seaLevel;
     for (int y=0; y<surface.height; y++)
     { 
@@ -179,10 +179,8 @@ class Planet extends Object {
     int yOffset=round(height-surfaceScreen.dimension.y)/2;
     float halfRes=mapRes/2;
     if (cursor.x>xOffset-halfRes&&cursor.x<width-xOffset-halfRes&&cursor.y>yOffset-halfRes&&cursor.y<height-yOffset-halfRes) {
-      int x=floor((cursor.x-xOffset)/mapRes);
-      if (x<0) x=0;
-      int y=floor((cursor.y-yOffset)/mapRes);
-      if (y<0) y=0;
+      int x=round((cursor.x-xOffset)/mapRes);
+      int y=round((cursor.y-yOffset)/mapRes);
       selected=terrain[x+y*surface.height];
 
       return selected;

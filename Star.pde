@@ -21,22 +21,24 @@ class Star extends Object {
     planets=new ArrayList<Planet>();
     mass=random(Settings.minStarMass, Settings.maxStarMass);
     c=recalculateTemp(Settings.minStarTemp*pow(2, mass/Settings.minStarMass-1));
-    radius=sqrt(mass);
+    radius=300+sqrt(mass);
     diameter=radius*2;
         gravPull=mass;
-    float distS=random(300, 600)+gravWellRadius+surfaceTemp;//+mass;
-    int isAsteroid=round(random(0, 100));
+    float distS=random(3000, 6000)+sqrt(surfaceTemp);
+    //int isAsteroid=round(random(0, 100));
     for (int i=0; i<round(random(Settings.minPlanetsPerStar, Settings.maxPlanetsPerStar)); i++) {
-      if (isAsteroid>40) {
+      /*if (isAsteroid>40) {
         float pMass=random(1, 5);
         distS+=random(10, 30)+sqrt(pMass)*5*2;
         for (int asters=0; asters<round(random(Settings.minAsteroidsPerChain, Settings.maxAsteroidsPerChain)); asters++) asteroids.add(new Asteroid(this, pMass, distS));
       }
-      isAsteroid=round(random(0, 100));
-      float pMass=random(10, 100);
-      distS+=random(2000, 5000)+round(sqrt(pMass)*20*Settings.gravityWellRadiusMultiplier);
+      isAsteroid=round(random(0, 100));*/
+      float pMass=random(3000, 8000);
+      if (i>0) distS+=random(1000, 2000)+planets.get(i-1).gravWellDiameter;
+      else distS+=random(1000, 2000);
       planets.add(new Planet(this, pMass, distS, i+1));
     }
+    distS+=random(2000, 5000);
     gravWellRadius=round(distS+radius);
     gravWellDiameter=gravWellRadius*2;
   }
@@ -48,13 +50,15 @@ class Star extends Object {
         currDist=getDistTo(s);
         if (currDist<gravWellRadius&&currDist>radius) {
           s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
+          println(gravPull/pow(currDist, 2));
         }
       }
     }
     for (Particle p : particles) { 
       currDist=getDistTo(p);
-      if (currDist<gravWellRadius&&currDist>radius) {
-        p.vel.add(new PVector(pos.x-p.pos.x, pos.y-p.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
+      if (currDist<radius) p.queueDestroy();
+      else if (currDist<gravWellRadius) {
+        p.vel.add(new PVector(pos.x-p.pos.x, pos.y-p.pos.y).normalize().mult(gravPull/2/pow(currDist, 2)));
       }
     }
   }
@@ -63,11 +67,11 @@ class Star extends Object {
     float currDist;
     float heatIntensity;
     for (Ship s : ships) {
-      currDist=getDistTo(s);
+      currDist=getDistTo(s)-radius;
+      if (currDist<1) currDist=1;
       if (currDist<gravWellRadius) {
-        heatIntensity=surfaceTemp*s.radius/(PI*currDist);
-        //println(heatIntensity);
-        s.heatUpSide(s.getDirTo(this), surfaceTemp, heatIntensity);
+        heatIntensity=mass/(PI*currDist*2)*s.radius;
+        s.heatUpSide(s.getDirTo(this), heatIntensity);
       }
     }
   }

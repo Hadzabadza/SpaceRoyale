@@ -18,6 +18,7 @@ ArrayList<Object> newSpawns;
 ArrayList<Object> objects;
 Ship[] ships;
 PGraphics[] screen;
+IMG sprites;
 ArrayList<View> view;
  
 /////////////////GFX/////////////////
@@ -27,7 +28,7 @@ int spareParts=0;
 ////////////////MISC/////////////////
 static float FMAX=3.40282347E+38;
 float gameTime=0;
-long seed=400;
+long seed=623456146;
 int gameState=0;
 color backgroundColour= color(0);
 
@@ -48,7 +49,7 @@ static class Settings {
   static int backgroundColor=50;
   static int FPS=60;          //For debug
   static boolean DEBUG=true; //
-  static boolean drawObjectsOnlyInRange=false;
+  static boolean drawObjectsOnlyInRange=true;
 
   //Generator settings
   static int ships=1;              // SHIPS HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -105,22 +106,25 @@ static class Settings {
   static float shipSize=22; //Radius of ship entities
   static float turretGfxSize=20; //Extra radius around the ship for turret graphics
   static float projectileSpeed=6; //Bullet's muzzle velocity
-  static float minWarpSpeed=10; //Minimum warp speed
-  static float maxWarpSpeed=50; //Maximum warp speed
-  static float shipSpeedLimit=3;
+  static float minWarpSpeed=20; //Minimum warp speed
+  static float maxWarpSpeed=80; //Maximum warp speed
   static float fireCooldown=0.1;
-  static float targetingDistance=1250;
+  static float targetingDistance=2550;
   static float staticTurnSpeed=0.0002;
   static float assistedTurnSpeed=0.00035;
+  static float afterBurnerMaxCap=3;
   static int turretXOffset=-2;
   static int turretYOffset=8;
   static int msslSlotXOffset=13;
   static int msslSlotYOffset=-26;
   static int msslAmount=2;
   static float heatRadiationRate=0.999;
-  static float heatConductivityRate=0.03;
+  static float heatConductivityRate=0.1;
+  static float hullAlbedo=0.8;
   static int hullMeltingPoint=2200;
   static float hullPieceMass=100;
+  static float hullPieceArea=10; //Hull piece = square, therefore radiating area of its piece is its length sqrt(hullPieceMass).
+  static float shipDrawScale=0.2;
 
   //Bullet properties
   static float bullDmg=0.1;

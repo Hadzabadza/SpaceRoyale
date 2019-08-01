@@ -19,7 +19,7 @@ class Bullet extends Object {
     rr.rotate(dir);
     rr.scale(0.15);
     rr.noTint();
-    rr.image(IMGShell, -IMGShell.width/2, -IMGShell.height/2);
+    rr.image(sprites.Shell, -sprites.Shell.width/2, -sprites.Shell.height/2);
     rr.popMatrix();
   }
 
@@ -54,7 +54,7 @@ class Bullet extends Object {
   }
   void queueDestroy() {
     int n = round(random(30, 40));
-    for (int i=0; i<n; i++) particles.add(new Particle(IMGDebris[round(random(0, debrisImages-1))], pos, new PVector(random(-0.5,0.5),random(-0.5,0.5)),random(0,TWO_PI),color(255),0.2,-1,-0.0001,random(-0.5,0.5),255));
+    for (int i=0; i<n; i++) particles.add(new Particle(sprites.Debris[round(random(0, sprites.debrisImages-1))], pos, new PVector(random(-0.5,0.5),random(-0.5,0.5)),random(0,TWO_PI),color(255),0.2,-1,-0.0001,random(-0.5,0.5),255, true));
     destroyees.add(this);
   }
   void destroy() {

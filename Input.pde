@@ -9,6 +9,7 @@ void keyPressed() {
     if ((key == 'q')||(key=='Q'))  ships[0].turnTurretLeft = true;
     if ((key == 'e')||(key=='E'))  ships[0].turnTurretRight = true;
     if (key == ' ')  ships[0].fire = true;
+    if ((key == 'c')||(key=='C')) ships[0].afterBurning=true;
     if ((key == 'z')||(key=='Z')) ships[0].missileAiming=true;
   }
   if (ships.length>1&&!ships[1].displayPlanetMap) {
@@ -43,6 +44,7 @@ void keyReleased() {
     if ((key == 'q')||(key=='Q'))  ships[0].turnTurretLeft = false;
     if ((key == 'e')||(key=='E'))  ships[0].turnTurretRight = false;
     if (key == ' ')  ships[0].fire = false;
+    if ((key == 'c')||(key=='C')) ships[0].afterBurning=false;
     if ((key == 'x')||(key=='X'))  if (ships[0].warp) ships[0].stopWarp(); 
     else ships[0].warp=true;
     if ((key == 'z')||(key=='Z')) {

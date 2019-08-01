@@ -4,9 +4,9 @@ class Particle extends Object {
   float alphaChange;
   float scale;
   float scaleChange;
-  float rotation;
   float timer;
   float largerSide;
+  boolean isDebris;
   PImage sprt = null;
 
   Particle(PImage inputImg) {
@@ -15,9 +15,9 @@ class Particle extends Object {
     alpha=random(100, 255);
     c=color(255, alpha);
     scale=1;
-    alphaChange=random(-1,Settings.alphaChange);
+    alphaChange=random(-1, Settings.alphaChange);
     scaleChange=Settings.scaleChange;
-    rotation=random(-0.05, 0.05);
+    spin=random(-0.05, 0.05);
     timer=Settings.defaultTimer;
     findLargerSide();
   }
@@ -28,9 +28,9 @@ class Particle extends Object {
     alpha=random(100, 255);
     c=color(255, alpha);
     scale=1;
-    alphaChange=random(-1,Settings.alphaChange);
+    alphaChange=random(-1, Settings.alphaChange);
     scaleChange=Settings.scaleChange;
-    rotation=random(-0.05, 0.05);
+    spin=random(-0.05, 0.05);
     timer=Settings.defaultTimer;
     findLargerSide();
   }
@@ -41,9 +41,9 @@ class Particle extends Object {
     alpha=random(100, 255);
     c=color(255, alpha);
     scale=1;
-    alphaChange=random(-1,Settings.alphaChange);
+    alphaChange=random(-1, Settings.alphaChange);
     scaleChange=Settings.scaleChange;
-    rotation=random(-0.05, 0.05);
+    spin=random(-0.05, 0.05);
     timer=Settings.defaultTimer;
     findLargerSide();
   }
@@ -54,27 +54,27 @@ class Particle extends Object {
     alpha=random(100, 255);
     c=color(255, alpha);
     scale=1;
-    alphaChange=random(-1,Settings.alphaChange);
+    alphaChange=random(-1, Settings.alphaChange);
     scaleChange=Settings.scaleChange;
-    rotation=random(-0.05, 0.05);
+    spin=random(-0.05, 0.05);
     timer=Settings.defaultTimer;
     findLargerSide();
   }
-  
+
   Particle(PImage inputImg, PVector _pos, PVector _vel, float _dir, color _c) {
     super( _pos, _vel, _dir, 0);
     sprt = inputImg;
     c=_c;
     alpha=alpha(c);
     scale=1;
-    alphaChange=random(-1,Settings.alphaChange);
+    alphaChange=random(-1, Settings.alphaChange);
     scaleChange=Settings.scaleChange;
-    rotation=random(-0.05, 0.05);
+    spin=random(-0.05, 0.05);
     timer=Settings.defaultTimer;
     findLargerSide();
   }
-  
-  Particle(PImage inputImg, PVector _pos, PVector _vel, float _dir, color _c, float _scale, float _alphaChange, float _scaleChange, float _rotation, float _timer) {
+
+  Particle(PImage inputImg, PVector _pos, PVector _vel, float _dir, color _c, float _scale, float _alphaChange, float _scaleChange, float _rotation, float _timer, boolean _isDebris) {
     super( _pos, _vel, _dir, 0);
     sprt = inputImg;
     c=_c;
@@ -82,30 +82,10 @@ class Particle extends Object {
     scale=_scale;
     alphaChange=_alphaChange;
     scaleChange=_scaleChange;
-    rotation=_rotation;
+    spin=_rotation;
     timer=_timer;
+    isDebris=_isDebris;
     findLargerSide();
-  }
-
-  void update() {
-    alpha+=alphaChange;
-    scale+=scaleChange;
-    dir+=rotation;
-    radius=largerSide*scale;
-    super.update();
-    timer--;
-    if ((scale<=0)||(alpha<=0)||(timer<=0)) queueDestroy();
-  }
-
-  void draw(PGraphics rr) {
-    c=color(red(c), green(c), blue(c), alpha);
-    rr.pushMatrix();
-    rr.tint(c);
-    rr.translate(pos.x, pos.y);
-    rr.rotate(dir);
-    rr.scale(scale);
-    rr.image(sprt, -sprt.width/2, -sprt.height/2);
-    rr.popMatrix();
   }
 
   void refresh(PImage _sprt, PVector _pos) {
@@ -117,16 +97,49 @@ class Particle extends Object {
     alpha=random(100, 255);
     c=color(255, alpha);
     scale=1;
-    alphaChange=random(-1,Settings.alphaChange);
+    alphaChange=random(-1, Settings.alphaChange);
     scaleChange=Settings.scaleChange;
-    rotation=random(-0.05, 0.05);
+    spin=random(-0.05, 0.05);
     timer=Settings.defaultTimer;
     destroyed=false;
   }
 
-  void findLargerSide(){
-    if (sprt.height>sprt.width) largerSide=sprt.height;
-    else largerSide=sprt.width;
+  float findLargerSide() {
+    if (sprt.height>sprt.width) return sprt.height;
+    else return sprt.width;
+  }
+
+  void update() {
+    alpha+=alphaChange;
+    scale+=scaleChange;
+    radius=largerSide*scale;
+    super.update();
+    timer--;
+    if ((scale<=0)||(alpha<=0)||(timer<=0)) queueDestroy();
+  }
+
+  void draw(PGraphics rr) {
+    if (isDebris) {
+      c=color(red(c), green(c), blue(c), alpha);
+      rr.pushMatrix();
+      rr.tint(c);
+      rr.translate(pos.x, pos.y);
+      rr.rotate(dir);
+      if (ships[0].zoom>0.5) rr.scale(scale*ships[0].zoom*2);
+      else rr.scale(scale);
+      rr.image(sprt, -sprt.width/2, -sprt.height/2);
+      rr.popMatrix();
+    } else {
+      c=color(red(c), green(c), blue(c), alpha);
+      rr.pushMatrix();
+      rr.tint(c);
+      rr.translate(pos.x, pos.y);
+      rr.rotate(dir);
+      if (ships[0].zoom>1) rr.scale(scale*sqrt(ships[0].zoom));
+      else rr.scale(scale);
+      rr.image(sprt, -sprt.width/2, -sprt.height/2);
+      rr.popMatrix();
+    }
   }
 
   void spawn() {
@@ -141,6 +154,6 @@ class Particle extends Object {
     objects.remove(this);
     particles.remove(this);
     /*spareParticles.add(this);
-    spareParts++;*///FetchKvetch stuff
+     spareParts++;*/    //FetchKvetch stuff
   }
 }
