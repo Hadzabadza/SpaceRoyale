@@ -80,7 +80,8 @@ void mouseWheel(MouseEvent e) {
 
 
 void mouseReleased() {
-  if (mouseButton==RIGHT) if (ships[0].displayPlanetMap) heightColour=!heightColour;
+  if (mouseButton==RIGHT) if (ships[0].displayPlanetMap) ships[0].orbited.surfaceScreen.heightMap=!ships[0].orbited.surfaceScreen.heightMap;
+  //ships[0].orbited.surfaceScreen.pressureMap=!ships[0].orbited.surfaceScreen.pressureMap;
   if (mouseButton==LEFT)
   {
     if (ships[0].displayPlanetMap) 
@@ -104,7 +105,7 @@ void mouseReleased() {
   }
   if (mouseButton==CENTER) if (ships[0].displayPlanetMap) {
     Terrain t=ships[0].land.pickTile();
-    if (t!=null) t.plopLava();
+    if (t!=null) t.blopLava();
     else ships[0].zoom=1;
   } else ships[0].zoom=1;
 }

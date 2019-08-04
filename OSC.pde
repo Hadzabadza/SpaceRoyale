@@ -1,8 +1,8 @@
-class OscHub { //<>// //<>// //<>// //<>// //<>// //<>// //<>//
+class OscHub { //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
   OscDock[] dock; //Multiple docks with specific data for multiple controllers 
   int displaySize=280; //Smallest dimension of the display
-  int longestDistance; //Farthest star
-
+  int longestDistance; //Farthest planet
+  
   int OMPlanets; //TouchOSC orbital map planets count
   int OMPlanetSize=10; //Width/height of a planet on display
   int OMLEDCorrectionOffset=-5; //Offset the planet (and ship) LEDs by this ammount 
@@ -558,7 +558,8 @@ class OscDockInitialized extends OscDock {
 
   public void heightView(float f)
   {
-    heightColour=!heightColour;
+    if (s.orbited!=null)
+    s.orbited.surfaceScreen.heightMap=!s.orbited.surfaceScreen.heightMap;
   }
 
   public void changeZoom(float f) {

@@ -89,52 +89,111 @@ class Terrain {
     lava+=lavaIncrement;
   }
 
-  void plopLava() {
+  void blopLava() {
+    Terrain t;
     volcanoTime=0;
-    float rad=30;
-    for (int i=-30; i<rad; i++)
-      for (int j=-30; j<rad; j++) {
-        if (dist(0, 0, i, j)<rad) {
-          getNeighbour(i, j).lava+=getNeighbour(i, j).totalOre*0.5;
-          getNeighbour(i, j).totalOre*=0.5;//getNeighbour(i, j).totalOre*0.1;
-          //getNeighbour(i, j).totalOre*=0.9;
+    int rad=30;
+    float boom;
+    float neighDist;
+    for (int i=-rad; i<rad; i++)
+      for (int j=-rad; j<rad; j++) {
+        neighDist=dist(0, 0, i, j);
+        if (neighDist<=rad) {
+          t=getNeighbour(i, j);
+          boom=0.3*cos(neighDist/rad*HALF_PI);
+          // println(neighDist/rad*PI+" "+neighDist+" "+boom);
+          t.lava+=t.totalOre*boom;
+          t.pressure+=t.lava;
+          t.totalOre*=1-boom;
         }
       }
   }
 
+  void plopLava() {
+    Terrain t;
+    volcanoTime=0;
+    float rad=30;
+    for (int i=-30; i<rad; i++){
+      for (int j=-30; j<rad; j++) {
+        if (dist(0, 0, i, j)<rad) {
+          t=getNeighbour(i, j);
+          t.lava+=t.totalOre*0.5;
+          t.totalOre*=0.5;
+        }
+      }
+    }
+  }
+
   void moveLava() {
-    int propagated=0;
-    Terrain[] propagation=new Terrain[8];
+    int propagations=0;
+    float avgHeight=totalOre;
+    float avgPressure=pressure;
+    float avgLava=lava;
+    Terrain t;
+    for (int deg=0; deg<360; deg+=45) {
+      t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
+      if (t.pressure<pressure)
+      {
+        propagations++;
+        propMatrix[propagations-1]=t;
+      }
+    }
+    for (int i=0; i<propagations; i++)
+    {
+      avgPressure+=propMatrix[i].pressure;
+      avgHeight+=propMatrix[i].totalOre;
+      avgLava+=propMatrix[i].lava;
+    }
+    avgPressure/=propagations+1;
+    avgHeight/=propagations+1;
+    avgLava/=propagations+1;
+    for (int i=0; i<propagations; i++)
+    {
+      //propMatrix[i].lava=avgHeight+avgLava-propMatrix[i].totalOre;
+      propMatrix[i].lava=avgLava;
+      propMatrix[i].pressure=avgPressure;
+    }
+    lava=avgLava;
+    totalOre+=lava*0.10;
+    pressure*=0.90;
+    lava*=0.90;
+    
+    /*    int propagations=0;
     float avgHeight=totalOre;
     float avgLava=lava;
     Terrain t;
     for (int deg=0; deg<360; deg+=45) {
       t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
-      if (t.totalOre+t.lava<totalOre+lava)
+      if (t.totalOre+t.lava+pressure<totalOre+lava+pressure)
       {
-        propagated++;
-        propagation[propagated-1]=t;
+        propagations++;
+        propMatrix[propagations-1]=t;
       }
     }
-    for (int i=0; i<propagated; i++)
+    for (int i=0; i<propagations; i++)
     {
-      avgHeight+=propagation[i].totalOre;
-      avgLava+=propagation[i].lava;
+      avgHeight+=propMatrix[i].totalOre;
+      avgLava+=propMatrix[i].lava;
     }
-    avgHeight/=propagated+1;
-    avgLava/=propagated+1;
-    for (int i=0; i<propagated; i++)
+    avgHeight/=propagations+1;
+    avgLava/=propagations+1;
+    for (int i=0; i<propagations; i++)
     {
-      propagation[i].lava=avgHeight+avgLava-propagation[i].totalOre;
+      propMatrix[i].lava=avgHeight+avgLava-propMatrix[i].totalOre;
     }
     lava=avgHeight+avgLava-totalOre;
     totalOre+=lava*0.05;
-    lava-=lava*0.05;
+    lava-=lava*0.05;*/
+  }
+  
+  void solidifyResource(int resource){
+    
   }
 
   void removeLavaRemnants() {
     totalOre+=lava;
     lava=0;
+    pressure=0;
   }
 
   Terrain getNeighbour(int _x, int _y) {
@@ -191,27 +250,31 @@ class Terrain {
     rr.point(x*p.mapRes, (y+1)*p.mapRes);
   }
 
-  void draw(PGraphics rr) {
+  void draw(Map m) {
     //totalOre=stone+solane+perditium+etramite+omnitium;
-    if (heightColour)
+    if (m.heightMap)
     {
       /*
       if (water) rr.fill(color(map(totalOre, p.minHeight, p.maxHeight, 255, 0), map(totalOre, p.minHeight, p.maxHeight, 0, 255), 0));
        else rr.fill(fill);*/
-      rr.fill(colouriseByHeight(totalOre, p.minHeight, p.maxHeight, p.waterLevel));
-    } else
+      m.screen.fill(colouriseByHeight(totalOre, p.minHeight, p.maxHeight, p.waterLevel));
+    } else if (m.pressureMap) {
+      if (pressure>0) m.screen.fill(pressure,0,0);      
+      else m.screen.fill(totalOre);
+    } 
+    else
     {
-      if (water) rr.fill(0, 0, waterColour/2+waterColour/3+waterColour/3*(cos(gameTime)));
-      else rr.fill(totalOre);
+      if (water) m.screen.fill(0, 0, waterColour/2+waterColour/3+waterColour/3*(cos(gameTime)));
+      else m.screen.fill(totalOre);
       if (lava!=0) 
-        if (lava>2) rr.fill(50+lava*3, lava, 0);
-        else if (depth<=0) rr.fill(25*lava+(1-lava/2)*totalOre, 0, 0);
-        else rr.fill(32.6*lava, 20.6*lava, 220*(1-depth));
+        if (lava>2) m.screen.fill(50+lava*3, lava, 0);
+        else if (depth<=0) m.screen.fill(25*lava+(1-lava/2)*totalOre, 0, 0);
+        else m.screen.fill(32.6*lava, 20.6*lava, 220*(1-depth));
     }
 
-    rr.noStroke();
-    rr.rect(x*p.mapRes, y*p.mapRes, p.mapRes, p.mapRes);
-    if (p.selected==this) drawSelection(rr, ships[0]); //TODO: Multiple ships
+    m.screen.noStroke();
+    m.screen.rect(x*p.mapRes, y*p.mapRes, p.mapRes, p.mapRes);
+    if (p.selected==this) drawSelection(m.screen, ships[0]); //TODO: Multiple ships
     if (frameCount%5==0) update();
   };
 }

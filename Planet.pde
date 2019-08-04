@@ -1,6 +1,5 @@
 class Planet extends Object {
   PImage surface;
-  //PImage surfaceImage;
   Map surfaceScreen;
   float mass;
   float distance;
@@ -45,7 +44,7 @@ class Planet extends Object {
     pos.y=orbitStar.pos.y+distance*sin(phase);
     spin=random(-1,1)*TWO_PI/Settings.FPS/60; //Speed of planet's rotation, determined as revelations per minute.
     orbitNumber=number;
-    surface=createImage((int)radius/Settings.planetScaler, (int)radius/Settings.planetScaler, ARGB);
+    surface=createImage((int)radius/Settings.planetScaler*2, (int)radius/Settings.planetScaler*2, ARGB);
     terrain=new Terrain[surface.width*surface.height];
     if (height<width)
       mapRes=floor(height/(surface.height+20));
@@ -56,11 +55,6 @@ class Planet extends Object {
 
   void orbitalMovement() {
     grav=new PVector(orbitStar.pos.x-pos.x, orbitStar.pos.y-pos.y).normalize().mult(starPull);
-    /*
-    grav.x=-(pos.x-orbitStar.pos.x);
-     grav.y=-(pos.y-orbitStar.pos.y);*/
-    //grav.normalize().mult(starPull);;
-    //grav.mult(starPull);
     vel.add(grav);
   }
 
@@ -148,10 +142,11 @@ class Planet extends Object {
     surface.updatePixels();
   }
 
-  void updateMapInfo() { //A fairly expensive updater for map info
+  void updateGlobalInfo() { //A fairly expensive updater for map info
     totalHeight=0;
     minHeight=99999;
     maxHeight=-99999;
+    avgHeight=0;
     terrainUpdateQueue=new IntDict();
     Terrain t;
     for (int y=0; y<surface.height; y++)
@@ -160,7 +155,7 @@ class Planet extends Object {
       { 
         t=terrain[x+y*surface.height];
         totalHeight+=t.totalOre;
-        avgHeight=(avgHeight+t.totalOre)/2;
+        avgHeight+=t.totalOre;
         if (minHeight>t.totalOre)
           minHeight=t.totalOre;
         if (maxHeight<t.totalOre)
@@ -169,6 +164,7 @@ class Planet extends Object {
         else t.removeLavaRemnants();
       }
     }
+    avgHeight/=surface.height*surface.width;
     terrainUpdateQueue.sortValuesReverse();
     String[] trueQueue=terrainUpdateQueue.keyArray();
     for (int i=0; i<trueQueue.length; i++) terrain[int(trueQueue[i])].propagateLava();
@@ -198,7 +194,7 @@ class Planet extends Object {
     pullObjects();
     dir=(dir+spin)%TWO_PI;
     super.update();
-    if (frameCount%5==0) updateMapInfo();
+    if (frameCount%1==0) updateGlobalInfo();
   }
 
   void softDraw(PGraphics rr) {

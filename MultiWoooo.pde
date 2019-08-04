@@ -1,4 +1,4 @@
-//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
+//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
 //TODO: SHIP: Improve targeting!
 //TODO: MISSILE: Improve targeting!!!!
 //TODO: OSC: Find the name of the connected device and add to bundle logs.
@@ -11,7 +11,7 @@ import netP5.*;
 
 void setup() {
   size(1300, 700, P3D); //Screen size, can't be dynamically adjusted
-  surface.setLocation((displayWidth-1300)/2, (displayHeight-650)/2); //Location of the game window on screen
+  surface.setLocation((displayWidth-1300)/2, (displayHeight-700)/2); //Location of the game window on screen
   randomSeed(seed);
   
   pixFont=createFont("Minecraftia-Regular.ttf", 120, true); //The font used throughout the game
@@ -97,7 +97,7 @@ void init() { //Initialiser. Useful for game restarting
     //ships[i].vel.y=stars.get(0).gravPull*120*sin(startDir+HALF_PI);
     ships[i].zoom=100;
   }
-  mapScreenShift=new PVector(100, 100);
+  //mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
   if (osc!=null) {
     osc.exit();

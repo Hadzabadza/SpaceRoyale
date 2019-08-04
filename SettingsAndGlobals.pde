@@ -20,6 +20,8 @@ Ship[] ships;
 PGraphics[] screen;
 IMG sprites;
 ArrayList<View> view;
+Terrain[] propMatrix=new Terrain[8]; //Used in propagation calculation
+float[] propRatios=new float[8];
  
 /////////////////GFX/////////////////
 PFont pixFont;
@@ -36,12 +38,10 @@ color backgroundColour= color(0);
 OscHub osc;
 
 /////////!!!!!FIX THESE!!!!!/////////
-PVector mapScreenShift;
-boolean mapScreen;
-boolean heightColour;
+//PVector mapScreenShift;
+//boolean mapScreen;
 Terrain active;
 PVector cursor;
-//int tSize=50;
 
 static class Settings {
 

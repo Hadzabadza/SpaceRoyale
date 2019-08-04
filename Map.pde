@@ -1,10 +1,15 @@
-class Map {
+class Map { //Used to display the terrain composition of a planet.
   Planet p;
   PVector dimension;
   PVector screeenPos;
   PGraphics screen;
   int id;
   boolean active;
+  
+  //Map display properties
+  boolean heightMap;
+  boolean resourceMap;
+  boolean pressureMap;
 
   Map(PVector _dimension, Planet _p) {
     dimension=new PVector(_dimension.x, _dimension.y);
@@ -20,7 +25,7 @@ class Map {
     screen.rectMode(CENTER);
     for (Terrain t : p.terrain)
     {
-      t.draw(screen);
+      t.draw(this);
     }
     screen.endDraw();
     Terrain selected=ship.land.pickTile();
@@ -37,7 +42,7 @@ class Map {
       rr.text("Avg: "+ship.land.avgHeight, 50, pos.y+40);
       rr.text("Max: "+ship.land.maxHeight, 50, pos.y+60);
       rr.text("Min: "+ship.land.minHeight, 50, pos.y+80);
-      if (heightColour)
+      if (heightMap)
         rr.text("Height Colouring: ON", 50, pos.y+20);
       else
         rr.text("Height Colouring: OFF", 50, pos.y+20);
@@ -56,7 +61,7 @@ class Map {
       rr.text("Avg: "+ship.land.avgHeight, pos.x+50, pos.y+60);
       rr.text("Max: "+ship.land.maxHeight, pos.x+250, pos.y+60);
       rr.text("Min: "+ship.land.minHeight, pos.x+450, pos.y+60);
-      if (heightColour)
+      if (heightMap)
         rr.text("Height Colouring: ON", pos.x+450, pos.y+40);
       else
         rr.text("Height Colouring: OFF", pos.x+450, pos.y+40);

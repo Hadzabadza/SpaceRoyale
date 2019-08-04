@@ -50,7 +50,7 @@ class Star extends Object {
         currDist=getDistTo(s);
         if (currDist<gravWellRadius&&currDist>radius) {
           s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
-          println(gravPull/pow(currDist, 2));
+          //println(gravPull/pow(currDist, 2));
         }
       }
     }
