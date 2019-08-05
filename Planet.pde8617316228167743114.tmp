@@ -74,8 +74,7 @@ class Planet extends Object {
       shadePoints[i]=new PVector(0,0);
       shadeFunctions[i]=0;
     }
-    surfaceTemp=s.mass/(2*PI*distance)*radius; //This is how much energy a planet gets and has to give away to stabilise temperature.
-    surfaceTemp*=PI*diameter/mass; //This is its actual temperature.
+    surfaceTemp=s.mass*2*PI*distance/mass;
   }
 
   void orbitalMovement() {
@@ -93,20 +92,13 @@ class Planet extends Object {
     shadeFunctions[2]=(shadePoints[0].x-shadePoints[1].x)/(shadePoints[0].y-shadePoints[1].y);
   }
 
-  void pullObjects() { //Gravitational pull and on-surface management of ships.
+  void pullObjects() { //Gravitational pull
     float currDist;
     for (Ship s : ships) { 
       if (!s.warp) {
         currDist=getDistTo(s);
-        if (currDist<gravWellRadius) {//&&currDist>radius*0.98) {
-          if(currDist>radius)
-            s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
-          else for (int i=0; i<s.heatArray.length; i++) 
-          { 
-            float heatTransfer=surfaceTemp*Settings.hullPieceMass;
-            if (heatTransfer>s.heatArray[i]) s.heatArray[i]+=(heatTransfer-s.heatArray[i])*0.01;
-             println(surfaceTemp*Settings.hullPieceMass/s.heatArray[i]);
-          }
+        if (currDist<gravWellRadius&&currDist>radius) {//&&currDist>radius*0.98) {
+          s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
         }
       }
     }
@@ -141,7 +133,7 @@ class Planet extends Object {
   }
 
   void createSurfaceImagery() { //NEEDS SURFACE.PIXELS LOADED!!
-    //println(terrainSize+" "+surface.pixels.length);
+    println(terrainSize+" "+surface.pixels.length);
     for (Terrain t : terrain)
     { 
       t.depth=t.depthCalculation();
@@ -177,7 +169,7 @@ class Planet extends Object {
   
   boolean checkIfShaded(PVector tp){
     float shipStarFunction=(tp.x-shadePoints[2].x)/(tp.y-shadePoints[2].y);
-    //println(orbitNumber+" "+shadeFunctions[0]+" "+shadeFunctions[1]+" "+shipStarFunction+" ");
+    println(orbitNumber+" "+shadeFunctions[0]+" "+shadeFunctions[1]+" "+shipStarFunction+" ");
     if (shadeFunctions[0]<shipStarFunction)
     if (shadeFunctions[1]>shipStarFunction)
     if (dist(orbitStar.pos.x,orbitStar.pos.y,tp.x,tp.y)>=distance) 

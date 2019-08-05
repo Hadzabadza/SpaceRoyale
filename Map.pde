@@ -4,19 +4,45 @@ class Map { //Used to display the terrain composition of a planet.
   PVector screeenPos;
   PGraphics screen;
   int id;
+  int trueSize;
   boolean active;
+  int xOffset;
+  int yOffset;
+  int mapRes;
+  Terrain[] terrain;
   
-  //Map display properties
-  boolean heightMap;
+  //Map display modes
+  boolean heightMap=false;
   boolean resourceMap;
   boolean pressureMap;
 
   Map(PVector _dimension, Planet _p) {
     dimension=new PVector(_dimension.x, _dimension.y);
+    xOffset=round(width-dimension.x)/2;
+    yOffset=round(width-dimension.y)/2;
     id=_p.orbitNumber;
     p=_p;
     screen=createGraphics(floor(dimension.x), floor(dimension.y), P3D);
     active=false;
+    trueSize=p.terrainSize;
+    mapRes=p.mapRes;
+    terrain=p.terrain;
+  }
+  
+  Terrain pickTile() {
+    int yOffset=round(height-dimension.y)/2;
+    float halfRes=mapRes/2;
+    if (cursor.x>xOffset-halfRes&&cursor.x<width-xOffset-halfRes&&cursor.y>yOffset-halfRes&&cursor.y<height-yOffset-halfRes) {
+      int x=floor((cursor.x-xOffset)/mapRes);
+      if (x<0) x=0;
+      int y=floor((cursor.y-yOffset)/mapRes);
+      if (y<0) y=0;
+      return p.terrain[x+y*trueSize];
+    } else
+    {
+      p.selected=null;
+      return null;
+    }
   }
 
   void draw(PGraphics rr, Ship ship, PVector pos) {    
@@ -28,7 +54,7 @@ class Map { //Used to display the terrain composition of a planet.
       t.draw(this);
     }
     screen.endDraw();
-    Terrain selected=ship.land.pickTile();
+    Terrain selected=pickTile();
     if (height<width) {
       if (selected!=null)
       {

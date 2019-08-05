@@ -8,6 +8,7 @@ void keyPressed() {
     if ((key == 'f')||(key=='F'))  ships[0].decWarpSpeed = true;
     if ((key == 'q')||(key=='Q'))  ships[0].turnTurretLeft = true;
     if ((key == 'e')||(key=='E'))  ships[0].turnTurretRight = true;
+    if (((key == 'o')||(key=='O'))&&ships[0].displayPlanetMap)  ;
     if (key == ' ')  ships[0].fire = true;
     if ((key == 'c')||(key=='C')) ships[0].afterBurning=true;
     if ((key == 'z')||(key=='Z')) ships[0].missileAiming=true;
@@ -86,7 +87,7 @@ void mouseReleased() {
   {
     if (ships[0].displayPlanetMap) 
     {
-      Terrain t=ships[0].land.pickTile();
+      Terrain t=ships[0].land.surfaceScreen.pickTile();
       if (t!=null)
       {
         t.build();
@@ -104,7 +105,7 @@ void mouseReleased() {
     }
   }
   if (mouseButton==CENTER) if (ships[0].displayPlanetMap) {
-    Terrain t=ships[0].land.pickTile();
+    Terrain t=ships[0].land.surfaceScreen.pickTile();
     if (t!=null) t.blopLava();
     else ships[0].zoom=1;
   } else ships[0].zoom=1;

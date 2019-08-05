@@ -70,11 +70,9 @@ class Terrain {
       createLava();
       volcanoTime--;
     }
-    if (lava!=0)
+    if (lava>0)
     {
-      //if (lava-lava*0.1>=1)
-      if (lava>=0.08)
-        moveLava();
+      if (lava>=0.08) moveLava();
       else removeLavaRemnants();
     }
   }
@@ -97,7 +95,7 @@ class Terrain {
     float neighDist;
     for (int i=-rad; i<rad; i++)
       for (int j=-rad; j<rad; j++) {
-        neighDist=dist(0, 0, i, j);
+        neighDist=dist(0, 0, i, j)-random(float(rad)*0.1);
         if (neighDist<=rad) {
           t=getNeighbour(i, j);
           boom=0.3*cos(neighDist/rad*HALF_PI);
@@ -132,7 +130,7 @@ class Terrain {
     Terrain t;
     for (int deg=0; deg<360; deg+=45) {
       t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
-      if (t.pressure<pressure)
+      if (t.totalOre+t.lava+t.pressure<totalOre+lava+pressure)
       {
         propagations++;
         propMatrix[propagations-1]=t;
@@ -141,11 +139,11 @@ class Terrain {
     for (int i=0; i<propagations; i++)
     {
       avgPressure+=propMatrix[i].pressure;
-      avgHeight+=propMatrix[i].totalOre;
+      //avgHeight+=propMatrix[i].totalOre;
       avgLava+=propMatrix[i].lava;
     }
     avgPressure/=propagations+1;
-    avgHeight/=propagations+1;
+    //avgHeight/=propagations+1;
     avgLava/=propagations+1;
     for (int i=0; i<propagations; i++)
     {
@@ -154,46 +152,22 @@ class Terrain {
       propMatrix[i].pressure=avgPressure;
     }
     lava=avgLava;
-    totalOre+=lava*0.10;
-    pressure*=0.90;
-    lava*=0.90;
-    
-    /*    int propagations=0;
-    float avgHeight=totalOre;
-    float avgLava=lava;
-    Terrain t;
-    for (int deg=0; deg<360; deg+=45) {
-      t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
-      if (t.totalOre+t.lava+pressure<totalOre+lava+pressure)
-      {
-        propagations++;
-        propMatrix[propagations-1]=t;
-      }
-    }
-    for (int i=0; i<propagations; i++)
-    {
-      avgHeight+=propMatrix[i].totalOre;
-      avgLava+=propMatrix[i].lava;
-    }
-    avgHeight/=propagations+1;
-    avgLava/=propagations+1;
-    for (int i=0; i<propagations; i++)
-    {
-      propMatrix[i].lava=avgHeight+avgLava-propMatrix[i].totalOre;
-    }
-    lava=avgHeight+avgLava-totalOre;
-    totalOre+=lava*0.05;
-    lava-=lava*0.05;*/
+    cooldownLava();
   }
   
-  void solidifyResource(int resource){
-    
+  void cooldownLava(){
+    totalOre+=lava*0.05;
+    pressure*=0.95;
+    lava*=0.95;
+    if (lava<=0.08){
+      removeLavaRemnants();
+    }
   }
-
-  void removeLavaRemnants() {
-    totalOre+=lava;
-    lava=0;
-    pressure=0;
+  
+  void removeLavaRemnants(){
+   totalOre+=lava;
+   lava=0;
+   pressure=0;
   }
 
   Terrain getNeighbour(int _x, int _y) {
@@ -201,16 +175,16 @@ class Terrain {
     int neighY=y+_y;
     if (neighY<0) {
       neighY=abs(neighY);
-      neighX+=p.surface.width/2;
+      neighX+=p.terrainSize/2;
     }
-    if (neighY>=p.surface.height) {
-      neighY=p.surface.height*2-neighY-1;
-      neighX+=p.surface.width/2;
+    if (neighY>=p.terrainSize) {
+      neighY=p.terrainSize*2-neighY-1;
+      neighX+=p.terrainSize/2;
     }
     if (neighX>=0) {
-      if (neighX>=p.surface.width) neighX=neighX-p.surface.width;
-    } else neighX=p.surface.width+neighX;
-    return(p.terrain[neighX+neighY*p.surface.width]);
+      if (neighX>=p.terrainSize) neighX=neighX-p.terrainSize;
+    } else neighX=p.terrainSize+neighX;
+    return(p.terrain[neighX+neighY*p.terrainSize]);
   }
   
   void update() {
@@ -223,8 +197,7 @@ class Terrain {
       fill=color(0, 0, round(250-200*depth));
     }
     //propagateLava();
-    //depth=map(totalOre, p.minHeight, p.minHeight+(p.maxHeight-p.avgHeight)*p.waterLevel, 1, 0);
-    depth=map(totalOre, p.minHeight, (p.minHeight+(p.avgHeight-p.minHeight)*p.waterLevel), 1, 0);
+    depth=depthCalculation();
     if (depth>0)
     {
       water=true;
@@ -235,6 +208,10 @@ class Terrain {
       water=false;
       depth=0;
     }
+  }
+  
+  float depthCalculation(){
+    return map(totalOre, p.minHeight, (p.minHeight+(p.avgHeight-p.minHeight)*p.waterLevel), 1, 0);
   }
 
   void drawSelection(PGraphics rr, Ship ship) {
@@ -268,7 +245,7 @@ class Terrain {
       else m.screen.fill(totalOre);
       if (lava!=0) 
         if (lava>2) m.screen.fill(50+lava*3, lava, 0);
-        else if (depth<=0) m.screen.fill(25*lava+(1-lava/2)*totalOre, 0, 0);
+        else if (depth<=0) m.screen.fill(25*lava+(1-lava/2)*totalOre/2, totalOre/(lava+2), totalOre/(lava+2));
         else m.screen.fill(32.6*lava, 20.6*lava, 220*(1-depth));
     }
 

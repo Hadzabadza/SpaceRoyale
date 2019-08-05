@@ -10,8 +10,8 @@ class Planet extends Object {
   float gravPull;
   PVector grav;
   int orbitNumber;
-  PVector[] shadePoints; //0 - Left, 1 - right, 2 - tip (on the furthest point of stellar grav radius)
-  float[] shadeFunctions; //0 - Left, 1 - right. Originating from tip
+  PVector[] shadePoints; //Left, right, tip
+  float[] shadeFunctions;
   float dirFromStar;
   
   //Surface parameters
@@ -32,7 +32,7 @@ class Planet extends Object {
   Terrain [] terrain;
   Terrain selected;
   Terrain maxTile;
-  float surfaceTemp;
+
 
   Planet(Star s, float mas, float dens, float distS, int number) {
     super(new PVector(), new PVector(), 0, sqrt(mas)/dens);
@@ -68,14 +68,12 @@ class Planet extends Object {
     else
       mapRes=floor(width/(terrainSize+20));
     createMap();
-    shadePoints=new PVector[4];
-    shadeFunctions=new float[4];
+    shadePoints=new PVector[3];
+    shadeFunctions=new float[3];
     for (int i=0; i<3; i++){
       shadePoints[i]=new PVector(0,0);
       shadeFunctions[i]=0;
     }
-    surfaceTemp=s.mass/(2*PI*distance)*radius; //This is how much energy a planet gets and has to give away to stabilise temperature.
-    surfaceTemp*=PI*diameter/mass; //This is its actual temperature.
   }
 
   void orbitalMovement() {
@@ -88,25 +86,18 @@ class Planet extends Object {
     shadePoints[1].y=pos.y+vel.y+radius*sin(dirFromStar+HALF_PI);
     shadePoints[2].x=orbitStar.pos.x+orbitStar.gravWellRadius*cos(dirFromStar);
     shadePoints[2].y=orbitStar.pos.y+orbitStar.gravWellRadius*sin(dirFromStar);
-    shadeFunctions[0]=(shadePoints[2].x-shadePoints[0].x)/(shadePoints[2].y-shadePoints[0].y);
-    shadeFunctions[1]=(shadePoints[2].x-shadePoints[1].x)/(shadePoints[2].y-shadePoints[1].y);
-    shadeFunctions[2]=(shadePoints[0].x-shadePoints[1].x)/(shadePoints[0].y-shadePoints[1].y);
+    shadeFunctions[0]=shadePoints[0].x/shadePoints[0].y;
+    shadeFunctions[1]=shadePoints[1].x/shadePoints[1].y);
+    shadeFunctions[2]=shadePoints[0].x/shadePoints[0].y);
   }
 
-  void pullObjects() { //Gravitational pull and on-surface management of ships.
+  void pullObjects() { //Gravitational pull
     float currDist;
     for (Ship s : ships) { 
       if (!s.warp) {
         currDist=getDistTo(s);
-        if (currDist<gravWellRadius) {//&&currDist>radius*0.98) {
-          if(currDist>radius)
-            s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
-          else for (int i=0; i<s.heatArray.length; i++) 
-          { 
-            float heatTransfer=surfaceTemp*Settings.hullPieceMass;
-            if (heatTransfer>s.heatArray[i]) s.heatArray[i]+=(heatTransfer-s.heatArray[i])*0.01;
-             println(surfaceTemp*Settings.hullPieceMass/s.heatArray[i]);
-          }
+        if (currDist<gravWellRadius&&currDist>radius) {//&&currDist>radius*0.98) {
+          s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
         }
       }
     }
@@ -141,7 +132,7 @@ class Planet extends Object {
   }
 
   void createSurfaceImagery() { //NEEDS SURFACE.PIXELS LOADED!!
-    //println(terrainSize+" "+surface.pixels.length);
+    println(terrainSize+" "+surface.pixels.length);
     for (Terrain t : terrain)
     { 
       t.depth=t.depthCalculation();
@@ -176,12 +167,9 @@ class Planet extends Object {
   }
   
   boolean checkIfShaded(PVector tp){
-    float shipStarFunction=(tp.x-shadePoints[2].x)/(tp.y-shadePoints[2].y);
-    //println(orbitNumber+" "+shadeFunctions[0]+" "+shadeFunctions[1]+" "+shipStarFunction+" ");
-    if (shadeFunctions[0]<shipStarFunction)
-    if (shadeFunctions[1]>shipStarFunction)
-    if (dist(orbitStar.pos.x,orbitStar.pos.y,tp.x,tp.y)>=distance) 
-    return true;
+    if ((shadePoints[0].x-shadePoints[2].x)/(shadePoints[0].y-shadePoints[2].y)<tp.x/tp.y)
+    if ((shadePoints[1].x-shadePoints[2].x)/(shadePoints[1].y-shadePoints[2].y)>tp.x/tp.y)
+    if ((shadePoints[0].x-shadePoints[1].x)/(shadePoints[0].y-shadePoints[1].y)<tp.x/tp.y) return true;
     return false;
   }
 

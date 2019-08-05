@@ -98,15 +98,8 @@ class Planet extends Object {
     for (Ship s : ships) { 
       if (!s.warp) {
         currDist=getDistTo(s);
-        if (currDist<gravWellRadius) {//&&currDist>radius*0.98) {
-          if(currDist>radius)
-            s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
-          else for (int i=0; i<s.heatArray.length; i++) 
-          { 
-            float heatTransfer=surfaceTemp*Settings.hullPieceMass;
-            if (heatTransfer>s.heatArray[i]) s.heatArray[i]+=(heatTransfer-s.heatArray[i])*0.01;
-             println(surfaceTemp*Settings.hullPieceMass/s.heatArray[i]);
-          }
+        if (currDist<gravWellRadius&&currDist>radius) {//&&currDist>radius*0.98) {
+          s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
         }
       }
     }

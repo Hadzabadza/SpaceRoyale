@@ -13,42 +13,42 @@ void setup() {
   size(1300, 700, P3D); //Screen size, can't be dynamically adjusted
   surface.setLocation((displayWidth-1300)/2, (displayHeight-700)/2); //Location of the game window on screen
   randomSeed(seed);
-  
+
   pixFont=createFont("Minecraftia-Regular.ttf", 120, true); //The font used throughout the game
   textFont(pixFont, 12); 
   sprites=new IMG();
   sprites.loadImages(); //Loader for all the game's sprites. Defined on "Sprites" tab.
-  
+
   frameRate(Settings.FPS); //For testing purposes
-  
+
   init(); //Initialiser. Useful for game restarting
 }
 
 void init() { //Initialiser. Useful for game restarting
   gameState=0; 
-  
+
   frameCount=0; //Framecount restarter
-  
+
   stars=new ArrayList<Star>();  //Resets all tracked object lists.
   asteroids=new ArrayList<Asteroid>();
   bullets=new ArrayList<Bullet>(); 
   missiles=new ArrayList<Missile>();
   ships=new Ship[Settings.ships]; 
   objects=new ArrayList<Object>();
-  
+
   particles=new ArrayList<Particle>(); //Particle buffers
   spareParticles=new ArrayList<Particle>();
-  
+
   destroyees=new ArrayList<Object>(); //Object destruction and construction queues
   newSpawns=new ArrayList<Object>();
-  
+
   screen= new PGraphics[Settings.ships];
   view= new ArrayList<View>();
   stars.add(new Star(0, 0));
-  
+
   for (int i=0; i<Settings.ships; i++) {
     float startDir=random(TWO_PI);
-    float startDist=random(stars.get(0).gravWellRadius*0.4,stars.get(0).gravWellRadius);
+    float startDist=random(stars.get(0).gravWellRadius*0.4, stars.get(0).gravWellRadius);
     PVector startPos=new PVector(startDist*cos(startDir), startDist*sin(startDir));
     screen[i]=createGraphics(width/Settings.ships, height, P3D);
     switch (i) {
@@ -95,7 +95,7 @@ void init() { //Initialiser. Useful for game restarting
     }
     //ships[i].vel.x=stars.get(0).gravPull*120*cos(startDir+HALF_PI);
     //ships[i].vel.y=stars.get(0).gravPull*120*sin(startDir+HALF_PI);
-    ships[i].zoom=100;
+    ships[i].zoom=1;
   }
   //mapScreenShift=new PVector(100, 100);
   cursor=new PVector(0.5, 0.5);
@@ -107,11 +107,17 @@ void init() { //Initialiser. Useful for game restarting
   osc=new OscHub(Settings.ships);
   println("Setting up..................");
   float spawnDir=random(TWO_PI);
-  Planet spawnPlanet=stars.get(0).planets.get(0);
-  ships[0].pos.x=spawnPlanet.pos.x+spawnPlanet.radius*cos(spawnDir);
-  ships[0].pos.y=spawnPlanet.pos.y+spawnPlanet.radius*sin(spawnDir);
-  ships[0].vel.x=spawnPlanet.vel.x;
-  ships[0].vel.y=spawnPlanet.vel.y;
+  //Planet spawnPlanet=stars.get(0).planets.get(0);
+  Planet spawnPlanet=stars.get(0).planets[stars.get(0).planets.length-1];
+  float spawnDistance=spawnPlanet.gravWellRadius*0.95;
+  //ships[0].pos.x=spawnPlanet.pos.x+spawnPlanet.radius*cos(spawnDir);
+  //ships[0].pos.y=spawnPlanet.pos.y+spawnPlanet.radius*sin(spawnDir);
+  //ships[0].vel.x=spawnPlanet.vel.x;
+  //ships[0].vel.y=spawnPlanet.vel.y;
+  ships[0].pos.x=spawnPlanet.pos.x+spawnDistance*cos(spawnDir);
+  ships[0].pos.y=spawnPlanet.pos.y+spawnDistance*sin(spawnDir);
+  ships[0].vel.x=spawnPlanet.vel.x+sqrt(spawnPlanet.gravPull/spawnDistance)*cos(spawnDir+HALF_PI);
+  ships[0].vel.y=spawnPlanet.vel.y+sqrt(spawnPlanet.gravPull/spawnDistance)*sin(spawnDir+HALF_PI);
 }
 
 void draw() {
@@ -136,41 +142,42 @@ void draw() {
       screen[i].background(backgroundColour);
 
       /*screen[i].strokeWeight(3); //ATTEMPT TO MAKE A STAR FIELD
-      screen[i].stroke(255);
-      for (int x=round(ships[i].pos.x)-screen[i].width/2; x<round(ships[i].pos.x)+screen[i].width/2;x+=10){
-        for (int y=round(ships[i].pos.y)-screen[i].height/2; y<round(ships[i].pos.y)+screen[i].height/2;y+=10){
-          if (noise(x,y)>0.76) screen[i].point(x,y);
-        }
-      }*/
+       screen[i].stroke(255);
+       for (int x=round(ships[i].pos.x)-screen[i].width/2; x<round(ships[i].pos.x)+screen[i].width/2;x+=10){
+       for (int y=round(ships[i].pos.y)-screen[i].height/2; y<round(ships[i].pos.y)+screen[i].height/2;y+=10){
+       if (noise(x,y)>0.76) screen[i].point(x,y);
+       }
+       }*/
       /*int zoomedXBorder=screen[i].height/2*ceil(ships[i].zoom); //ANOTHER ATTEMPT TO MAKE A STAR FIELD
-      int zoomedYBorder=screen[i].width/2*ceil(ships[i].zoom);
-      for (int backX=-zoomedXBorder; backX<=zoomedXBorder; backX+=IMGStarryBack.width)
-        for (int backY=-zoomedYBorder; backY<=zoomedYBorder; backY+=IMGStarryBack.height)
-          image(IMGStarryBack, backX+ships[0].pos.x%IMGStarryBack.width, backY+ships[0].pos.y%IMGStarryBack.height, -10);
-      */
-      
+       int zoomedYBorder=screen[i].width/2*ceil(ships[i].zoom);
+       for (int backX=-zoomedXBorder; backX<=zoomedXBorder; backX+=IMGStarryBack.width)
+       for (int backY=-zoomedYBorder; backY<=zoomedYBorder; backY+=IMGStarryBack.height)
+       image(IMGStarryBack, backX+ships[0].pos.x%IMGStarryBack.width, backY+ships[0].pos.y%IMGStarryBack.height, -10);
+       */
+
       //if (ships[i].warp) screen[i].camera(ships[i].pos.x+random(-ships[i].warpSpeed/2, ships[i].warpSpeed/2), ships[i].pos.y+random(-ships[i].warpSpeed/2, ships[i].warpSpeed/2), ships[i].zoom*600, ships[i].pos.x+random(-ships[i].warpSpeed, ships[i].warpSpeed), ships[i].pos.y+random(-ships[i].warpSpeed, ships[i].warpSpeed), 0.0, 0.0, 1.0, 0.0);
       //else 
       screen[i].camera(ships[i].pos.x, ships[i].pos.y, ships[i].zoom*600, ships[i].pos.x, ships[i].pos.y, 0.0, 0.0, 1.0, 0.0);
-      
+
       for (Object o : objects) { //DRAWS ALL OBJECTS ON SHIP'S SCREEN!!
-        if (Settings.drawObjectsOnlyInRange){
-          float distToScreenCorner=dist(0,0,screen[i].height,screen[i].width)*ships[i].zoom/2;
-          if (dist(ships[i].pos.x, ships[i].pos.y, o.pos.x, o.pos.y)-o.diameter<distToScreenCorner) o.draw(screen[i]); 
-          else o.softDraw(screen[i]);
-        } else o.draw(screen[i]);
+        if (o.active)
+          if (Settings.drawObjectsOnlyInRange) {
+            float distToScreenCorner=dist(0, 0, screen[i].height, screen[i].width)*ships[i].zoom/2;
+            if (dist(ships[i].pos.x, ships[i].pos.y, o.pos.x, o.pos.y)-o.diameter<distToScreenCorner) o.draw(screen[i]); 
+            else o.softDraw(screen[i]);
+          } else o.draw(screen[i]);
       }
-      if (!ships[i].destroyed){
+      if (!ships[i].destroyed) {
         ships[i].drawTarget(screen[i]); //Draws missile target
         ships[i].drawAim(screen[i]); //Draws turret aiming direction
-        ships[i].drawHeat(this.g,new PVector(screen[i].width/2+screen[i].width*i,screen[i].height/2));
+        ships[i].drawHeat(this.g, new PVector(screen[i].width/2+screen[i].width*i, screen[i].height/2));
       }
       screen[i].endDraw();
       image(screen[i], screenSize*i, 0);
       if (ships[i].displayPlanetMap&&ships[i].land!=null)
       {
         Map mp=ships[i].land.surfaceScreen;
-        mp.draw(this.g,ships[i],new PVector((screen[i].width-mp.dimension.x)/2,(screen[i].height-mp.dimension.y)/2));
+        mp.draw(this.g, ships[i], new PVector((screen[i].width-mp.dimension.x)/2, (screen[i].height-mp.dimension.y)/2));
       }
     }
     stroke (255);
@@ -182,12 +189,12 @@ void draw() {
       fill(100, 150, 255);
       rect(screenSize*i+halfScreen-50, 25, 10+90*ships[i].warpSpeed/Settings.maxWarpSpeed, 10);
       if (Settings.DEBUG) {
-        fill(130+50*sin(gameTime),0,0);
+        fill(130+50*sin(gameTime), 0, 0);
         text("DEBUG", screenSize*i+20, 20);
         if (ships[i].displayPlanetMap)
-          fill(0,130+50*sin(gameTime),0);
+          fill(0, 130+50*sin(gameTime), 0);
         else
-          fill(130+50*sin(gameTime),0,0);
+          fill(130+50*sin(gameTime), 0, 0);
         text("LAND", screenSize*i+24, 30);
       }
       noFill();
@@ -195,7 +202,7 @@ void draw() {
       rect(screenSize*i+halfScreen-50, 25, 100, 10);
     }
     int xPos=1;
-    for (View v:view) {
+    for (View v : view) {
       v.pos.x=xPos;
       v.pos.y=height-1-v.dimension.y;
       v.draw(this.g);

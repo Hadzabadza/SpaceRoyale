@@ -99,8 +99,8 @@ static class Settings {
   //static float temperatureFalloff=
 
   //Planet properties
-  static float gravityWellRadiusMultiplier=10;
-  static int planetScaler=4;
+  static float gravityWellRadiusMultiplier=13;
+  static int planetScaler=1;
   
   //Ship properties
   static float shipSize=22; //Radius of ship entities
@@ -123,7 +123,7 @@ static class Settings {
   static float hullAlbedo=0.8;
   static int hullMeltingPoint=2200;
   static float hullPieceMass=100;
-  static float hullPieceArea=10; //Hull piece = square, therefore radiating area of its piece is its length sqrt(hullPieceMass).
+  //static float hullPieceArea=10; //Hull piece = square, therefore radiating area of its piece is its length = sqrt(hullPieceMass).
   static float shipDrawScale=0.2;
 
   //Bullet properties

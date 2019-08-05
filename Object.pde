@@ -6,6 +6,7 @@ class Object { //Superclass for physical ingame objects
   float radius;
   float diameter;
   boolean destroyed;
+  boolean active=true;
 
   private Object(){}
 
