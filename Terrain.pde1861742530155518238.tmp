@@ -72,29 +72,27 @@ class Terrain {
         return color(30);
       }
       case 1:{
-        return color(200,40,255);
+        return color(60,40,80);
       }
       case 2:{
-        return color(80,255,80);
+        return color(60,40,80);
       }
       case 3:{
-        return color(120);
+        return color(60,40,80);
       }
       case 4:{
-        return color(255,160,30);
+        return color(60,40,80);
       }
       case 5:{
-        return color(255,255,40);
+        return color(255,255,80);
       }
       case 6:{
-        return color(240,80,0);
+        return color(totalOre);
       }
       case 7:{
-        return color(60,255,255);
+        return color(60,180,220);
       }
-      default:{
-        return color(120);
-      }
+      default:{}
     }
   }
 
@@ -281,9 +279,6 @@ class Terrain {
       m.screen.fill(colouriseByHeight(totalOre, p.minHeight, p.maxHeight, p.waterLevel));
     } else if (m.pressureMap) {
       if (pressure>0) m.screen.fill(pressure, 0, 0);      
-      else m.screen.fill(totalOre);
-    } else if (m.resourceMap){
-      if (resources[m.shownResource*3]>10) m.screen.fill(colouriseByResource(m.shownResource));
       else m.screen.fill(totalOre);
     } else
     {

@@ -23,7 +23,7 @@ ArrayList<View> view;
 Terrain[] propMatrix=new Terrain[8]; //Used in propagation calculation
 float[] propRatios=new float[8];
 
-String[] resourceName={
+String[] resourceNames={
 "Bedrock",
 "Omnitium",
 "Etramite",
@@ -32,14 +32,15 @@ String[] resourceName={
 "Solane",
 "Regolith",
 "Forazol"};
-float[] resourceTemperatureThreshold=
+
+float[] resourceTemperatureThresholds=
 {FMAX,FMAX,  //Bedrock   - impossibly hard.
-3000,FMAX,   //Omnitium  - melts at very high temperatures, lays very low.
-2200,FMAX,   //Etramite  - melts more easily than omni.
-1200,FMAX,   //Stone     - melts and becomes lava, useless, a filler.
+3000,9000,   //Omnitium  - melts at very high temperatures, lays very low.
+2200,7000,   //Etramite  - melts more easily than omni.
+1200,4500,   //Stone     - melts and becomes lava, useless, a filler.
 800,1400,    //Perditium - volatile element.
 600,1200,    //Solane    - condensed solar wind.
-500,800,     //Regolith  - covers other resource.
+500,800,     //Regolith  - covers other resources.
 10,200,};    //Forazol   - almost always a gas, almost never a solid.
  
 /////////////////GFX/////////////////
@@ -123,7 +124,7 @@ static class Settings {
   static float turretGfxSize=20; //Extra radius around the ship for turret graphics
   static float projectileSpeed=6; //Bullet's muzzle velocity
   static float minWarpSpeed=20; //Minimum warp speed
-  static float maxWarpSpeed=80; //Maximum warp speed
+  static float maxWarpSpeed=160; //Maximum warp speed
   static float fireCooldown=0.1;
   static float targetingDistance=2550;
   static float staticTurnSpeed=0.0002;

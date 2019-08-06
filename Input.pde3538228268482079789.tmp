@@ -8,6 +8,10 @@ void keyPressed() {
     if ((key == 'f')||(key=='F'))  ships[0].decWarpSpeed = true;
     if ((key == 'q')||(key=='Q'))  ships[0].turnTurretLeft = true;
     if ((key == 'e')||(key=='E'))  ships[0].turnTurretRight = true;
+    if (((key == 'o')||(key=='O'))&&ships[0].displayPlanetMap) {
+      ships[0].orbited.surfaceScreen.resourceMap=true;
+      ships[0].orbited.surfaceScreen.heightMap=false;
+    }
     if (key == ' ')  ships[0].fire = true;
     if ((key == 'c')||(key=='C')) ships[0].afterBurning=true;
     if ((key == 'z')||(key=='Z')) ships[0].missileAiming=true;
@@ -51,8 +55,6 @@ void keyReleased() {
       ships[0].fireMissile();
       ships[0].missileAiming=false;
     }
-  } else if ((key == 'i')||(key=='I')) {
-    ships[0].orbited.surfaceScreen.resourceMap=!ships[0].orbited.surfaceScreen.resourceMap;
   }
   if (ships.length>1&&!ships[1].displayPlanetMap) {
     if ((keyCode==UP)||(key==56))  ships[1].speedUp = false;
@@ -81,7 +83,7 @@ void mouseWheel(MouseEvent e) {
 }
 
 void mousePressed() {
-  if (mouseButton==LEFT) if (testSLD.checkClicked()&&ships[0].displayPlanetMap) operated=testSLD;
+  if (mouseButton==LEFT) if (testSLD.checkClicked()) operated=testSLD;
 }
 
 void mouseReleased() {
@@ -93,7 +95,6 @@ void mouseReleased() {
     {
       if (operated!=null) {
         operated.snap();
-        ships[0].orbited.surfaceScreen.shownResource=byte(round(operated.power)-1);
         operated=null;
       } else {
         Terrain t=ships[0].land.surfaceScreen.pickTile(ships[0].cursor);

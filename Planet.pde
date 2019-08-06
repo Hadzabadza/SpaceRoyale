@@ -29,6 +29,7 @@ class Planet extends Object {
   float waterLevel=0;
   int mapRes;
   IntDict terrainUpdateQueue;
+  float[] maxRes;
   Terrain [] terrain;
   Terrain selected;
   Terrain maxTile;
@@ -62,6 +63,8 @@ class Planet extends Object {
     surface=createImage(terrainSize*4, terrainSize*4, ARGB);
     surfWidthCoeff=surface.width/terrainSize;
     surfHeightCoeff=surface.height/terrainSize;
+    surfaceTemp=s.mass/(2*PI*distance)*radius; //This is how much energy a planet gets and has to give away to stabilise temperature.
+    surfaceTemp*=PI*diameter/mass; //This is its actual temperature.
     terrain=new Terrain[terrainSize*terrainSize];
     if (height<width)
       mapRes=floor(height/(terrainSize+20));
@@ -74,8 +77,7 @@ class Planet extends Object {
       shadePoints[i]=new PVector(0,0);
       shadeFunctions[i]=0;
     }
-    surfaceTemp=s.mass/(2*PI*distance)*radius; //This is how much energy a planet gets and has to give away to stabilise temperature.
-    surfaceTemp*=PI*diameter/mass; //This is its actual temperature.
+    maxRes=new float[resourceNames.length];
   }
 
   void orbitalMovement() {

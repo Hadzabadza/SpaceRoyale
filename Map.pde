@@ -14,6 +14,7 @@ class Map { //Used to display the terrain composition of a planet.
   //Map display modes
   boolean heightMap=false;
   boolean resourceMap;
+  byte shownResource=3;
   boolean pressureMap;
 
   Map(PVector _dimension, Planet _p) {
@@ -96,6 +97,7 @@ class Map { //Used to display the terrain composition of a planet.
       rr.text("Sea level: "+ship.land.waterLevel, pos.x+250, pos.y+40);
     }
     rr.strokeWeight(1);
+    rr.rectMode(CORNER);
     rr.stroke(255);
     rr.noFill();
     rr.image(screen, pos.x, pos.y);
@@ -103,6 +105,7 @@ class Map { //Used to display the terrain composition of a planet.
     rr.fill(66, 100, 180);
     rr.rect(pos.x, pos.y-14, screen.width, 15);
     rr.textAlign(LEFT);
+    rr.textSize(12);
     rr.fill(255);
     rr.text("Planet "+id, pos.x+3, pos.y+6);
   }

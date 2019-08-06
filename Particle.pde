@@ -50,35 +50,23 @@ class Particle extends Object {
 
   Particle(PImage inputImg, PVector _pos, PVector _vel, float _dir) {
     super( _pos, _vel, _dir, 0);
-    sprt = inputImg;
-    alpha=random(100, 255);
-    c=color(255, alpha);
-    scale=1;
-    alphaChange=random(-1, Settings.alphaChange);
-    scaleChange=Settings.scaleChange;
-    spin=random(-0.05, 0.05);
-    timer=Settings.defaultTimer;
-    findLargerSide();
+    partInit(inputImg, color(255,random(100,255)), 1, random(-1, Settings.alphaChange), Settings.scaleChange, random(-0.05, 0.05), Settings.defaultTimer, false); 
   }
 
   Particle(PImage inputImg, PVector _pos, PVector _vel, float _dir, color _c) {
     super( _pos, _vel, _dir, 0);
-    sprt = inputImg;
-    c=_c;
-    alpha=alpha(c);
-    scale=1;
-    alphaChange=random(-1, Settings.alphaChange);
-    scaleChange=Settings.scaleChange;
-    spin=random(-0.05, 0.05);
-    timer=Settings.defaultTimer;
-    findLargerSide();
+    partInit(inputImg, _c, 1, random(-1, Settings.alphaChange), Settings.scaleChange, random(-0.05, 0.05), Settings.defaultTimer, false); 
   }
 
   Particle(PImage inputImg, PVector _pos, PVector _vel, float _dir, color _c, float _scale, float _alphaChange, float _scaleChange, float _rotation, float _timer, boolean _isDebris) {
     super( _pos, _vel, _dir, 0);
+    partInit(inputImg, _c, _scale, _alphaChange, _scaleChange, _rotation,_timer, _isDebris); 
+  }
+  
+  void partInit(PImage inputImg, color _c, float _scale, float _alphaChange, float _scaleChange, float _rotation, float _timer, boolean _isDebris){
     sprt = inputImg;
     c=_c;
-    alpha=alpha(c);
+    alpha=c >> 24 & 0xFF;
     scale=_scale;
     alphaChange=_alphaChange;
     scaleChange=_scaleChange;

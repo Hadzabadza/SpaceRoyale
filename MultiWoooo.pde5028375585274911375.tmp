@@ -1,4 +1,4 @@
-//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
+//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
 //TODO: SHIP: Improve targeting!
 //TODO: MISSILE: Improve targeting!!!!
 //TODO: OSC: Find the name of the connected device and add to bundle logs.
@@ -9,8 +9,8 @@
 import oscP5.*;
 import netP5.*;
 
+Button testBTN;
 Slider testSLD;
-Slider operated;
 
 void setup() {
   size(1300, 700, P3D); //Screen size, can't be dynamically adjusted
@@ -121,7 +121,8 @@ void init() { //Initialiser. Useful for game restarting
   ships[0].pos.y=spawnPlanet.pos.y+spawnDistance*sin(spawnDir);
   ships[0].vel.x=spawnPlanet.vel.x+sqrt(spawnPlanet.gravPull/spawnDistance)*cos(spawnDir+HALF_PI);
   ships[0].vel.y=spawnPlanet.vel.y+sqrt(spawnPlanet.gravPull/spawnDistance)*sin(spawnDir+HALF_PI);*/
-  testSLD=new Slider(width/2,height-30,600,40,resourceNames.length-1,1,"Resource");
+  testBTN=new Button(width,height,60,15,"lel",color(ships[0].c));
+  testSLD=new Slider(width/2,height/2,800,200,resourceNames.length,1,"Resource");
 }
 
 void draw() {
@@ -181,7 +182,6 @@ void draw() {
       image(screen[i], screenSize*i, 0);
       if (ships[i].displayPlanetMap&&ships[i].land!=null)
       {
-        testSLD.draw(this.g);
         Map mp=ships[i].land.surfaceScreen;
         mp.draw(this.g, ships[i], new PVector((screen[i].width-mp.dimension.x)/2, (screen[i].height-mp.dimension.y)/2));
       }
@@ -218,7 +218,8 @@ void draw() {
     stroke(255);
     for (int i=1; i<screen.length; i++) line (screenSize*i, 0, screenSize*i, height);
   }
-  if (operated!=null) operated.changeX();
+  testBTN.draw(this.g);
+  testSLD.draw(this.g);
 }
 
 

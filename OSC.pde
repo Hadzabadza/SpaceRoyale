@@ -1,4 +1,4 @@
-class OscHub { //<>// //<>// //<>// //<>// //<>// //<>//
+class OscHub { //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
   OscDock[] dock; //Multiple docks with specific data for multiple controllers 
   int displaySize=280; //Smallest dimension of the display
   int longestDistance; //Farthest planet

@@ -72,16 +72,16 @@ class Terrain {
         return color(30);
       }
       case 1:{
-        return color(200,40,255);
+        return color(60,40,80);
       }
       case 2:{
-        return color(80,255,80);
+        return color(20,80,20);
       }
       case 3:{
         return color(120);
       }
       case 4:{
-        return color(255,160,30);
+        return color(200,160,30);
       }
       case 5:{
         return color(255,255,40);
