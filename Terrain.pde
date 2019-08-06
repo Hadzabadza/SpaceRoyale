@@ -3,14 +3,8 @@ class Terrain {
   int index;
   Planet p;
 
-  float forazol;
+  float[] resources=new float[resourceName.length*3];
   float totalOre;
-  float stone;
-  float solane;
-  float perditium;
-  float etramite;
-  float omnitium;
-  float bedrock;
 
   float lava;
   float pressure;
@@ -111,7 +105,7 @@ class Terrain {
     Terrain t;
     volcanoTime=0;
     float rad=30;
-    for (int i=-30; i<rad; i++){
+    for (int i=-30; i<rad; i++) {
       for (int j=-30; j<rad; j++) {
         if (dist(0, 0, i, j)<rad) {
           t=getNeighbour(i, j);
@@ -128,7 +122,8 @@ class Terrain {
     float avgPressure=pressure;
     float avgLava=lava;
     Terrain t;
-    for (int deg=0; deg<360; deg+=45) {
+    int degStart=round(random(8));
+    for (int deg=0+45*degStart; deg<360+45*degStart; deg+=45) {
       t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
       if (t.totalOre+t.lava+t.pressure<totalOre+lava+pressure)
       {
@@ -154,20 +149,20 @@ class Terrain {
     lava=avgLava;
     cooldownLava();
   }
-  
-  void cooldownLava(){
+
+  void cooldownLava() {
     totalOre+=lava*0.05;
     pressure*=0.95;
     lava*=0.95;
-    if (lava<=0.08){
+    if (lava<=0.08) {
       removeLavaRemnants();
     }
   }
-  
-  void removeLavaRemnants(){
-   totalOre+=lava;
-   lava=0;
-   pressure=0;
+
+  void removeLavaRemnants() {
+    totalOre+=lava;
+    lava=0;
+    pressure=0;
   }
 
   Terrain getNeighbour(int _x, int _y) {
@@ -186,7 +181,7 @@ class Terrain {
     } else neighX=p.terrainSize+neighX;
     return(p.terrain[neighX+neighY*p.terrainSize]);
   }
-  
+
   void update() {
     if (!water)
     {
@@ -209,22 +204,27 @@ class Terrain {
       depth=0;
     }
   }
-  
-  float depthCalculation(){
+
+  float depthCalculation() {
     return map(totalOre, p.minHeight, (p.minHeight+(p.avgHeight-p.minHeight)*p.waterLevel), 1, 0);
   }
 
   void drawSelection(PGraphics rr, Ship ship) {
     rr.strokeWeight(1);
     rr.stroke(ship.c);
-    rr.line(-width, y*p.mapRes, width, y*p.mapRes);
-    rr.line(x*p.mapRes, -height, x*p.mapRes, height);
-    rr.stroke(100+50*cos(gameTime), 0, 0);
-    rr.strokeWeight(ship.land.mapRes);
-    rr.point((x-1)*p.mapRes, y*p.mapRes);
-    rr.point((x+1)*p.mapRes, y*p.mapRes);
-    rr.point(x*p.mapRes, (y-1)*p.mapRes);
-    rr.point(x*p.mapRes, (y+1)*p.mapRes);
+    rr.noFill();
+    rr.line(-width, (y+0.5)*p.mapRes, (x)*p.mapRes, (y+0.5)*p.mapRes);
+    rr.line((x+1)*p.mapRes, (y+0.5)*p.mapRes, width, (y+0.5)*p.mapRes);
+    rr.line(x*p.mapRes, -height, (x+0.5)*p.mapRes, y*p.mapRes);
+    rr.line((x+0.5)*p.mapRes, (y+1)*p.mapRes, (x+0.5)*p.mapRes, height);
+    rr.rect((x+0.5)*p.mapRes, (y+0.5)*p.mapRes, p.mapRes, p.mapRes);
+    //rr.stroke(100+50*cos(gameTime), 0, 0);
+    //rr.strokeWeight(ship.land.mapRes);
+    /*rr.point((x-1)*p.mapRes, y*p.mapRes);
+     rr.point((x+1)*p.mapRes, y*p.mapRes);
+     rr.point(x*p.mapRes, (y-1)*p.mapRes);
+     rr.point(x*p.mapRes, (y+1)*p.mapRes);
+     */
   }
 
   void draw(Map m) {
@@ -236,10 +236,9 @@ class Terrain {
        else rr.fill(fill);*/
       m.screen.fill(colouriseByHeight(totalOre, p.minHeight, p.maxHeight, p.waterLevel));
     } else if (m.pressureMap) {
-      if (pressure>0) m.screen.fill(pressure,0,0);      
+      if (pressure>0) m.screen.fill(pressure, 0, 0);      
       else m.screen.fill(totalOre);
-    } 
-    else
+    } else
     {
       if (water) m.screen.fill(0, 0, waterColour/2+waterColour/3+waterColour/3*(cos(gameTime)));
       else m.screen.fill(totalOre);
@@ -250,7 +249,7 @@ class Terrain {
     }
 
     m.screen.noStroke();
-    m.screen.rect(x*p.mapRes, y*p.mapRes, p.mapRes, p.mapRes);
+    m.screen.rect((x+0.5)*p.mapRes, (y+0.5)*p.mapRes, p.mapRes, p.mapRes);
     if (p.selected==this) drawSelection(m.screen, ships[0]); //TODO: Multiple ships
     if (frameCount%5==0) update();
   };

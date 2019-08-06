@@ -29,14 +29,15 @@ class Map { //Used to display the terrain composition of a planet.
     terrain=p.terrain;
   }
   
-  Terrain pickTile() {
+  Terrain pickTile(PVector curs) {
     int yOffset=round(height-dimension.y)/2;
     float halfRes=mapRes/2;
-    if (cursor.x>xOffset-halfRes&&cursor.x<width-xOffset-halfRes&&cursor.y>yOffset-halfRes&&cursor.y<height-yOffset-halfRes) {
-      int x=floor((cursor.x-xOffset)/mapRes);
+    if (curs.x>xOffset-halfRes&&curs.x<width-xOffset-halfRes&&curs.y>yOffset-halfRes&&curs.y<height-yOffset-halfRes) {
+      int x=floor((curs.x-xOffset)/mapRes);
       if (x<0) x=0;
-      int y=floor((cursor.y-yOffset)/mapRes);
+      int y=floor((curs.y-yOffset)/mapRes);
       if (y<0) y=0;
+      p.selected=p.terrain[x+y*trueSize];
       return p.terrain[x+y*trueSize];
     } else
     {
@@ -54,7 +55,7 @@ class Map { //Used to display the terrain composition of a planet.
       t.draw(this);
     }
     screen.endDraw();
-    Terrain selected=pickTile();
+    Terrain selected=pickTile(ship.cursor);
     if (height<width) {
       if (selected!=null)
       {

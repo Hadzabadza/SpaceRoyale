@@ -22,6 +22,25 @@ IMG sprites;
 ArrayList<View> view;
 Terrain[] propMatrix=new Terrain[8]; //Used in propagation calculation
 float[] propRatios=new float[8];
+
+String[] resourceName={
+"Bedrock",
+"Omnitium",
+"Etramite",
+"Stone",
+"Perditium",
+"Solane",
+"Regolith",
+"Forazol"};
+float[] resourceTemperatureThreshold=
+{FMAX,FMAX,  //Bedrock   - impossibly hard.
+3000,FMAX,   //Omnitium  - melts at very high temperatures, lays very low.
+2200,FMAX,   //Etramite  - melts more easily than omni.
+1200,FMAX,   //Stone     - melts and becomes lava, useless, a filler.
+800,1400,    //Perditium - volatile element.
+600,1200,    //Solane    - condensed solar wind.
+500,800,     //Regolith  - covers other resource.
+10,200,};    //Forazol   - almost always a gas, almost never a solid.
  
 /////////////////GFX/////////////////
 PFont pixFont;
@@ -38,10 +57,7 @@ color backgroundColour= color(0);
 OscHub osc;
 
 /////////!!!!!FIX THESE!!!!!/////////
-//PVector mapScreenShift;
-//boolean mapScreen;
-Terrain active;
-PVector cursor;
+//NOTHING< YAY
 
 static class Settings {
 
@@ -61,7 +77,7 @@ static class Settings {
 
   //OSC stuff
   static String[] controllerIP={
-    "10.0.50.20", 
+    "192.168.0.100", 
     "192.168.0.105", 
     "192.168.1.162", 
     "192.168.1.162", 

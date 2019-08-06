@@ -87,7 +87,7 @@ void mouseReleased() {
   {
     if (ships[0].displayPlanetMap) 
     {
-      Terrain t=ships[0].land.surfaceScreen.pickTile();
+      Terrain t=ships[0].land.surfaceScreen.pickTile(ships[0].cursor);
       if (t!=null)
       {
         t.build();
@@ -97,7 +97,7 @@ void mouseReleased() {
       {
         ships[0].displayPlanetMap=false;
         ships[0].land.updateSurfaceImagery();
-        active=null;
+        //active=null;
       }
     } else if (ships[0].land!=null) {
       ships[0].displayPlanetMap=true;
@@ -105,13 +105,13 @@ void mouseReleased() {
     }
   }
   if (mouseButton==CENTER) if (ships[0].displayPlanetMap) {
-    Terrain t=ships[0].land.surfaceScreen.pickTile();
+    Terrain t=ships[0].land.surfaceScreen.pickTile(ships[0].cursor);
     if (t!=null) t.blopLava();
     else ships[0].zoom=1;
   } else ships[0].zoom=1;
 }
 
 void mouseMoved() {
-  cursor.x=mouseX;
-  cursor.y=mouseY;
+  ships[0].cursor.x=mouseX;
+  ships[0].cursor.y=mouseY;
 }

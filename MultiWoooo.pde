@@ -98,7 +98,7 @@ void init() { //Initialiser. Useful for game restarting
     ships[i].zoom=1;
   }
   //mapScreenShift=new PVector(100, 100);
-  cursor=new PVector(0.5, 0.5);
+  //cursor=new PVector(0.5, 0.5);
   if (osc!=null) {
     osc.exit();
     osc=null; 
@@ -110,14 +110,14 @@ void init() { //Initialiser. Useful for game restarting
   //Planet spawnPlanet=stars.get(0).planets.get(0);
   Planet spawnPlanet=stars.get(0).planets[stars.get(0).planets.length-1];
   float spawnDistance=spawnPlanet.gravWellRadius*0.95;
-  //ships[0].pos.x=spawnPlanet.pos.x+spawnPlanet.radius*cos(spawnDir);
-  //ships[0].pos.y=spawnPlanet.pos.y+spawnPlanet.radius*sin(spawnDir);
-  //ships[0].vel.x=spawnPlanet.vel.x;
-  //ships[0].vel.y=spawnPlanet.vel.y;
-  ships[0].pos.x=spawnPlanet.pos.x+spawnDistance*cos(spawnDir);
+  ships[0].pos.x=spawnPlanet.pos.x+spawnPlanet.radius*cos(spawnDir);
+  ships[0].pos.y=spawnPlanet.pos.y+spawnPlanet.radius*sin(spawnDir);
+  ships[0].vel.x=spawnPlanet.vel.x;
+  ships[0].vel.y=spawnPlanet.vel.y;
+  /*ships[0].pos.x=spawnPlanet.pos.x+spawnDistance*cos(spawnDir);
   ships[0].pos.y=spawnPlanet.pos.y+spawnDistance*sin(spawnDir);
   ships[0].vel.x=spawnPlanet.vel.x+sqrt(spawnPlanet.gravPull/spawnDistance)*cos(spawnDir+HALF_PI);
-  ships[0].vel.y=spawnPlanet.vel.y+sqrt(spawnPlanet.gravPull/spawnDistance)*sin(spawnDir+HALF_PI);
+  ships[0].vel.y=spawnPlanet.vel.y+sqrt(spawnPlanet.gravPull/spawnDistance)*sin(spawnDir+HALF_PI);*/
 }
 
 void draw() {

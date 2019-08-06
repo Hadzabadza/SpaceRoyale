@@ -496,11 +496,11 @@ class OscDockInitialized extends OscDock {
     if (s.displayPlanetMap==true)  
     {
       s.displayPlanetMap=false;
-      active=null;
+      //active=null;
     } else if (s.land!=null) {
       s.displayPlanetMap=true;
       s.thrust=0;
-      ex.send(new OscMessage("/PV"));
+      send(new OscMessage("/PV"));
     }
   }
 
@@ -543,15 +543,17 @@ class OscDockInitialized extends OscDock {
     if (s.land!=null) {
       int xOffset=(width-int(s.land.surfaceScreen.dimension.x))/2;
       int yOffset=(height-int(s.land.surfaceScreen.dimension.y))/2;
-      cursor.x=xOffset+x*int(s.land.surfaceScreen.dimension.x);
-      cursor.y=yOffset+y*int(s.land.surfaceScreen.dimension.y);
+      if (x!=1) s.cursor.x=xOffset+x*floor(s.land.surfaceScreen.dimension.x);
+      else s.cursor.x=xOffset+s.land.surfaceScreen.dimension.x-s.land.surfaceScreen.mapRes;
+      if (y!=1) s.cursor.y=yOffset+y*floor(s.land.surfaceScreen.dimension.y);
+      else s.cursor.y=yOffset+s.land.surfaceScreen.dimension.y-s.land.surfaceScreen.mapRes;
     }
   }
 
   public void placeVolcano(float f) {
     if (s.land!=null) 
     {
-      Terrain t=s.land.surfaceScreen.pickTile();
+      Terrain t=s.land.surfaceScreen.pickTile(s.cursor);
       if (t!=null) t.volcanize();
     }
   }

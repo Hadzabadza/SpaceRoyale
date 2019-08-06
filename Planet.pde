@@ -105,7 +105,7 @@ class Planet extends Object {
           { 
             float heatTransfer=surfaceTemp*Settings.hullPieceMass;
             if (heatTransfer>s.heatArray[i]) s.heatArray[i]+=(heatTransfer-s.heatArray[i])*0.01;
-             println(surfaceTemp*Settings.hullPieceMass/s.heatArray[i]);
+             //println(surfaceTemp*Settings.hullPieceMass/s.heatArray[i]);
           }
         }
       }
@@ -213,14 +213,14 @@ class Planet extends Object {
           maxHeight=t.totalOre;
           maxTile=t;
         }
-        if (ceil(t.lava+t.volcanoTime)>0) terrainUpdateQueue.set(""+(x+y*terrainSize), ceil(t.lava+t.volcanoTime));
+        if (ceil(t.lava+t.volcanoTime)>0) t.propagateLava();//terrainUpdateQueue.set(""+(x+y*terrainSize), ceil(t.lava+t.volcanoTime));
         //else t.removeLavaRemnants();
       }
     }
     avgHeight/=terrainSize*terrainSize;
-    terrainUpdateQueue.sortValuesReverse();
+    /*terrainUpdateQueue.sortValuesReverse();
     String[] trueQueue=terrainUpdateQueue.keyArray();
-    for (int i=0; i<trueQueue.length; i++) terrain[int(trueQueue[i])].propagateLava();
+    for (int i=0; i<trueQueue.length; i++) terrain[int(trueQueue[i])].propagateLava();*/
   }
 
   void update() {

@@ -37,6 +37,7 @@ class Ship extends Object {
   boolean missileAiming;
   boolean afterBurning;
   int turnWheelInput;
+  PVector cursor;
 
   Ship() {
     super(new PVector(), new PVector(), 0, Settings.shipSize);
@@ -63,6 +64,7 @@ class Ship extends Object {
     turretGfxDiameter+=diameter;
     heatArray=new float[32];
     hullPieceArea=diameter*PI/32;
+    cursor=new PVector(0.5,0.5);
     //for (int i=0; i<heatArray.length; i++) heatArray[i]=i*100;
   }
 
