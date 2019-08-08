@@ -21,7 +21,7 @@ PGraphics[] screen;
 IMG sprites;
 ArrayList<View> view;
 Terrain[] propMatrix=new Terrain[8]; //Used in propagation calculation
-float[] propRatios=new float[8];
+float[] PROPortions=new float[8];
 
 String[] resourceNames={
 "Bedrock",
@@ -118,6 +118,7 @@ static class Settings {
   //Planet properties
   static float gravityWellRadiusMultiplier=13;
   static int planetScaler=1;
+  static float resDisplayThreshold=1;
   
   //Ship properties
   static float shipSize=22; //Radius of ship entities

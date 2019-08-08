@@ -292,7 +292,6 @@ void fetchParticles(int n, PImage[] imgs, PVector where) {
     spareParts=0;
   }
 }
-
 void exit() {
   println("quitting");
   osc.exit();

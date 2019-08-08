@@ -3,8 +3,10 @@ class Terrain {
   int index;
   Planet p;
 
-  float[] resources=new float[resourceNames.length*3];
+  float[] resources=new float[resourceNames.length*3];  //Resources and their states of matter. 0 - solid, 1 - liquid - 2 - gas.
   float totalOre;
+  float totalLiquid;
+  float totalGas;
   
   float lava;
   float pressure;
@@ -23,14 +25,15 @@ class Terrain {
     p=_p;
     fill=0;
     totalOre=elev;
-    temperature=p.surfaceTemp;
+    temperature=p.ambientTemp;
     float[] resourceShare=new float[resourceNames.length];
-    float totalResourceShares=0;
+    float totalresourceShares=0;
+    float noiseOffset=-p.orbitNumber*9321;
     for (int i=0; i<resourceNames.length; i++) {
-      resourceShare[i]=random(0,1);
-      totalResourceShares+=resourceShare[i];
+      resourceShare[i]=noise(float(x)/100+noiseOffset+i*1000,float(y)/100+noiseOffset+i*1000);//random(0,1);
+      totalresourceShares+=resourceShare[i];
     }
-    for (int i=0; i<resourceNames.length; i++) resources[i*3]=elev*resourceShare[i]/totalResourceShares;
+    for (int i=0; i<resourceNames.length; i++) resources[i*3]=elev*resourceShare[i]/totalresourceShares;
     this.index=index;
   }
 
@@ -67,33 +70,38 @@ class Terrain {
   }
   
   color colouriseByResource(int resNumber){
+    float divider=(p.maxRes[resNumber*3]+p.maxRes[resNumber*3+1]+p.maxRes[resNumber*3+2]);
+    float brightness;
+    if (divider==0) return color(totalOre); 
+    else brightness=(resources[resNumber*3]+resources[resNumber*3+1]+resources[resNumber*3+2])/divider;
+    if (p.selected==this) println(brightness);
     switch (resNumber){
       case 0:{
-        return color(30);
+        return color(80*brightness);
       }
       case 1:{
-        return color(200,40,255);
+        return color(200*brightness,40*brightness,255*brightness);
       }
       case 2:{
-        return color(80,255,80);
+        return color(80*brightness,255*brightness,80*brightness);
       }
       case 3:{
-        return color(120);
+        return color(120*brightness);
       }
       case 4:{
-        return color(255,160,30);
+        return color(255*brightness,160*brightness,30*brightness);
       }
       case 5:{
-        return color(255,255,40);
+        return color(255*brightness,255*brightness,40*brightness);
       }
       case 6:{
-        return color(240,80,0);
+        return color(240*brightness,80*brightness,0);
       }
       case 7:{
-        return color(60,255,255);
+        return color(60*brightness,255*brightness,255*brightness);
       }
       default:{
-        return color(120);
+        return color(random(255));
       }
     }
   }
@@ -156,8 +164,73 @@ class Terrain {
       }
     }
   }
+  
+  /*void moveLava() {
+    int propagations=0;
+    float lowestFall=0;
+    float totalFall=0;
+    Terrain t;
+    int degStart=round(random(8));
+    for (int deg=0+45*degStart; deg<360+45*degStart; deg+=45) {
+      t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
+      if (t.totalOre+t.lava<totalOre+lava)
+      {
+        propMatrix[propagations]=t;
+        PROPortions[propagations]=(t.totalOre+t.lava)/(totalOre+lava);
+        if (lowestFall<(-t.totalOre-t.lava+totalOre+lava)) lowestFall=-t.totalOre-t.lava+totalOre+lava;
+        totalFall+=-t.totalOre-t.lava+totalOre+lava;
+        propagations++;
+      }
+    }
+    for (int i=0; i<propagations; i++) propMatrix[i].lava+=lowestFall/totalFall*PROPortions[i];
+    lava-=lowestFall;
+    /*avgPressure/=propagations+1;
+    //avgHeight/=propagations+1;
+    avgLava/=propagations+1;
+    for (int i=0; i<propagations; i++)
+    {
+      //propMatrix[i].lava=avgHeight+avgLava-propMatrix[i].totalOre;
+      propMatrix[i].lava=avgLava;
+      propMatrix[i].pressure=avgPressure;
+    }
+    lava=avgLava;
+    cooldownLava();
+  }*/
 
-  void moveLava() {
+  //void ImTakingOverNowGLitchMove() {
+    void moveLava(){
+    int propagations=0;
+    float lowestFall=0;
+    float totalFall=0;
+    Terrain t;
+    int degStart=round(random(8));
+    for (int deg=0+45*degStart; deg<360+45*degStart; deg+=45) {
+      t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
+      if (t.totalOre+t.lava<totalOre+lava)
+      {
+        propMatrix[propagations]=t;
+        PROPortions[propagations]=(t.totalOre+t.lava)/(totalOre+lava);
+        if (lowestFall<PROPortions[propagations]) lowestFall=PROPortions[propagations];
+        totalFall+=-t.totalOre-t.lava+totalOre+lava;
+        propagations++;
+      }
+    }
+    for (int i=0; i<propagations; i++) propMatrix[i].lava+=lowestFall/totalFall*PROPortions[i];
+    lava-=lowestFall;
+    /*avgPressure/=propagations+1;
+    //avgHeight/=propagations+1;
+    avgLava/=propagations+1;
+    for (int i=0; i<propagations; i++)
+    {
+      //propMatrix[i].lava=avgHeight+avgLava-propMatrix[i].totalOre;
+      propMatrix[i].lava=avgLava;
+      propMatrix[i].pressure=avgPressure;
+    }
+    lava=avgLava;*/
+    cooldownLava();
+  }
+
+  void moveLavaOld() {
     int propagations=0;
     float avgHeight=totalOre;
     float avgPressure=pressure;
@@ -206,9 +279,55 @@ class Terrain {
     pressure=0;
   }
   
-  void liquefy(){
+  void moveLiquids(){
+    int propagations=0;
+    float lowestFall;
+    float avgHeight=totalOre;
+    float avgPressure=pressure;
+    float avgLava=lava;
+    Terrain t;
+    int degStart=round(random(8));
+    for (int deg=0+45*degStart; deg<360+45*degStart; deg+=45) {
+      t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
+      if (t.totalOre+t.lava+t.pressure<totalOre+lava+pressure)
+      {
+        propagations++;
+        propMatrix[propagations-1]=t;
+      }
+    }
+  }
+  
+  void moveGas(){
+  }
+  
+  void melt(int resourceNumber){
+    resources[resourceNumber*3+1]+=resources[resourceNumber*3];
+    totalOre-=resources[resourceNumber*3];
+    totalLiquid+=resources[resourceNumber*3];
+    resources[resourceNumber*3]=0;
+  }
+  
+  void vaporise(int resourceNumber){
+    resources[resourceNumber*3+2]+=resources[resourceNumber*3+1];
+    totalLiquid-=resources[resourceNumber*3+1];
+    totalGas+=resources[resourceNumber*3+1];
+    resources[resourceNumber*3+1]=0;
+  }
+  
+  void solidify(int resourceNumber){
+    resources[resourceNumber*3]+=resources[resourceNumber*3+1];
+    totalOre+=resources[resourceNumber*3+1];
+    totalLiquid-=resources[resourceNumber*3+1];
+    resources[resourceNumber*3+1]=0;
   }
 
+  void condense(int resourceNumber){
+    resources[resourceNumber*3+1]+=resources[resourceNumber*3+2];
+    totalLiquid+=resources[resourceNumber*3+2];
+    totalGas-=resources[resourceNumber*3+2];
+    resources[resourceNumber*3+2]=0;
+  }
+  
   Terrain getNeighbour(int _x, int _y) {
     int neighX=x+_x;
     int neighY=y+_y;
@@ -247,6 +366,20 @@ class Terrain {
       water=false;
       depth=0;
     }
+    for (int i=0; i<resourceNames.length; i++){
+      if (temperature>resourceTemperatureThresholds[i*2+1]){
+        vaporise(i);
+        melt(i);        
+      }
+      else if (temperature<resourceTemperatureThresholds[i*2]){
+        solidify(i);
+        condense(i);
+      }
+      else {
+        melt(i);
+        condense(i);
+      }
+    }
   }
 
   float depthCalculation() {
@@ -283,8 +416,9 @@ class Terrain {
       if (pressure>0) m.screen.fill(pressure, 0, 0);      
       else m.screen.fill(totalOre);
     } else if (m.resourceMap){
-      if (resources[m.shownResource*3]>10) m.screen.fill(colouriseByResource(m.shownResource));
-      else m.screen.fill(totalOre);
+      //if (resources[m.shownResource*3]>Settings.resDisplayThreshold) 
+      m.screen.fill(colouriseByResource(m.shownResource));
+      //else m.screen.fill(totalOre);
     } else
     {
       if (water) m.screen.fill(0, 0, waterColour/2+waterColour/3+waterColour/3*(cos(gameTime)));

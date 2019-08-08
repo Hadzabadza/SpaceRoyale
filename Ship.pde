@@ -254,7 +254,7 @@ class Ship extends Object {
         for (Planet p : stars.get(0).planets) if (checkCollision(p)) //Find which planet collided with (landed on), if any
         {
           land=p;
-          println(land.surfaceTemp);
+          println(land.ambientTemp);
           if (getDistTo(p)<p.radius-radius*0.2) {
             vel.x=p.vel.x;
             vel.y=p.vel.y;

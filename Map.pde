@@ -58,12 +58,16 @@ class Map { //Used to display the terrain composition of a planet.
     screen.endDraw();
     Terrain selected=pickTile(ship.cursor);
     if (height<width) {
+      rr.textAlign(LEFT);
       if (selected!=null)
       {
         rr.fill(255);
         rr.text("Index: "+selected.index, pos.x+dimension.x+40, pos.y+20);
         rr.text("Current height: "+selected.totalOre, pos.x+dimension.x+40, pos.y+40);
         rr.text("Depth: "+selected.depth, pos.x+dimension.x+40, pos.y+60);
+        rr.text("Solid "+resourceNames[shownResource]+" at ("+selected.x+","+selected.y+"): "+(selected.resources[shownResource*3]), pos.x+dimension.x+40, pos.y+80);
+        rr.text("Liquid "+resourceNames[shownResource]+" at ("+selected.x+","+selected.y+"): "+(selected.resources[shownResource*3+1]), pos.x+dimension.x+40, pos.y+100);
+        rr.text("Gaseous "+resourceNames[shownResource]+" at ("+selected.x+","+selected.y+"): "+(selected.resources[shownResource*3+2]), pos.x+dimension.x+40, pos.y+120);
       }
       rr.fill(255);
       rr.textAlign(LEFT);
@@ -76,6 +80,9 @@ class Map { //Used to display the terrain composition of a planet.
         rr.text("Height Colouring: OFF", 50, pos.y+20);
       rr.text("Total Height: "+ship.land.totalHeight, 50, pos.y+100);
       rr.text("Sea level: "+ship.land.waterLevel, 50, pos.y+120);
+      rr.text("Max solid "+resourceNames[shownResource]+": "+p.maxRes[shownResource*3], 50, pos.y+140);
+      rr.text("Max liquid "+resourceNames[shownResource]+": "+p.maxRes[shownResource*3+1], 50, pos.y+160);
+      rr.text("Max gaseous "+resourceNames[shownResource]+": "+p.maxRes[shownResource*3+2], 50, pos.y+180);
     } else {
       if (selected!=null)
       {
