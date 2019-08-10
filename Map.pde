@@ -69,6 +69,7 @@ class Map { //Used to display the terrain composition of a planet.
         rr.text("Liquid "+resourceNames[shownResource]+" at ("+selected.x+","+selected.y+"): "+(selected.resources[shownResource*3+1]), pos.x+dimension.x+40, pos.y+100);
         rr.text("Gaseous "+resourceNames[shownResource]+" at ("+selected.x+","+selected.y+"): "+(selected.resources[shownResource*3+2]), pos.x+dimension.x+40, pos.y+120);
         rr.text("Lava: "+selected.lava, pos.x+dimension.x+40, pos.y+140);
+        rr.text("Pressure: "+selected.liquidPressure, pos.x+dimension.x+40, pos.y+160);
       }
       rr.fill(255);
       rr.textAlign(LEFT);

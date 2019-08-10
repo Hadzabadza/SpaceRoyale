@@ -114,8 +114,9 @@ class Terrain {
     }
     if (lava>0)
     {
-      if (lava>=0.08) moveLava();
-      else removeLavaRemnants();
+      //if (lava>=0.08) 
+      moveLava();
+      //else removeLavaRemnants();
     }
   }
 
@@ -127,9 +128,9 @@ class Terrain {
       t.totalOre-=lavaIncrement/p.terrain.length;
     }
     lava+=lavaIncrement;
-    lava+=totalOre*0.01;
-    totalOre*=0.99;
-    liquidPressure+=lavaIncrement;
+    //lava+=totalOre*0.01;
+    //totalOre*=0.99;
+    //liquidPressure+=lavaIncrement;
   }
 
   void blopLava() {
@@ -146,7 +147,7 @@ class Terrain {
           boom=0.3*cos(neighDist/rad*HALF_PI);
           // println(neighDist/rad*PI+" "+neighDist+" "+boom);
           t.lava+=t.totalOre*boom;
-          t.liquidPressure+=1000*boom;
+          t.liquidPressure+=100*boom;
           t.totalOre*=1-boom;
         }
       }
@@ -188,26 +189,27 @@ class Terrain {
         avgPressure+=t.liquidPressure;
       }
     }
-    if (lowestFall>lava) lowestFall=lava;
+    if (lowestFall>lava*0.8) lowestFall=lava*0.8;
     for (int i=0; i<propagations; i++) {
       if (totalFall!=0){
         currProp=PROPortions[i]/totalFall;
-        propMatrix[i].lava+=lowestFall*currProp;
-        propMatrix[i].liquidPressure+=liquidPressure*currProp;
+        p.lavaChange[propMatrix[i].index]+=lowestFall*currProp;
+        p.liquidPressureChange[propMatrix[i].index]+=liquidPressure*currProp;
+        //propMatrix[i].lava+=lowestFall*currProp;
+        //propMatrix[i].liquidPressure+=liquidPressure*currProp;
       }
       propMatrix[i].liquidPressure=avgPressure/(propagations+1);
     }
-    lava-=lowestFall;
-    liquidPressure=avgPressure/(propagations+1);
-    //liquidPressure-=totalFall;
+    p.lavaChange[index]-=lowestFall;
+    p.liquidPressureChange[index]-=liquidPressure-avgPressure/(propagations+1);
   }
 
   void cooldownLava() {
-    totalOre+=lava*0.02;
-    lava*=0.98;
-    if (lava<=0.08) {
-      removeLavaRemnants();
-    }
+    //totalOre+=lava*0.02;
+    //lava*=0.98;
+    //if (lava<=0.08) {
+    //  removeLavaRemnants();
+    //}
   }
 
   void removeLavaRemnants() {

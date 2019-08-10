@@ -71,6 +71,8 @@ class Planet extends Object {
     ambientTemp=s.mass/(2*PI*distance)*radius; //This is how much energy a planet gets and has to give away to stabilise temperature.
     ambientTemp*=PI*diameter/mass; //This is its actual temperature.
     terrain=new Terrain[terrainSize*terrainSize];
+    lavaChange=new float[terrainSize*terrainSize];           //
+    liquidPressureChange=new float[terrainSize*terrainSize];
     if (height<width)
       mapRes=floor(height/(terrainSize+20));
     else
@@ -225,6 +227,12 @@ class Planet extends Object {
         if (ceil(t.lava+t.volcanoTime)>0) t.propagateLava();//terrainUpdateQueue.set(""+(x+y*terrainSize), ceil(t.lava+t.volcanoTime));
         //else t.removeLavaRemnants();
       }
+    }
+    for (int i=0; i<terrain.length; i++){
+      terrain[i].lava+=lavaChange[i];
+      terrain[i].liquidPressure=liquidPressureChange[i];
+      lavaChange[i]=0;
+      liquidPressureChange[i]=0;
     }
     avgHeight/=terrainSize*terrainSize;
     /*terrainUpdateQueue.sortValuesReverse();
