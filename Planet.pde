@@ -26,6 +26,7 @@ class Planet extends Object {
   float minHeight=255;          //Lowest point on the map.
   float maxHeight=0;            //Highest point on the map.
   float totalHeight=0;          //Total landmass of the planet. 
+  float totalLava=0;            //Total lava level of the planet, TODO: replace with liquids.
   float waterLevel=0;           //Eye-candy water, to be removed. TODO: replace with actual liquids.
   int mapRes;                   //This is the multiplier for the map's pixels (if the screen can fir two maps, each pixel will be twice its size).
   IntDict terrainUpdateQueue;   //Unused due to being computationally expensive, supposed to even out the distribution of lava.
@@ -200,6 +201,7 @@ class Planet extends Object {
     totalHeight=0;
     minHeight=99999;
     maxHeight=-99999;
+    totalLava=0;
     avgHeight=0;
     terrainUpdateQueue=new IntDict();
     for (int i=0; i<maxRes.length; i++) maxRes[i]=0;
@@ -210,6 +212,7 @@ class Planet extends Object {
       { 
         t=terrain[x+y*terrainSize];
         totalHeight+=t.totalOre;
+        totalLava+=t.lava;
         avgHeight+=t.totalOre;
         if (minHeight>t.totalOre) minHeight=t.totalOre;
         if (maxHeight<t.totalOre) {

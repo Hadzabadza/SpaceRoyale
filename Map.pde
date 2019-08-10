@@ -68,6 +68,7 @@ class Map { //Used to display the terrain composition of a planet.
         rr.text("Solid "+resourceNames[shownResource]+" at ("+selected.x+","+selected.y+"): "+(selected.resources[shownResource*3]), pos.x+dimension.x+40, pos.y+80);
         rr.text("Liquid "+resourceNames[shownResource]+" at ("+selected.x+","+selected.y+"): "+(selected.resources[shownResource*3+1]), pos.x+dimension.x+40, pos.y+100);
         rr.text("Gaseous "+resourceNames[shownResource]+" at ("+selected.x+","+selected.y+"): "+(selected.resources[shownResource*3+2]), pos.x+dimension.x+40, pos.y+120);
+        rr.text("Lava: "+selected.lava, pos.x+dimension.x+40, pos.y+140);
       }
       rr.fill(255);
       rr.textAlign(LEFT);
@@ -83,6 +84,7 @@ class Map { //Used to display the terrain composition of a planet.
       rr.text("Max solid "+resourceNames[shownResource]+": "+p.maxRes[shownResource*3], 50, pos.y+140);
       rr.text("Max liquid "+resourceNames[shownResource]+": "+p.maxRes[shownResource*3+1], 50, pos.y+160);
       rr.text("Max gaseous "+resourceNames[shownResource]+": "+p.maxRes[shownResource*3+2], 50, pos.y+180);
+      rr.text("Total lava: "+p.totalLava, 50, pos.y+200);
     } else {
       if (selected!=null)
       {

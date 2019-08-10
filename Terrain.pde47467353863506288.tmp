@@ -166,7 +166,6 @@ class Terrain {
   }
   
   void moveLava() {
-    cooldownLava();
     int propagations=0;
     float lowestFall=0;
     float totalFall=0;
@@ -179,14 +178,12 @@ class Terrain {
         propMatrix[propagations]=t;
         PROPortions[propagations]=(t.totalOre+t.lava)/(totalOre+lava);
         if (lowestFall<(-t.totalOre-t.lava+totalOre+lava)) lowestFall=-t.totalOre-t.lava+totalOre+lava;
-        totalFall+=PROPortions[propagations];
+        totalFall+=-t.totalOre-t.lava+totalOre+lava;
         propagations++;
       }
     }
-    if (lowestFall>lava) lowestFall=lava;
     for (int i=0; i<propagations; i++) {
       propMatrix[i].lava+=lowestFall/totalFall*PROPortions[i];
-      //propMatrix[i].lava+=lowestFall/totalFall*PROPortions[i];
     }
     lava-=lowestFall;
     /*avgPressure/=propagations+1;
@@ -199,6 +196,7 @@ class Terrain {
       propMatrix[i].pressure=avgPressure;
     }
     lava=avgLava;*/
+    // cooldownLava();
   }
 
   void ImTakingOverNowGLitchMove() {
@@ -269,9 +267,9 @@ class Terrain {
   }
 
   void cooldownLava() {
-    totalOre+=lava*0.02;
-    pressure*=0.98;
-    lava*=0.98;
+    totalOre+=lava*0.05;
+    pressure*=0.95;
+    lava*=0.95;
     if (lava<=0.08) {
       removeLavaRemnants();
     }
