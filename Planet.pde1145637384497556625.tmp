@@ -35,8 +35,9 @@ class Planet extends Object {
   Terrain selected;             //Currently selected tile. TODO: make this multiplayer-friendly.
   float ambientTemp;            //Planet's ambient temperature. All tiles start with this, heats the ship up to this value if landed.
   //Update queue
-  float[] lavaChange;           //
-  float[] liquidPressureChange; //
+  Terrain[] updateQueue;
+  float[] lavaChange;
+  float[] liquidPressureChange;
 
   Planet(Star s, float mas, float dens, float distS, int number) {
     super(new PVector(), new PVector(), 0, sqrt(mas)/dens);

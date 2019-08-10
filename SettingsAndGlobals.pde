@@ -21,7 +21,8 @@ PGraphics[] screen;
 IMG sprites;
 ArrayList<View> view;
 Terrain[] propMatrix=new Terrain[8]; //Used in propagation calculation
-float[] PROPortions=new float[8];
+float[] PROPortions=new float[8];    //Proportional movement of liquids
+float[] pressMatrix=new float[8];    //Proportional movement of liquid pressure
 
 String[] resourceNames={
 "Bedrock",

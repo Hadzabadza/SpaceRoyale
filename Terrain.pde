@@ -9,9 +9,8 @@ class Terrain {
   float totalGas;
   
   float lava;
-  float pressure;
+  float liquidPressure;                                 //Used to simulate liquids being pushed out of the explosion epicentre
   float temperature;
-  boolean volcano;
   int volcanoTime;
 
   float waterColour;
@@ -122,12 +121,15 @@ class Terrain {
 
   void createLava() {
 
-    float lavaIncrement=300-lava;
+    float lavaIncrement=100-lava;
     for (Terrain t : p.terrain)
     {
       t.totalOre-=lavaIncrement/p.terrain.length;
     }
     lava+=lavaIncrement;
+    lava+=totalOre*0.01;
+    totalOre*=0.99;
+    liquidPressure+=lavaIncrement;
   }
 
   void blopLava() {
@@ -144,7 +146,7 @@ class Terrain {
           boom=0.3*cos(neighDist/rad*HALF_PI);
           // println(neighDist/rad*PI+" "+neighDist+" "+boom);
           t.lava+=t.totalOre*boom;
-          t.pressure+=t.lava;
+          t.liquidPressure+=1000*boom;
           t.totalOre*=1-boom;
         }
       }
@@ -169,108 +171,39 @@ class Terrain {
     cooldownLava();
     int propagations=0;
     float lowestFall=0;
+    float avgPressure=liquidPressure;
     float totalFall=0;
+    float currProp=0;
     Terrain t;
     int degStart=round(random(8));
     for (int deg=0+45*degStart; deg<360+45*degStart; deg+=45) {
       t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
-      if (t.totalOre+t.lava<totalOre+lava)//&&(lava>0))
+      if (t.totalOre+t.lava+t.liquidPressure<totalOre+lava+liquidPressure)//&&(lava>0))
       {
         propMatrix[propagations]=t;
-        PROPortions[propagations]=(t.totalOre+t.lava)/(totalOre+lava);
-        if (lowestFall<(-t.totalOre-t.lava+totalOre+lava)) lowestFall=-t.totalOre-t.lava+totalOre+lava;
+        PROPortions[propagations]=(t.totalOre+t.lava+t.liquidPressure)/(totalOre+lava+liquidPressure);
+        if (lowestFall<(-t.totalOre-t.lava-t.liquidPressure+totalOre+lava+liquidPressure)) lowestFall=-t.totalOre-t.lava-t.liquidPressure+totalOre+lava+liquidPressure;
         totalFall+=PROPortions[propagations];
         propagations++;
+        avgPressure+=t.liquidPressure;
       }
     }
     if (lowestFall>lava) lowestFall=lava;
     for (int i=0; i<propagations; i++) {
-      propMatrix[i].lava+=lowestFall/totalFall*PROPortions[i];
-      //propMatrix[i].lava+=lowestFall/totalFall*PROPortions[i];
+      if (totalFall!=0){
+        currProp=PROPortions[i]/totalFall;
+        propMatrix[i].lava+=lowestFall*currProp;
+        propMatrix[i].liquidPressure+=liquidPressure*currProp;
+      }
+      propMatrix[i].liquidPressure=avgPressure/(propagations+1);
     }
     lava-=lowestFall;
-    /*avgPressure/=propagations+1;
-    //avgHeight/=propagations+1;
-    avgLava/=propagations+1;
-    for (int i=0; i<propagations; i++)
-    {
-      //propMatrix[i].lava=avgHeight+avgLava-propMatrix[i].totalOre;
-      propMatrix[i].lava=avgLava;
-      propMatrix[i].pressure=avgPressure;
-    }
-    lava=avgLava;*/
-  }
-
-  void ImTakingOverNowGLitchMove() {
-    //void moveLava(){
-    int propagations=0;
-    float lowestFall=0;
-    float totalFall=0;
-    Terrain t;
-    int degStart=round(random(8));
-    for (int deg=0+45*degStart; deg<360+45*degStart; deg+=45) {
-      t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
-      if (t.totalOre+t.lava<totalOre+lava)
-      {
-        propMatrix[propagations]=t;
-        PROPortions[propagations]=(t.totalOre+t.lava)/(totalOre+lava);
-        if (lowestFall<PROPortions[propagations]) lowestFall=PROPortions[propagations];
-        totalFall+=-t.totalOre-t.lava+totalOre+lava;
-        propagations++;
-      }
-    }
-    for (int i=0; i<propagations; i++) propMatrix[i].lava+=lowestFall/totalFall*PROPortions[i];
-    lava-=lowestFall;
-    /*avgPressure/=propagations+1;
-    //avgHeight/=propagations+1;
-    avgLava/=propagations+1;
-    for (int i=0; i<propagations; i++)
-    {
-      //propMatrix[i].lava=avgHeight+avgLava-propMatrix[i].totalOre;
-      propMatrix[i].lava=avgLava;
-      propMatrix[i].pressure=avgPressure;
-    }
-    lava=avgLava;*/
-    cooldownLava();
-  }
-
-  void moveLavaOld() {
-    int propagations=0;
-    float avgHeight=totalOre;
-    float avgPressure=pressure;
-    float avgLava=lava;
-    Terrain t;
-    int degStart=round(random(8));
-    for (int deg=0+45*degStart; deg<360+45*degStart; deg+=45) {
-      t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
-      if (t.totalOre+t.lava+t.pressure<totalOre+lava+pressure)
-      {
-        propagations++;
-        propMatrix[propagations-1]=t;
-      }
-    }
-    for (int i=0; i<propagations; i++)
-    {
-      avgPressure+=propMatrix[i].pressure;
-      //avgHeight+=propMatrix[i].totalOre;
-      avgLava+=propMatrix[i].lava;
-    }
-    avgPressure/=propagations+1;
-    //avgHeight/=propagations+1;
-    avgLava/=propagations+1;
-    for (int i=0; i<propagations; i++)
-    {
-      //propMatrix[i].lava=avgHeight+avgLava-propMatrix[i].totalOre;
-      propMatrix[i].lava=avgLava;
-      propMatrix[i].pressure=avgPressure;
-    }
-    lava=avgLava;
-    cooldownLava();
+    liquidPressure=avgPressure/(propagations+1);
+    //liquidPressure-=totalFall;
   }
 
   void cooldownLava() {
     totalOre+=lava*0.02;
-    pressure*=0.98;
     lava*=0.98;
     if (lava<=0.08) {
       removeLavaRemnants();
@@ -280,20 +213,20 @@ class Terrain {
   void removeLavaRemnants() {
     totalOre+=lava;
     lava=0;
-    pressure=0;
+    liquidPressure=0;
   }
   
   void moveLiquids(){
     int propagations=0;
     float lowestFall;
     float avgHeight=totalOre;
-    float avgPressure=pressure;
+    float avgPressure=liquidPressure;
     float avgLava=lava;
     Terrain t;
     int degStart=round(random(8));
     for (int deg=0+45*degStart; deg<360+45*degStart; deg+=45) {
       t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
-      if (t.totalOre+t.lava+t.pressure<totalOre+lava+pressure)
+      if (t.totalOre+t.lava+t.liquidPressure<totalOre+lava+liquidPressure)
       {
         propagations++;
         propMatrix[propagations-1]=t;
@@ -350,6 +283,7 @@ class Terrain {
   }
 
   void update() {
+    //liquidPressure*=0.98;
     if (!water)
     {
       fill=color(map(totalOre, p.minHeight, p.maxHeight, 255, 0), map(totalOre, p.minHeight, p.maxHeight, 0, 255), 0);
@@ -417,7 +351,7 @@ class Terrain {
        else rr.fill(fill);*/
       m.screen.fill(colouriseByHeight(totalOre, p.minHeight, p.maxHeight, p.waterLevel));
     } else if (m.pressureMap) {
-      if (pressure>0) m.screen.fill(pressure, 0, 0);      
+      if (liquidPressure>0) m.screen.fill(liquidPressure, 0, 0);      
       else m.screen.fill(totalOre);
     } else if (m.resourceMap){
       //if (resources[m.shownResource*3]>Settings.resDisplayThreshold) 
