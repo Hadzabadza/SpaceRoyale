@@ -9,7 +9,7 @@ class Terrain {
   float totalGas;
   
   float lava;
-  float liquidPressure;                                 //Used to simulate liquids being pushed out of the explosion epicentre
+  float liquidPressure;                                 //Used to simulate liquids being pushed, out of an explosion epicentre, for example.
   float temperature;
   int volcanoTime;
 
@@ -168,7 +168,7 @@ class Terrain {
     }
   }
   
-  void moveLava() {
+void moveLava() {
     cooldownLava();
     int propagations=0;
     float lowestFall=0;
@@ -189,7 +189,7 @@ class Terrain {
         avgPressure+=t.liquidPressure;
       }
     }
-    if (lowestFall>lava*0.8) lowestFall=lava*0.8;
+    if (lowestFall>lava) lowestFall=lava;
     for (int i=0; i<propagations; i++) {
       if (totalFall!=0){
         currProp=PROPortions[i]/totalFall;
@@ -203,7 +203,43 @@ class Terrain {
     p.lavaChange[index]-=lowestFall;
     p.liquidPressureChange[index]-=liquidPressure-avgPressure/(propagations+1);
   }
-
+  
+  void moveLavaOld() {
+    int propagations=0;
+    float avgHeight=totalOre;
+    float avgPressure=liquidPressure;
+    float avgLava=lava;
+    Terrain t;
+    int degStart=round(random(8));
+    for (int deg=0+45*degStart; deg<360+45*degStart; deg+=45) {
+      t=getNeighbour(round(cos(radians(deg))), round(sin(radians(deg))));
+      if (t.totalOre+t.lava+t.liquidPressure<totalOre+lava+liquidPressure)
+      {
+        propagations++;
+        propMatrix[propagations-1]=t;
+      }
+    }
+    for (int i=0; i<propagations; i++)
+    {
+      avgPressure+=propMatrix[i].liquidPressure;
+      avgHeight+=propMatrix[i].totalOre;
+      avgLava+=propMatrix[i].lava;
+    }
+    avgPressure/=propagations+1;
+    avgHeight/=propagations+1;
+    avgLava/=propagations+1;
+    for (int i=0; i<propagations; i++)
+    {
+      //propMatrix[i].lava=avgHeight+avgLava-propMatrix[i].totalOre;
+      propMatrix[i].lava=avgLava;
+      //p.lavaChange[propMatrix[i].index]-=propMatrix[i].lava-avgLava;
+      //p.liquidPressureChange[propMatrix[i].index]-=propMatrix[i].liquidPressure-avgPressure;
+    }
+    lava=avgLava;
+    ///p.lavaChange[index]-=lava-avgLava;
+    //p.liquidPressureChange[index]-=liquidPressure-avgPressure;
+    cooldownLava();
+  }
   void cooldownLava() {
     //totalOre+=lava*0.02;
     //lava*=0.98;

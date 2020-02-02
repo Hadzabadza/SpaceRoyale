@@ -2,12 +2,12 @@ class Planet extends Object {
   
   //Orbital parameters
   Star orbitStar;               //Orbited star.
-  float starPull;               //Gravitation pull of the star.
+  float starPull;               //Gravitational pull of the parent star.
   float distance;               //Distance from the star.
-  int gravWellRadius;           //Radius of the gravity well of the planet.
-  int gravWellDiameter;         //Obvious.
+  int gravWellRadius;           //Radius of the planetary gravity well.
+  int gravWellDiameter;         //Diameter of the above.
   float gravPull;               //Gravitational pull of the planet.
-  PVector grav;                 //Temporary vector for calculation of the orbited star's gravitational pull on this planet.
+  PVector grav;                 //Temporary vector for calculation of the parent star's gravity forces.
   int orbitNumber;              //Number of planet's orbit, also used as its ID.
   //Vars for calculating planetary shade
   PVector[] shadePoints;        //0 - Left, 1 - right, 2 - tip (on the furthest point of stellar grav radius).

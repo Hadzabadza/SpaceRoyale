@@ -1,4 +1,4 @@
-void keyPressed() { 
+void keyPressed() { //Here are all the hard-coded buttons for keyboard controls.
   if (!ships[0].displayPlanetMap) {
     if ((key == 'w')||(key=='W'))  ships[0].speedUp = true;
     if ((key == 's')||(key=='S'))  ships[0].slowDown = true;

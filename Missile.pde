@@ -1,4 +1,4 @@
-class Missile extends Object {
+class Missile extends Object { //A class for homing projectiles.
   int timer=Settings.msslSelfDestructTimer;
   int inactivityTimer=Settings.msslInactivityTimer;
   float fuel=Settings.msslFuel;

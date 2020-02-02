@@ -1,4 +1,4 @@
-class ControlPanel{
+/*class ControlPanel{
   Button[] b;
   Slider[] s;
-}
+}*/

@@ -1,4 +1,4 @@
-class Map { //Used to display the terrain composition of a planet.
+class Map { //Used to display the terrain of a planet.
   Planet p;
   PVector dimension;
   PVector screeenPos;

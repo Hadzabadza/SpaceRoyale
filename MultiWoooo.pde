@@ -1,48 +1,60 @@
-//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
-//TODO: SHIP: Improve targeting!
+//TODO: Add direction and speed markers. //<>//
+//TODO: Add a planet scan system
+//TODO: Orbital scan/planet interaction
+//TODO: Make directions matter when facing planets from orbit/landing
+//TODO: Add upgrades system
+//TODO: Add UIs for new stuff
+//TODO: Add difficulty levels
+//TODO: Add intra-system node travel
+//TODO: Add inter-system travel and animations
+//TODO: Fix gas/liquids propagation
 //TODO: MISSILE: Improve targeting!!!!
+//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
+//TODO: SHIP: Improve targeting!
 //TODO: OSC: Find the name of the connected device and add to bundle logs.
 //TODO: OSC: Fix controller unresponsiveness after reinit
-//TODO: Fix fetchkvetch
 //TODO: improve particle systems, maybe put into a manager class
 
-import oscP5.*;
-import netP5.*;
 
-Slider testSLD;
+
+import oscP5.*;                                             //Required libs for TouchOSC controls.
+import netP5.*; 
+
+Slider testSLD; 
 Slider operated;
 
 void setup() {
-  size(1300, 700, P3D); //Screen size, can't be dynamically adjusted
-  surface.setLocation((displayWidth-1300)/2, (displayHeight-700)/2); //Location of the game window on screen
+  size(1300, 700, P3D);                                     //Screen size, can't be dynamically adjusted
+  surface.setLocation((displayWidth-1300)/2, 
+  (displayHeight-700)/2);                                   //Location of the game window on screen
   randomSeed(seed);
 
-  pixFont=createFont("Minecraftia-Regular.ttf", 120, true); //The font used throughout the game
+  pixFont=createFont("Minecraftia-Regular.ttf", 120, true); //The font of the game
   textFont(pixFont, 12); 
   sprites=new IMG();
-  sprites.loadImages(); //Loader for all the game's sprites. Defined on "Sprites" tab.
+  sprites.loadImages();                                     //Loader for all the game's sprites
 
-  frameRate(Settings.FPS); //For testing purposes
+  frameRate(Settings.FPS);                                  //DEBUG
 
-  init(); //Initialiser. Useful for game restarting
+  init();
 }
 
-void init() { //Initialiser. Useful for game restarting
+void init() {                                               //Initialiser. Useful for game restarting
   gameState=0; 
 
-  frameCount=0; //Framecount restarter
+  frameCount=0;                                             //Framecount restart
 
-  stars=new ArrayList<Star>();  //Resets all tracked object lists.
+  stars=new ArrayList<Star>();                              //Resets all tracked object lists.
   asteroids=new ArrayList<Asteroid>();
   bullets=new ArrayList<Bullet>(); 
   missiles=new ArrayList<Missile>();
   ships=new Ship[Settings.ships]; 
   objects=new ArrayList<Object>();
 
-  particles=new ArrayList<Particle>(); //Particle buffers
+  particles=new ArrayList<Particle>();                     //Particle buffers
   spareParticles=new ArrayList<Particle>();
 
-  destroyees=new ArrayList<Object>(); //Object destruction and construction queues
+  destroyees=new ArrayList<Object>();                      //Object destruction and construction queues
   newSpawns=new ArrayList<Object>();
 
   screen= new PGraphics[Settings.ships];
@@ -55,46 +67,14 @@ void init() { //Initialiser. Useful for game restarting
     PVector startPos=new PVector(startDist*cos(startDir), startDist*sin(startDir));
     screen[i]=createGraphics(width/Settings.ships, height, P3D);
     switch (i) {
-    case 0: 
-      {
-        ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 255, 0));
-        break;
-      }
-    case 1: 
-      {
-        ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 0, 0));
-        break;
-      }
-    case 2: 
-      {
-        ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 0, 255));
-        break;
-      }
-    case 3: 
-      {
-        ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 255, 255));
-        break;
-      }
-    case 4: 
-      {
-        ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 0, 255));
-        break;
-      }
-    case 5: 
-      {
-        ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 255, 0));
-        break;
-      }
-    case 6: 
-      {
-        ships[i]=new Ship(startPos, startDir+HALF_PI, color(100, 100, 0));
-        break;
-      }
-    case 7: 
-      {
-        ships[i]=new Ship(startPos, startDir+HALF_PI, color(100));
-        break;
-      }
+      case 0: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 255, 0)); break;}
+      case 1: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 0, 0)); break;}
+      case 2: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 0, 255)); break;}
+      case 3: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 255, 255)); break;}
+      case 4: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 0, 255)); break;}
+      case 5: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 255, 0)); break;}
+      case 6: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(100, 100, 0)); break;}
+      case 7: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(100)); break;}
     }
     //ships[i].vel.x=stars.get(0).gravPull*120*cos(startDir+HALF_PI);
     //ships[i].vel.y=stars.get(0).gravPull*120*sin(startDir+HALF_PI);
