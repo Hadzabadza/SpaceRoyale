@@ -21,6 +21,10 @@ class Ship extends Object {
   float hullPieceArea;
   PImage sprt=sprites.Ship;
 
+  //Graphics
+  VelocityIndicator speedometer;
+  HeatIndicator thermometer;
+
   //Controls and inputs
   boolean speedUp;
   boolean slowDown;
@@ -38,6 +42,12 @@ class Ship extends Object {
   boolean afterBurning;
   int turnWheelInput;
   PVector cursor;
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Init functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   Ship() {
     super(new PVector(), new PVector(), 0, Settings.shipSize);
@@ -60,101 +70,21 @@ class Ship extends Object {
     aimDir=_dir;
     shipInit();
   }
+
   void shipInit() {
     turretGfxDiameter+=diameter;
     heatArray=new float[32];
     hullPieceArea=diameter*PI/32;
     cursor=new PVector(0.5,0.5);
+    speedometer=new VelocityIndicator(width-80,80,50,50,this);
     //for (int i=0; i<heatArray.length; i++) heatArray[i]=i*100;
   }
 
-  void updateHeat() {
-    for (int i=0; i<heatArray.length; i++) { //IF first element in array
-      if (i==0) {
-        heatFunction(0, heatArray.length-1, 1);
-      } else if (i==heatArray.length-1) { //IF last element in array
-        heatFunction(i, i-1, 0);
-      } else { //If any other element in array
-        heatFunction(i, i-1, i+1);
-      }
-    }
-  }
-
-  void heatFunction(int mid, int left, int right) {
-    //RADIATION
-    float heatRad=(heatArray[mid]/Settings.hullPieceMass)*hullPieceArea/Settings.FPS;
-    heatArray[left]+=heatRad;
-    heatArray[right]+=heatRad;
-    heatArray[mid]-=heatRad*3;
-    
-    //CONDUCTION
-    float heatConduction=0;
-    if (heatArray[left]<heatArray[mid]) {
-      heatConduction=(heatArray[mid]-heatArray[left])*Settings.heatConductivityRate;
-      heatArray[left]+=heatConduction;
-      heatArray[mid]-=heatConduction;
-    }
-    if (heatArray[right]<heatArray[mid]) {
-      heatConduction=(heatArray[mid]-heatArray[right])*Settings.heatConductivityRate;
-      heatArray[right]+=heatConduction;
-      heatArray[mid]-=heatConduction;
-    }
-    /*
-    float heatConduction=0;
-    heatArray[mid]*=Settings.heatRadiationRate;
-    if (heatArray[left]<heatArray[mid]) {
-      heatConduction=(heatArray[mid]-heatArray[left])*Settings.heatConductivityRate;
-      heatArray[left]+=heatConduction;
-      heatArray[mid]-=heatConduction;
-    }
-    if (heatArray[right]<heatArray[mid]) {
-      heatConduction=(heatArray[mid]-heatArray[right])*Settings.heatConductivityRate;
-      heatArray[right]+=heatConduction;
-      heatArray[mid]-=heatConduction;
-    }*/
-  }
-
-  void heatUpSide(float rad, float energy) {
-    if (dir>rad) rad+=TWO_PI;
-    rad=(rad-dir)%TWO_PI;
-    int index=floor(rad/(QUARTER_PI/4)); 
-    if (index<0) index=heatArray.length-index;
-    if (index>=heatArray.length) index-=heatArray.length;
-    //if (heatArray[index]<temp)
-    heatArray[index]+=energy;//energy*(pow(1-heatArray[index]/temp,2));
-    //println(energy+" "+heatArray[index]);
-    //if (temp>heatArray[index]) heatArray[index]+=(temp-heatArray[index])*energy/Settings.FPS;
-  }
-
-  void turnLeft() {
-    spin-=Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed;
-  };
-
-  void turnRight() {
-    spin+=Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed;
-  };
-
-  void turnLeft(float assistPower) {
-    spin-=(assistPower*Settings.assistedTurnSpeed)*thrust+Settings.staticTurnSpeed;
-  };
-
-  void turnRight(float assistPower) {
-    spin+=(assistPower*Settings.assistedTurnSpeed)*thrust+Settings.staticTurnSpeed;
-  };
-
-  void killSpin() {
-    spin+=Math.signum(spin)*-1*(Settings.staticTurnSpeed+Settings.assistedTurnSpeed);
-  }
-
-  void zoomIn() {
-    if (zoom>0.2) zoom*=0.95;
-    else zoom=0.2;
-  }
-
-  void zoomOut() {
-    if (zoom<50) zoom*=1.05;
-    else zoom=50;
-  }
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    General functions                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   void shoot() {
     if (cooldown<=0) {
@@ -188,30 +118,16 @@ class Ship extends Object {
     distToTarget=min;
   }
 
-  void drawTarget(PGraphics rr) {
-    if ((dock.activePage==3)||(missileAiming))
-      if ((distToTarget<Settings.targetingDistance)&&(target!=null)) {
-        rr.stroke(200);
-        rr.strokeWeight(1);
-        rr.noFill();
-        for (int i =0; i<3; i++) for (int j=0; j<4; j++) rr.arc(target.pos.x, target.pos.y, target.diameter*1.05+10+(target.diameter*0.05+6)*i, target.diameter*1.05+10+(target.diameter*0.05+6)*i, QUARTER_PI/2+HALF_PI*j+gameTime, (QUARTER_PI+QUARTER_PI/2)+HALF_PI*j+gameTime);
-      }
-  }
-  void drawAim(PGraphics rr) {
-    if (!destroyed) {
-      PVector turretPos=new PVector(pos.x-Settings.turretXOffset*cos(dir)-Settings.turretYOffset*sin(dir), pos.y-Settings.turretXOffset*sin(dir)-Settings.turretYOffset*cos(dir+PI));
-      rr.stroke(200);
-      rr.noFill();
-      rr.strokeWeight(1);
-      rr.line(turretPos.x+turretGfxDiameter/2*cos(aimDir), turretPos.y+turretGfxDiameter/2*sin(aimDir), turretPos.x+(turretGfxDiameter/2+20)*cos(aimDir), turretPos.y+(turretGfxDiameter/2+20)*sin(aimDir));
-      rr.arc(turretPos.x, turretPos.y, turretGfxDiameter, turretGfxDiameter, aimDir-0.5, aimDir+0.5);
-    }
-  }
-
   void stopWarp() {
     warp=false;
     for (int i=0; i<3; i++) particles.add(new Particle(sprites.ShieldWaves, new PVector(pos.x+60*cos(dir+PI/3*(i-1)), pos.y+60*sin(dir+PI/3*(i-1))), new PVector(warpSpeed*cos(dir+PI/3*(i-1)), warpSpeed*sin(dir+PI/3*(i-1))), dir+PI/3*(i-1), color(255), 0.54, -5, 0.05, 0, 255, false));
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Update functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   void update() {
     if (dir<0) dir=TWO_PI+dir;
@@ -317,6 +233,107 @@ class Ship extends Object {
     }
   }
 
+  void turnLeft() {
+    spin-=Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed;
+  };
+
+  void turnRight() {
+    spin+=Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed;
+  };
+
+  void turnLeft(float assistPower) {
+    spin-=(assistPower*Settings.assistedTurnSpeed)*thrust+Settings.staticTurnSpeed;
+  };
+
+  void turnRight(float assistPower) {
+    spin+=(assistPower*Settings.assistedTurnSpeed)*thrust+Settings.staticTurnSpeed;
+  };
+
+  void killSpin() {
+    spin+=Math.signum(spin)*-1*(Settings.staticTurnSpeed+Settings.assistedTurnSpeed);
+  }
+
+  void zoomIn() {
+    if (zoom>0.2) zoom*=0.95;
+    else zoom=0.2;
+  }
+
+  void zoomOut() {
+    if (zoom<50) zoom*=1.05;
+    else zoom=50;
+  }
+
+    void updateHeat() {
+    for (int i=0; i<heatArray.length; i++) { //IF first element in array
+      if (i==0) {
+        heatFunction(0, heatArray.length-1, 1);
+      } else if (i==heatArray.length-1) { //IF last element in array
+        heatFunction(i, i-1, 0);
+      } else { //If any other element in array
+        heatFunction(i, i-1, i+1);
+      }
+    }
+  }
+
+  void heatFunction(int mid, int left, int right) {
+    //RADIATION
+    float heatRad=(heatArray[mid]/Settings.hullPieceMass)*hullPieceArea/Settings.FPS;
+    heatArray[left]+=heatRad;
+    heatArray[right]+=heatRad;
+    heatArray[mid]-=heatRad*3;
+    
+    //CONDUCTION
+    float heatConduction=0;
+    if (heatArray[left]<heatArray[mid]) {
+      heatConduction=(heatArray[mid]-heatArray[left])*Settings.heatConductivityRate;
+      heatArray[left]+=heatConduction;
+      heatArray[mid]-=heatConduction;
+    }
+    if (heatArray[right]<heatArray[mid]) {
+      heatConduction=(heatArray[mid]-heatArray[right])*Settings.heatConductivityRate;
+      heatArray[right]+=heatConduction;
+      heatArray[mid]-=heatConduction;
+    }
+  }
+
+  void heatUpSide(float rad, float energy) {
+    if (dir>rad) rad+=TWO_PI;
+    rad=(rad-dir)%TWO_PI;
+    int index=floor(rad/(QUARTER_PI/4)); 
+    if (index<0) index=heatArray.length-index;
+    if (index>=heatArray.length) index-=heatArray.length;
+    //if (heatArray[index]<temp)
+    heatArray[index]+=energy;//energy*(pow(1-heatArray[index]/temp,2));
+    //println(energy+" "+heatArray[index]);
+    //if (temp>heatArray[index]) heatArray[index]+=(temp-heatArray[index])*energy/Settings.FPS;
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Draw functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+  void drawTarget(PGraphics rr) {
+    if ((dock.activePage==3)||(missileAiming))
+      if ((distToTarget<Settings.targetingDistance)&&(target!=null)) {
+        rr.stroke(200);
+        rr.strokeWeight(1);
+        rr.noFill();
+        for (int i =0; i<3; i++) for (int j=0; j<4; j++) rr.arc(target.pos.x, target.pos.y, target.diameter*1.05+10+(target.diameter*0.05+6)*i, target.diameter*1.05+10+(target.diameter*0.05+6)*i, QUARTER_PI/2+HALF_PI*j+gameTime, (QUARTER_PI+QUARTER_PI/2)+HALF_PI*j+gameTime);
+      }
+  }
+  void drawAim(PGraphics rr) {
+    if (!destroyed) {
+      PVector turretPos=new PVector(pos.x-Settings.turretXOffset*cos(dir)-Settings.turretYOffset*sin(dir), pos.y-Settings.turretXOffset*sin(dir)-Settings.turretYOffset*cos(dir+PI));
+      rr.stroke(200);
+      rr.noFill();
+      rr.strokeWeight(1);
+      rr.line(turretPos.x+turretGfxDiameter/2*cos(aimDir), turretPos.y+turretGfxDiameter/2*sin(aimDir), turretPos.x+(turretGfxDiameter/2+20)*cos(aimDir), turretPos.y+(turretGfxDiameter/2+20)*sin(aimDir));
+      rr.arc(turretPos.x, turretPos.y, turretGfxDiameter, turretGfxDiameter, aimDir-0.5, aimDir+0.5);
+    }
+  }
+
   void drawHeat(PGraphics rr, PVector _pos) {
     if (!displayPlanetMap) {
       float startOffset=150;
@@ -398,6 +415,12 @@ class Ship extends Object {
     rr.image(sprites.Turret, -sprites.Turret.width/2, -sprites.Turret.height/2);
     rr.popMatrix();
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Object management                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   void spawn(int which) {
     ships[which]=this;

@@ -18,6 +18,12 @@ class Terrain {
   float depth;
   boolean water;
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Init functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   Terrain(int _x, int _y, float elev, Planet _p, int index) {
     x=_x;
     y=_y;
@@ -36,6 +42,12 @@ class Terrain {
     this.index=index;
   }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    General functions                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   void build() {
   }
 
@@ -46,24 +58,20 @@ class Terrain {
   color colouriseByHeight(float hgt, float min, float max, float seaLevel) {
     float bottom=min;
     float top=(min+(p.avgHeight-min)*seaLevel);
-    if (hgt<top) {
-      return color(map(hgt, bottom, top, 0, 100), map(hgt, bottom, top, 0, 100), map(hgt, bottom, top, 0, 220));
-    }
+    
+    if (hgt<top) { return color(map(hgt, bottom, top, 0, 100), map(hgt, bottom, top, 0, 100), map(hgt, bottom, top, 0, 220)); }
     bottom=top;
     top=top+(max-top)*0.5;
-    if (hgt<top) {
-      return color(map(hgt, bottom, top, 50, 220), map(hgt, bottom, top, 150, 255), 0);
-    }
+
+    if (hgt<top) { return color(map(hgt, bottom, top, 50, 220), map(hgt, bottom, top, 150, 255), 0); }
     bottom=top;
     top=top+(max-top)*0.5;
-    if (hgt<top) {
-      return color(round(map(hgt, bottom, top, 220, 100)), round(map(hgt, bottom, top, 255, 50)), 0);
-    }
+
+    if (hgt<top) { return color(round(map(hgt, bottom, top, 220, 100)), round(map(hgt, bottom, top, 255, 50)), 0); }
     bottom=top;
     top=top+(max-top)*0.3;
-    if (hgt<top) {
-      return color(round(map(hgt, bottom, top, 100, 220)), round(map(hgt, bottom, top, 50, 100)), round(map(hgt, bottom, max, 0, 100)));
-    }
+
+    if (hgt<top) { return color(round(map(hgt, bottom, top, 100, 220)), round(map(hgt, bottom, top, 50, 100)), round(map(hgt, bottom, max, 0, 100))); }
     bottom=top;
     return color(round(map(hgt, bottom, max, 220, 255)), round(map(hgt, bottom, max, 100, 255)), round(map(hgt, bottom, max, 0, 255)));
   }
@@ -75,62 +83,16 @@ class Terrain {
     else brightness=(resources[resNumber*3]+resources[resNumber*3+1]+resources[resNumber*3+2])/divider;
     if (p.selected==this) println(brightness);
     switch (resNumber){
-      case 0:{
-        return color(80*brightness);
-      }
-      case 1:{
-        return color(200*brightness,40*brightness,255*brightness);
-      }
-      case 2:{
-        return color(80*brightness,255*brightness,80*brightness);
-      }
-      case 3:{
-        return color(120*brightness);
-      }
-      case 4:{
-        return color(255*brightness,160*brightness,30*brightness);
-      }
-      case 5:{
-        return color(255*brightness,255*brightness,40*brightness);
-      }
-      case 6:{
-        return color(240*brightness,80*brightness,0);
-      }
-      case 7:{
-        return color(60*brightness,255*brightness,255*brightness);
-      }
-      default:{
-        return color(random(255));
-      }
+      case 0:{ return color(80*brightness); }
+      case 1:{ return color(200*brightness,40*brightness,255*brightness); }
+      case 2:{ return color(80*brightness,255*brightness,80*brightness); }
+      case 3:{ return color(120*brightness); }
+      case 4:{ return color(255*brightness,160*brightness,30*brightness); }
+      case 5:{ return color(255*brightness,255*brightness,40*brightness); }
+      case 6:{ return color(240*brightness,80*brightness,0); }
+      case 7:{ return color(60*brightness,255*brightness,255*brightness); }
+      default:{ return color(random(255)); }
     }
-  }
-
-
-  void propagateLava() {  
-    if (volcanoTime>0)
-    {
-      createLava();
-      volcanoTime--;
-    }
-    if (lava>0)
-    {
-      //if (lava>=0.08) 
-      moveLava();
-      //else removeLavaRemnants();
-    }
-  }
-
-  void createLava() {
-
-    float lavaIncrement=100-lava;
-    for (Terrain t : p.terrain)
-    {
-      t.totalOre-=lavaIncrement/p.terrain.length;
-    }
-    lava+=lavaIncrement;
-    //lava+=totalOre*0.01;
-    //totalOre*=0.99;
-    //liquidPressure+=lavaIncrement;
   }
 
   void blopLava() {
@@ -167,8 +129,85 @@ class Terrain {
       }
     }
   }
+
+  void createLava() {
+    float lavaIncrement=100-lava;
+    for (Terrain t : p.terrain)
+    {
+      t.totalOre-=lavaIncrement/p.terrain.length;
+    }
+    lava+=lavaIncrement;
+    //lava+=totalOre*0.01;
+    //totalOre*=0.99;
+    //liquidPressure+=lavaIncrement;
+  }
   
-void moveLava() {
+  void melt(int resourceNumber){
+    resources[resourceNumber*3+1]+=resources[resourceNumber*3];
+    totalOre-=resources[resourceNumber*3];
+    totalLiquid+=resources[resourceNumber*3];
+    resources[resourceNumber*3]=0;
+  }
+  
+  void vaporise(int resourceNumber){
+    resources[resourceNumber*3+2]+=resources[resourceNumber*3+1];
+    totalLiquid-=resources[resourceNumber*3+1];
+    totalGas+=resources[resourceNumber*3+1];
+    resources[resourceNumber*3+1]=0;
+  }
+  
+  void solidify(int resourceNumber){
+    resources[resourceNumber*3]+=resources[resourceNumber*3+1];
+    totalOre+=resources[resourceNumber*3+1];
+    totalLiquid-=resources[resourceNumber*3+1];
+    resources[resourceNumber*3+1]=0;
+  }
+
+  void condense(int resourceNumber){
+    resources[resourceNumber*3+1]+=resources[resourceNumber*3+2];
+    totalLiquid+=resources[resourceNumber*3+2];
+    totalGas-=resources[resourceNumber*3+2];
+    resources[resourceNumber*3+2]=0;
+  }
+
+  Terrain getNeighbour(int _x, int _y) {
+    int neighX=x+_x;
+    int neighY=y+_y;
+    if (neighY<0) {
+      neighY=abs(neighY);
+      neighX+=p.terrainSize/2;
+    }
+    if (neighY>=p.terrainSize) {
+      neighY=p.terrainSize*2-neighY-1;
+      neighX+=p.terrainSize/2;
+    }
+    if (neighX>=0) {
+      if (neighX>=p.terrainSize) neighX=neighX-p.terrainSize;
+    } else neighX=p.terrainSize+neighX;
+    return(p.terrain[neighX+neighY*p.terrainSize]);
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Update functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void propagateLava() {  
+    if (volcanoTime>0)
+    {
+      createLava();
+      volcanoTime--;
+    }
+    if (lava>0)
+    {
+      //if (lava>=0.08) 
+      moveLava();
+      //else removeLavaRemnants();
+    }
+  }
+
+  void moveLava() {
     cooldownLava();
     int propagations=0;
     float lowestFall=0;
@@ -240,6 +279,7 @@ void moveLava() {
     //p.liquidPressureChange[index]-=liquidPressure-avgPressure;
     cooldownLava();
   }
+
   void cooldownLava() {
     //totalOre+=lava*0.02;
     //lava*=0.98;
@@ -275,51 +315,6 @@ void moveLava() {
   void moveGas(){
   }
   
-  void melt(int resourceNumber){
-    resources[resourceNumber*3+1]+=resources[resourceNumber*3];
-    totalOre-=resources[resourceNumber*3];
-    totalLiquid+=resources[resourceNumber*3];
-    resources[resourceNumber*3]=0;
-  }
-  
-  void vaporise(int resourceNumber){
-    resources[resourceNumber*3+2]+=resources[resourceNumber*3+1];
-    totalLiquid-=resources[resourceNumber*3+1];
-    totalGas+=resources[resourceNumber*3+1];
-    resources[resourceNumber*3+1]=0;
-  }
-  
-  void solidify(int resourceNumber){
-    resources[resourceNumber*3]+=resources[resourceNumber*3+1];
-    totalOre+=resources[resourceNumber*3+1];
-    totalLiquid-=resources[resourceNumber*3+1];
-    resources[resourceNumber*3+1]=0;
-  }
-
-  void condense(int resourceNumber){
-    resources[resourceNumber*3+1]+=resources[resourceNumber*3+2];
-    totalLiquid+=resources[resourceNumber*3+2];
-    totalGas-=resources[resourceNumber*3+2];
-    resources[resourceNumber*3+2]=0;
-  }
-  
-  Terrain getNeighbour(int _x, int _y) {
-    int neighX=x+_x;
-    int neighY=y+_y;
-    if (neighY<0) {
-      neighY=abs(neighY);
-      neighX+=p.terrainSize/2;
-    }
-    if (neighY>=p.terrainSize) {
-      neighY=p.terrainSize*2-neighY-1;
-      neighX+=p.terrainSize/2;
-    }
-    if (neighX>=0) {
-      if (neighX>=p.terrainSize) neighX=neighX-p.terrainSize;
-    } else neighX=p.terrainSize+neighX;
-    return(p.terrain[neighX+neighY*p.terrainSize]);
-  }
-
   void update() {
     //liquidPressure*=0.98;
     if (!water)
@@ -362,6 +357,22 @@ void moveLava() {
     return map(totalOre, p.minHeight, (p.minHeight+(p.avgHeight-p.minHeight)*p.waterLevel), 1, 0);
   }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Draw functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+//----------------------------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Object management                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+//----------------------------------------------------------------------------------------
+  
   void drawSelection(PGraphics rr, Ship ship) {
     rr.strokeWeight(1);
     rr.stroke(ship.c);

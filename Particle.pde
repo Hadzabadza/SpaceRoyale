@@ -9,7 +9,13 @@ class Particle extends Object {
   boolean isDebris;
   PImage sprt = null;
 
-  Particle(PImage inputImg) {
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Init functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Particle(PImage inputImg) {
     super(new PVector(width/2-inputImg.width/2, height/2-inputImg.height/2), new PVector(random(-2, 2), random(-2, 2)), random(0, TWO_PI), 0);
     sprt = inputImg;
     alpha=random(100, 255);
@@ -76,6 +82,23 @@ class Particle extends Object {
     findLargerSide();
   }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    General functions                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+  float findLargerSide() {
+    if (sprt.height>sprt.width) return sprt.height;
+    else return sprt.width;
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Update functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   void refresh(PImage _sprt, PVector _pos) {
     pos.x=_pos.x;
     pos.x=_pos.y;
@@ -91,12 +114,6 @@ class Particle extends Object {
     timer=Settings.defaultTimer;
     destroyed=false;
   }
-
-  float findLargerSide() {
-    if (sprt.height>sprt.width) return sprt.height;
-    else return sprt.width;
-  }
-
   void update() {
     alpha+=alphaChange;
     scale+=scaleChange;
@@ -106,7 +123,13 @@ class Particle extends Object {
     if ((scale<=0)||(alpha<=0)||(timer<=0)) queueDestroy();
   }
 
-  void draw(PGraphics rr) {
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Draw functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void draw(PGraphics rr) {
     if (isDebris) {
       c=color(red(c), green(c), blue(c), alpha);
       rr.pushMatrix();
@@ -129,6 +152,12 @@ class Particle extends Object {
       rr.popMatrix();
     }
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Object management                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   void spawn() {
     objects.add(this);

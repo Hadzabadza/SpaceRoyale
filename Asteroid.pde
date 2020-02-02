@@ -4,6 +4,12 @@ class Asteroid extends Object{
   PVector grav;
   Star orbitStar;
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Init functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   Asteroid (Star s, float mas, float distS) {
     super(new PVector(), new PVector(),0,sqrt(mas)*5);
     orbitStar=s;
@@ -15,6 +21,36 @@ class Asteroid extends Object{
     pos.x=orbitStar.pos.x+distance*cos(phase);
     pos.y=orbitStar.pos.y+distance*sin(phase);
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    General functions                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+//----------------------------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Update functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+  void update() {
+    grav=new PVector();
+    grav.x=-(pos.x-orbitStar.pos.x);
+    grav.y=-(pos.y-orbitStar.pos.y);
+    grav.normalize();
+    grav.mult(Settings.celestialPull);
+    vel.add(grav);
+    super.update();
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Draw functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   void softDraw(PGraphics rr){
     rr.pushMatrix();
@@ -37,15 +73,12 @@ class Asteroid extends Object{
     rr.popMatrix();
   }
 
-  void update() {
-    grav=new PVector();
-    grav.x=-(pos.x-orbitStar.pos.x);
-    grav.y=-(pos.y-orbitStar.pos.y);
-    grav.normalize();
-    grav.mult(Settings.celestialPull);
-    vel.add(grav);
-    super.update();
-  }
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Object management                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   void spawn(){
     asteroids.add(this);
     super.spawn();

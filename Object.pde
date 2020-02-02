@@ -10,6 +10,12 @@ class Object { //Superclass for physical ingame objects
 
   private Object(){}
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Init functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   Object(PVector _pos, PVector _vel, float _dir, float _radius) {
     pos=new PVector(_pos.x, _pos.y);
     vel=new PVector(_vel.x, _vel.y);
@@ -18,6 +24,12 @@ class Object { //Superclass for physical ingame objects
     diameter=radius*2;
     newSpawns.add(this);
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    General functions                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   boolean checkCollision(Object with) {
     if (dist(pos.x, pos.y, with.pos.x, with.pos.y)<=with.radius+radius) return true;
@@ -32,15 +44,34 @@ class Object { //Superclass for physical ingame objects
     if (checker.y<0) direction=TWO_PI+direction;
     return direction; 
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Update functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   void update()
   {
     pos.add(vel);
     dir+=spin;
   }
-  void softDraw(PGraphics renderer){
-  }
-  void draw(PGraphics renderer) {
-  }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Draw functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+  void softDraw(PGraphics renderer){  }
+  void draw(PGraphics renderer){  }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Object management                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   void spawn() {
     objects.add(this);
   }

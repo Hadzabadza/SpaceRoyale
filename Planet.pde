@@ -38,6 +38,12 @@ class Planet extends Object {
   float[] lavaChange;           //
   float[] liquidPressureChange; //
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Init functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   Planet(Star s, float mas, float dens, float distS, int number) {
     super(new PVector(), new PVector(), 0, sqrt(mas)/dens);
     orbitStar=s;
@@ -87,39 +93,11 @@ class Planet extends Object {
     maxRes=new float[resourceNames.length*3];
   }
 
-  void orbitalMovement() {
-    grav=new PVector(orbitStar.pos.x-pos.x, orbitStar.pos.y-pos.y).normalize().mult(starPull);
-    vel.add(grav);
-    dirFromStar=orbitStar.getDirTo(this);
-    shadePoints[0].x=pos.x+vel.x+radius*cos(dirFromStar-HALF_PI);
-    shadePoints[0].y=pos.y+vel.y+radius*sin(dirFromStar-HALF_PI);
-    shadePoints[1].x=pos.x+vel.x+radius*cos(dirFromStar+HALF_PI);
-    shadePoints[1].y=pos.y+vel.y+radius*sin(dirFromStar+HALF_PI);
-    shadePoints[2].x=orbitStar.pos.x+orbitStar.gravWellRadius*cos(dirFromStar);
-    shadePoints[2].y=orbitStar.pos.y+orbitStar.gravWellRadius*sin(dirFromStar);
-    shadeFunctions[0]=(shadePoints[2].x-shadePoints[0].x)/(shadePoints[2].y-shadePoints[0].y);
-    shadeFunctions[1]=(shadePoints[2].x-shadePoints[1].x)/(shadePoints[2].y-shadePoints[1].y);
-    shadeFunctions[2]=(shadePoints[0].x-shadePoints[1].x)/(shadePoints[0].y-shadePoints[1].y);
-  }
-
-  void pullObjects() { //Gravitational pull and on-surface management of ships.
-    float currDist;
-    for (Ship s : ships) { 
-      if (!s.warp) {
-        currDist=getDistTo(s);
-        if (currDist<gravWellRadius) {//&&currDist>radius*0.98) {
-          if(currDist>radius)
-            s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
-          else for (int i=0; i<s.heatArray.length; i++) 
-          { 
-            float heatTransfer=ambientTemp*Settings.hullPieceMass;
-            if (heatTransfer>s.heatArray[i]) s.heatArray[i]+=(heatTransfer-s.heatArray[i])*0.01;
-             //println(ambientTemp*Settings.hullPieceMass/s.heatArray[i]);
-          }
-        }
-      }
-    }
-  }
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    General functions                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   void createMap() { //Creates a surface map for the planet
     surface.loadPixels();
@@ -193,6 +171,46 @@ class Planet extends Object {
     return false;
   }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Update functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+  void orbitalMovement() {
+    grav=new PVector(orbitStar.pos.x-pos.x, orbitStar.pos.y-pos.y).normalize().mult(starPull);
+    vel.add(grav);
+    dirFromStar=orbitStar.getDirTo(this);
+    shadePoints[0].x=pos.x+vel.x+radius*cos(dirFromStar-HALF_PI);
+    shadePoints[0].y=pos.y+vel.y+radius*sin(dirFromStar-HALF_PI);
+    shadePoints[1].x=pos.x+vel.x+radius*cos(dirFromStar+HALF_PI);
+    shadePoints[1].y=pos.y+vel.y+radius*sin(dirFromStar+HALF_PI);
+    shadePoints[2].x=orbitStar.pos.x+orbitStar.gravWellRadius*cos(dirFromStar);
+    shadePoints[2].y=orbitStar.pos.y+orbitStar.gravWellRadius*sin(dirFromStar);
+    shadeFunctions[0]=(shadePoints[2].x-shadePoints[0].x)/(shadePoints[2].y-shadePoints[0].y);
+    shadeFunctions[1]=(shadePoints[2].x-shadePoints[1].x)/(shadePoints[2].y-shadePoints[1].y);
+    shadeFunctions[2]=(shadePoints[0].x-shadePoints[1].x)/(shadePoints[0].y-shadePoints[1].y);
+  }
+
+  void pullObjects() { //Gravitational pull and on-surface management of ships.
+    float currDist;
+    for (Ship s : ships) { 
+      if (!s.warp) {
+        currDist=getDistTo(s);
+        if (currDist<gravWellRadius) {//&&currDist>radius*0.98) {
+          if(currDist>radius)
+            s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
+          else for (int i=0; i<s.heatArray.length; i++) 
+          { 
+            float heatTransfer=ambientTemp*Settings.hullPieceMass;
+            if (heatTransfer>s.heatArray[i]) s.heatArray[i]+=(heatTransfer-s.heatArray[i])*0.01;
+             //println(ambientTemp*Settings.hullPieceMass/s.heatArray[i]);
+          }
+        }
+      }
+    }
+  }
+
   void updateSurfaceImagery() {
     surface.loadPixels();
     for (Terrain t : terrain) 
@@ -200,7 +218,6 @@ class Planet extends Object {
       else fillPixel(t.x,t.y,color(t.totalOre));
     circularizeSurfaceImage();
   }
-
 
   void updateGlobalInfo() { //A fairly expensive updater for map info
     totalHeight=0;
@@ -248,7 +265,13 @@ class Planet extends Object {
     if (frameCount%1==0) updateGlobalInfo();
   }
 
-  void softDraw(PGraphics rr) {
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Draw functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void softDraw(PGraphics rr) {
     rr.pushMatrix();
     rr.translate(0, 0, -1);
     rr.stroke(255, 125+75*cos(gameTime));
@@ -279,6 +302,12 @@ class Planet extends Object {
     rr.popMatrix();
     rr.imageMode(CORNER);
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Object management                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   void spawn() {
     //orbitStar.planets.add(this);

@@ -7,6 +7,12 @@ class Star extends Object {
   float surfaceTemp;
   Planet[] planets;
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Init functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   Star() {
     super(new PVector(), new PVector(), 0, 0);
     starInit();
@@ -41,6 +47,63 @@ class Star extends Object {
     distS+=random(2000, 5000);
     gravWellRadius=round(distS+planets[planets.length-1].gravWellDiameter);
     gravWellDiameter=gravWellRadius*2;
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    General functions                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+    color recalculateTemp(float temp) {
+    surfaceTemp=temp;
+    temp/=100;
+    float red;
+    float green;
+    float blue;
+    //Calculate Red:
+    if (temp <= 66) red = 255;
+    else {
+      red = temp - 60;
+      red = 329.698727446 * pow(red, -0.1332047592);
+      if (red < 0)  red = 0;
+      else if (red > 255) red = 255;
+    }
+
+    //Calculate Green:
+    if (temp <= 66) {
+      green = temp;
+      green = 99.4708025861 * log(green) - 161.1195681661;
+      if (green < 0) green = 0;
+      else if (green > 255) green = 255;
+    } else { 
+      green = temp - 60;
+      green = 288.1221695283 * pow(green, -0.0755148492);
+      if (green < 0) green = 0;
+      else if (green > 255) green = 255;
+    }
+
+    //Calculate Blue:
+    if (temp >= 66) blue = 255;
+    else if (temp <= 19) blue = 0;
+    else {
+      blue = temp - 10;
+      blue = 138.5177312231 * log(blue) - 305.0447927307;
+      if (blue < 0) blue = 0;
+      if (blue > 255) blue = 255;
+    }
+    return color(red, green, blue);
+  }   
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Update functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+  void update() {
+    pullObjects();
+    heatObjects();
   }
 
   void pullObjects() { //Gravitational pull
@@ -86,51 +149,11 @@ class Star extends Object {
     }
   }
 
-  color recalculateTemp(float temp) {
-    surfaceTemp=temp;
-    temp/=100;
-    float red;
-    float green;
-    float blue;
-    //Calculate Red:
-    if (temp <= 66) red = 255;
-    else {
-      red = temp - 60;
-      red = 329.698727446 * pow(red, -0.1332047592);
-      if (red < 0)  red = 0;
-      else if (red > 255) red = 255;
-    }
-
-    //Calculate Green:
-    if (temp <= 66) {
-      green = temp;
-      green = 99.4708025861 * log(green) - 161.1195681661;
-      if (green < 0) green = 0;
-      else if (green > 255) green = 255;
-    } else { 
-      green = temp - 60;
-      green = 288.1221695283 * pow(green, -0.0755148492);
-      if (green < 0) green = 0;
-      else if (green > 255) green = 255;
-    }
-
-    //Calculate Blue:
-    if (temp >= 66) blue = 255;
-    else if (temp <= 19) blue = 0;
-    else {
-      blue = temp - 10;
-      blue = 138.5177312231 * log(blue) - 305.0447927307;
-      if (blue < 0) blue = 0;
-      if (blue > 255) blue = 255;
-    }
-    return color(red, green, blue);
-  }   
-
-
-  void update() {
-    pullObjects();
-    heatObjects();
-  }
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Draw functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   void softDraw(PGraphics rr) {
     rr.pushMatrix();
@@ -157,6 +180,12 @@ class Star extends Object {
     rr.fill(c);
     rr.ellipse (pos.x, pos.y, diameter, diameter);
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Object management                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   void spawn() {
     stars.add(this);

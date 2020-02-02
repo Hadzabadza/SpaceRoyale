@@ -8,13 +8,33 @@ class Missile extends Object { //A class for homing projectiles.
   float estimatedBoostTime;
   View followerScreen;
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Init functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   Missile (PVector _pos, PVector _vel, float _radius, float _dir, Object _target) {
     super(new PVector(_pos.x, _pos.y), new PVector(_vel.x, _vel.y), _dir, _radius);
     accel=new PVector(0, 0);
     target=_target;
   }
 
-  void turnToTarget() { //MONSTROUS WIP
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    General functions                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+//----------------------------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Update functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void turnToTarget() { //MONSTROUS WIP
     /*PVector tempVel=new PVector(vel.x,vel.y);
      PVector targetVel=new PVector(target.vel.x,target.vel.y);
      PVector targetPos=new PVector(target.pos.x,target.pos.y);
@@ -95,6 +115,12 @@ class Missile extends Object { //A class for homing projectiles.
     super.update();
   }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Draw functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   void draw(PGraphics rr) 
   {
     rr.strokeWeight(1);
@@ -113,6 +139,12 @@ class Missile extends Object { //A class for homing projectiles.
     }
     rr.popMatrix();
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Object management                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
   
   void spawn() {
     missiles.add(this);

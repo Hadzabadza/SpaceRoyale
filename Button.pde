@@ -18,6 +18,12 @@ class Button
   boolean pressed;      //Determines whether the button is pressed down
   boolean on;           //Used to plug into other functions
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Init functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   Button(float xpos, float ypos, float width, float height)
   {
     buttonInit(xpos,ypos,width,height,"",color(255));
@@ -47,8 +53,21 @@ class Button
     name=_name;
   }
 
-  boolean hovered() //Checks if mouse is on button.
-  { 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    General functions                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+//----------------------------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Update functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+  boolean hovered() { //Checks if mouse is on button.
     if (circular) 
       if (dist(mouseX,mouseY,pos.x,pos.y)<=dim.x) return true;
       else return false;
@@ -56,7 +75,17 @@ class Button
     else return false;
   }
 
-  void draw(PGraphics rr)
+  void toggle(){
+    on=!on;
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Draw functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void draw(PGraphics rr)
   {
     rr.strokeWeight(1);
     rr.textAlign(CENTER);
@@ -151,10 +180,6 @@ class Button
     } else drawCircular(scaleX, scaleY, currentColor, rr);
   }
 
-  void toggle(){
-    on=!on;
-  }
-
   void drawSelection(){
           /*fill(10);
        rect(pos.x, pos.y, w*1.1, h*2.2);
@@ -228,4 +253,13 @@ class Button
       }
       */
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Object management                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+//----------------------------------------------------------------------------------------
+
 }

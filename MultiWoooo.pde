@@ -1,4 +1,5 @@
-//TODO: Add direction and speed markers. //<>//
+//TODO: Add direction and speed markers. 
+//TODO: Move drawing of the player's UI into the ship or other manager
 //TODO: Add a planet scan system
 //TODO: Orbital scan/planet interaction
 //TODO: Make directions matter when facing planets from orbit/landing
@@ -9,7 +10,7 @@
 //TODO: Add inter-system travel and animations
 //TODO: Fix gas/liquids propagation
 //TODO: MISSILE: Improve targeting!!!!
-//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
+//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP 
 //TODO: SHIP: Improve targeting!
 //TODO: OSC: Find the name of the connected device and add to bundle logs.
 //TODO: OSC: Fix controller unresponsiveness after reinit
@@ -61,7 +62,7 @@ void init() {                                               //Initialiser. Usefu
   view= new ArrayList<View>();
   stars.add(new Star(0, 0));
 
-  for (int i=0; i<Settings.ships; i++) {
+  for (int i=0; i<Settings.ships; i++) {                   //Player spawning directions and positions
     float startDir=random(TWO_PI);
     float startDist=random(stars.get(0).gravWellRadius*0.4, stars.get(0).gravWellRadius);
     PVector startPos=new PVector(startDist*cos(startDir), startDist*sin(startDir));
@@ -113,7 +114,7 @@ void draw() {
     if (frameCount<=Settings.ships) osc.dock[frameCount-1]=osc.dock[frameCount-1].initializeDock();
     else gameState=1;
   }
-  if (gameState==1) {
+  if (gameState==1) { 
     objectUpdates();
     background(backgroundColour);
     osc.update();
@@ -213,7 +214,7 @@ void objectUpdates() {
     newSpawns.remove(i);
   }
 }
-
+/* //WASTELANDS
 void sprinkleParticles(PImage img, PVector where, int min, int max) {
   int n = round(random(min, max));
   for (int i=0; i<n; i++) particles.add(new Particle(img, where));
@@ -272,6 +273,7 @@ void fetchParticles(int n, PImage[] imgs, PVector where) {
     spareParts=0;
   }
 }
+*/
 void exit() {
   println("quitting");
   osc.exit();

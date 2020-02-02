@@ -17,6 +17,12 @@ class Slider
   boolean horizontal=true;
   String name;
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Init functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   Slider(float Bposx, float Bposy, float Bsizex, float Bsizey, int _steps, String _name) {
     sliderInit(Bposx, Bposy, Bsizex, Bsizey, _steps, 1/_steps, _name, color(255,200));
   }
@@ -42,6 +48,65 @@ class Slider
     name=_name;
     slideArea=new PVector(barSize.x-sliderSize.x, barSize.y-sliderSize.y);
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    General functions                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+  void snap() //Snaps the slider to steps and rounds values to ints on mouse release.
+  {
+    power=round(map (sliderPos.x, barPos.x-slideArea.x/2, barPos.x+slideArea.x/2, minSteps, steps+minSteps));
+    sliderPos.x=barPos.x-slideArea.x/2+slideArea.x/steps*(power-minSteps);
+  }
+
+  void snapTo(int power) //Sets the slider to a property.
+  {
+    sliderPos.x=barPos.x-slideArea.x/2+slideArea.x/steps*(power-minSteps);
+  }
+
+  void changeY() //Used in vertical bars.
+  {
+  }
+
+  void changeX() //Used in horizontal bars, changes the position of the slider.
+  {
+    if (mouseX<barPos.x+slideArea.x/2&&mouseX>barPos.x-slideArea.x/2)
+    {
+      sliderPos.x = mouseX;
+      power=round(map (sliderPos.x, barPos.x-slideArea.x/2, barPos.x+slideArea.x/2, minSteps, steps+minSteps));
+    }
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Update functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+  boolean checkClicked()
+  {
+    if ( mouseX>sliderPos.x-(sliderSize.x/2) && mouseX< sliderPos.x + (sliderSize.x/2)&&mouseY>sliderPos.y-(sliderSize.y/2) && mouseY< sliderPos.y + (sliderSize.y/2))
+    {
+      return true;
+    } else return false;
+  }
+
+  void move() //Moves the slider.
+  {
+    if (horizontal) {
+      changeX();
+    } else {
+      changeY();
+    }
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Draw functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   void draw(PGraphics rr)
   {
@@ -85,43 +150,12 @@ class Slider
     }
   }
 
-  boolean checkClicked()
-  {
-    if ( mouseX>sliderPos.x-(sliderSize.x/2) && mouseX< sliderPos.x + (sliderSize.x/2)&&mouseY>sliderPos.y-(sliderSize.y/2) && mouseY< sliderPos.y + (sliderSize.y/2))
-    {
-      return true;
-    } else return false;
-  }
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Object management                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
-  void move() //Moves the slider.
-  {
-    if (horizontal) {
-      changeX();
-    } else {
-      changeY();
-    }
-  }
-  void snap() //Snaps the slider to steps and rounds values to ints on mouse release.
-  {
-    power=round(map (sliderPos.x, barPos.x-slideArea.x/2, barPos.x+slideArea.x/2, minSteps, steps+minSteps));
-    sliderPos.x=barPos.x-slideArea.x/2+slideArea.x/steps*(power-minSteps);
-  }
+//----------------------------------------------------------------------------------------
 
-  void snapTo(int power) //Sets the slider to a property.
-  {
-    sliderPos.x=barPos.x-slideArea.x/2+slideArea.x/steps*(power-minSteps);
-  }
-
-  void changeY() //Used in vertical bars.
-  {
-  }
-
-  void changeX() //Used in horizontal bars, changes the position of the slider.
-  {
-    if (mouseX<barPos.x+slideArea.x/2&&mouseX>barPos.x-slideArea.x/2)
-    {
-      sliderPos.x = mouseX;
-      power=round(map (sliderPos.x, barPos.x-slideArea.x/2, barPos.x+slideArea.x/2, minSteps, steps+minSteps));
-    }
-  }
 }

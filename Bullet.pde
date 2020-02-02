@@ -2,26 +2,29 @@ class Bullet extends Object {
   int timer=Settings.bullSelfDestructTimer;
   int inactivityTimer=Settings.bullInactivityTimer;
   
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Init functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   Bullet (PVector _pos, PVector _vel, float _radius, float _dir) {
     super(new PVector(_pos.x, _pos.y), new PVector(_vel.x, _vel.y), _dir, _radius);
   }
 
-  void draw(PGraphics rr) 
-  {
-    /*
-    rr.fill(255, 0, 0);
-     rr.strokeWeight(1);
-     rr.stroke (255);
-     rr.ellipse (pos.x, pos.y, diameter, diameter);
-     */
-    rr.pushMatrix();
-    rr.translate(pos.x, pos.y);
-    rr.rotate(dir);
-    rr.scale(0.15);
-    rr.noTint();
-    rr.image(sprites.Shell, -sprites.Shell.width/2, -sprites.Shell.height/2);
-    rr.popMatrix();
-  }
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    General functions                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+//----------------------------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Update functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
   void update() {
     pos.add(vel);
@@ -48,6 +51,37 @@ class Bullet extends Object {
       }
     }
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Draw functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+  void draw(PGraphics rr) 
+  {
+    /*
+    rr.fill(255, 0, 0);
+     rr.strokeWeight(1);
+     rr.stroke (255);
+     rr.ellipse (pos.x, pos.y, diameter, diameter);
+     */
+    rr.pushMatrix();
+    rr.translate(pos.x, pos.y);
+    rr.rotate(dir);
+    rr.scale(0.15);
+    rr.noTint();
+    rr.image(sprites.Shell, -sprites.Shell.width/2, -sprites.Shell.height/2);
+    rr.popMatrix();
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Object management                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
   void spawn() {
     bullets.add(this);
     super.spawn();

@@ -17,6 +17,12 @@ class Map { //Used to display the terrain of a planet.
   byte shownResource=3;
   boolean pressureMap;
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Init functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   Map(PVector _dimension, Planet _p) {
     dimension=new PVector(_dimension.x, _dimension.y);
     xOffset=round(width-dimension.x)/2;
@@ -29,7 +35,13 @@ class Map { //Used to display the terrain of a planet.
     mapRes=p.mapRes;
     terrain=p.terrain;
   }
-  
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    General functions                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
   Terrain pickTile(PVector curs) {
     int yOffset=round(height-dimension.y)/2;
     float halfRes=mapRes/2;
@@ -47,7 +59,21 @@ class Map { //Used to display the terrain of a planet.
     }
   }
 
-  void draw(PGraphics rr, Ship ship, PVector pos) {    
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Update functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+//----------------------------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                     Draw functions                                   //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void draw(PGraphics rr, Ship ship, PVector pos) {    
     screen.beginDraw();
     screen.background(30+15*cos(gameTime), 45+23*cos(gameTime), 65+33*cos(gameTime));
     screen.rectMode(CENTER);
@@ -119,4 +145,13 @@ class Map { //Used to display the terrain of a planet.
     rr.fill(255);
     rr.text("Planet "+id, pos.x+3, pos.y+6);
   }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                                    Object management                                 //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+//----------------------------------------------------------------------------------------
+  
 }
