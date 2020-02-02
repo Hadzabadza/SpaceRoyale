@@ -22,6 +22,7 @@ class Ship extends Object {
   PImage sprt=sprites.Ship;
 
   //Graphics
+  PGraphics layerUI;
   VelocityIndicator speedometer;
   HeatIndicator thermometer;
 
@@ -64,10 +65,11 @@ class Ship extends Object {
     c=color(0, 255, 0);
     shipInit();
   }
-  Ship(PVector _pos, float _dir, color _c) {
+  Ship(PVector _pos, float _dir, color _c, PGraphics _layerUI) {
     super(_pos, new PVector(), _dir, Settings.shipSize);
     c=_c;
     aimDir=_dir;
+    layerUI=_layerUI;
     shipInit();
   }
 
@@ -76,7 +78,7 @@ class Ship extends Object {
     heatArray=new float[32];
     hullPieceArea=diameter*PI/32;
     cursor=new PVector(0.5,0.5);
-    speedometer=new VelocityIndicator(width-80,80,50,50,this);
+    speedometer=new VelocityIndicator(width/2,height/2,50,50,this);
     thermometer=new HeatIndicator(width-80,80,50,50,this);
     //for (int i=0; i<heatArray.length; i++) heatArray[i]=i*100;
   }
@@ -171,7 +173,7 @@ class Ship extends Object {
         for (Planet p : stars.get(0).planets) if (checkCollision(p)) //Find which planet collided with (landed on), if any
         {
           land=p;
-          println(land.ambientTemp);
+          //println(land.ambientTemp);
           if (getDistTo(p)<p.radius-radius*0.2) {
             vel.x=p.vel.x;
             vel.y=p.vel.y;
@@ -255,13 +257,13 @@ class Ship extends Object {
   }
 
   void zoomIn() {
-    if (zoom>0.2) zoom*=0.95;
-    else zoom=0.2;
+    if (zoom>Settings.minZoom) zoom*=0.95;
+    else zoom=Settings.minZoom;
   }
 
   void zoomOut() {
-    if (zoom<50) zoom*=1.05;
-    else zoom=50;
+    if (zoom<Settings.maxZoom) zoom*=1.05;
+    else zoom=Settings.maxZoom;
   }
 
     void updateHeat() {
@@ -356,14 +358,14 @@ class Ship extends Object {
     rr.popMatrix();
 
     rr.strokeWeight(1);
-    if (zoom<20) {
+    if (zoom<Settings.maxZoom*0.5) {
       if (orbited!=null){
         rr.fill(200);
-        speedometer.draw(stars.get(0),color(200,12.75*zoom),rr);
-        speedometer.draw(orbited,color(0,200,0,12.5*(25-zoom)),rr);
-      } else speedometer.draw(stars.get(0),color(200),rr);
+        speedometer.draw(stars.get(0),color(200,12.75*zoom),layerUI);
+        speedometer.draw(orbited,color(0,200,0,12.5*(25-zoom)),layerUI);
+      } else speedometer.draw(stars.get(0),color(200),layerUI);
     }
-    else speedometer.draw(stars.get(0),color(200),rr);
+    else speedometer.draw(stars.get(0),color(200),layerUI);
 
     rr.pushMatrix();
     PVector turretPos=new PVector(pos.x-Settings.turretXOffset*cos(dir)-Settings.turretYOffset*sin(dir), pos.y-Settings.turretXOffset*sin(dir)-Settings.turretYOffset*cos(dir+PI));

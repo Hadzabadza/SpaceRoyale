@@ -1,24 +1,4 @@
-//TODO: Add direction and speed markers. 
-//TODO: Move drawing of the player's UI into the ship or other manager
-//TODO: Add a planet scan system
-//TODO: Orbital scan/planet interaction
-//TODO: Make directions matter when facing planets from orbit/landing
-//TODO: Add upgrades system
-//TODO: Add UIs for new stuff
-//TODO: Add difficulty levels
-//TODO: Add intra-system node travel
-//TODO: Add inter-system travel and animations
-//TODO: Fix gas/liquids propagation
-//TODO: MISSILE: Improve targeting!!!!
-//TODO: Create a (level/sector/galactic map/etc) superclass, replicate structure of "main" roguelike, more OOP 
-//TODO: SHIP: Improve targeting!
-//TODO: OSC: Find the name of the connected device and add to bundle logs.
-//TODO: OSC: Fix controller unresponsiveness after reinit
-//TODO: improve particle systems, maybe put into a manager class
-
-
-
-import oscP5.*;                                             //Required libs for TouchOSC controls.
+import oscP5.*;                                             //Required libs for TouchOSC controls. //<>//
 import netP5.*; 
 
 Slider testSLD; 
@@ -68,14 +48,14 @@ void init() {                                               //Initialiser. Usefu
     PVector startPos=new PVector(startDist*cos(startDir), startDist*sin(startDir));
     screen[i]=createGraphics(width/Settings.ships, height, P3D);
     switch (i) {
-      case 0: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 255, 0)); break;}
-      case 1: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 0, 0)); break;}
-      case 2: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 0, 255)); break;}
-      case 3: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(0, 255, 255)); break;}
-      case 4: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 0, 255)); break;}
-      case 5: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 255, 0)); break;}
-      case 6: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(100, 100, 0)); break;}
-      case 7: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(100)); break;}
+      case 0: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(000, 255, 000), this.g); break;}
+      case 1: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 000, 000), this.g); break;}
+      case 2: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(000, 000, 255), this.g); break;}
+      case 3: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(000, 255, 255), this.g); break;}
+      case 4: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 000, 255), this.g); break;}
+      case 5: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(255, 255, 000), this.g); break;}
+      case 6: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(100, 100, 000), this.g); break;}
+      case 7: {ships[i]=new Ship(startPos, startDir+HALF_PI, color(100, 100, 100), this.g); break;}
     }
     //ships[i].vel.x=stars.get(0).gravPull*120*cos(startDir+HALF_PI);
     //ships[i].vel.y=stars.get(0).gravPull*120*sin(startDir+HALF_PI);

@@ -36,11 +36,15 @@ class Indicator{
 
 class VelocityIndicator extends Indicator{
   
-  Ship parent;    //This indicator belongs to a ship (player)
-  PVector relVel; //Relative velocity
-  PVector relDir; //Used to define where to draw speed arrows
-  float speed=0;  //How many speed arrows are present
-  float speedDivider=
+  Ship parent;            //This indicator belongs to a ship [player]
+  PVector relVel;         //Relative velocity to some object
+  PVector relDir;         //Direction of the speedometer's arrows
+  PVector leftArrowDir;   //Used in arrow lines' angle calculation
+  PVector rightArrowDir;  //
+  float speed=0;          //How many speed arrows are present
+  float angle=0;          //General angle of the arrow
+  float arrowOffset=6;      //Offsets the indicator by the equivalent amount of arrows.
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                      //
@@ -52,6 +56,9 @@ class VelocityIndicator extends Indicator{
     super(x,y,sX,sY,_parent);
     parent=_parent;
     relVel=new PVector(0,0);
+    relDir=new PVector(0,0);
+    leftArrowDir=new PVector(0,0);
+    rightArrowDir=new PVector(0,0);
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -70,11 +77,57 @@ class VelocityIndicator extends Indicator{
 
   void draw(Object _relativeTo, color _velocityColour, PGraphics rr){
     rr.stroke(_velocityColour);
+    rr.strokeWeight(1);
     relVel.x=parent.vel.x-_relativeTo.vel.x;
     relVel.y=parent.vel.y-_relativeTo.vel.y;
     speed=relVel.mag();
-    for 
-    rr.line(parent.pos.x, parent.pos.y, parent.pos.x+(relVel.x)*Settings.FPS*1.5, parent.pos.y+(relVel.y)*Settings.FPS*1.5);
+    relDir=relVel.normalize();
+    angle=relDir.heading()+HALF_PI;
+    leftArrowDir.x=relDir.x+5*sin(angle-2.4434609528);  //2.4434609528 is 140 degrees.
+    leftArrowDir.y=relDir.y-5*cos(angle-2.4434609528);  //
+    rightArrowDir.x=relDir.x+5*sin(angle+2.4434609528); //
+    rightArrowDir.y=relDir.y-5*cos(angle+2.4434609528); //
+    relDir.mult(5);
+    int i;
+    float offset;
+    for (i=0; i<speed/Settings.speedArrowsDivider; i++){
+      offset=i+arrowOffset*(1-parent.zoom/Settings.maxZoom);
+
+      rr.line(screenPos.x+relDir.x*offset, 
+              screenPos.y+relDir.y*offset, 
+              screenPos.x+relDir.x*offset+leftArrowDir.x, 
+              screenPos.y+relDir.y*offset+leftArrowDir.y);
+
+      rr.line(screenPos.x+relDir.x*offset, 
+              screenPos.y+relDir.y*offset, 
+              screenPos.x+relDir.x*offset+rightArrowDir.x, 
+              screenPos.y+relDir.y*offset+rightArrowDir.y);
+    }
+
+    rr.stroke(red(_velocityColour),green(_velocityColour),blue(_velocityColour),alpha(_velocityColour)*(speed-i)*255.0);
+    offset=i+arrowOffset;
+    i++;
+
+    rr.line(screenPos.x+relDir.x*offset, 
+      screenPos.y+relDir.y*offset, 
+      screenPos.x+relDir.x*offset+leftArrowDir.x, 
+      screenPos.y+relDir.y*offset+leftArrowDir.y);
+
+    rr.line(screenPos.x+relDir.x*offset, 
+      screenPos.y+relDir.y*offset, 
+      screenPos.x+relDir.x*offset+rightArrowDir.x, 
+      screenPos.y+relDir.y*offset+rightArrowDir.y);
+
+    rr.stroke(100,100,255,190);
+    rr.line(screenPos.x+140*cos(parent.dir),                //0.1745329252 is 10 degrees.
+            screenPos.y+140*sin(parent.dir),                //
+            screenPos.x+125*cos(parent.dir-0.1745329252),   //
+            screenPos.y+125*sin(parent.dir-0.1745329252));  //
+    
+    rr.line(screenPos.x+140*cos(parent.dir),                //
+            screenPos.y+140*sin(parent.dir),                //
+            screenPos.x+125*cos(parent.dir+0.1745329252),   //
+            screenPos.y+125*sin(parent.dir+0.1745329252));  //
   }
 }
 
@@ -120,7 +173,9 @@ class HeatIndicator extends Indicator{
       int maxLines=0;
       rr.strokeWeight(1);
       rr.stroke(0, 0, 200);
-      rr.line(_pos.x, _pos.y, _pos.x+100*cos(parent.dir), _pos.y+100*sin(parent.dir));
+
+      //rr.line(_pos.x, _pos.y, _pos.x+100*cos(parent.dir), _pos.y+100*sin(parent.dir));
+
       for (int i=0; i<parent.heatArray.length; i++) {
         hullTemp=parent.heatArray[i]/Settings.hullPieceMass;
         if (hullTemp>Settings.hullMeltingPoint) 

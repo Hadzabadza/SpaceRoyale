@@ -151,6 +151,8 @@ static class Settings {
   //static float hullPieceArea=10;         //Hull piece = square, therefore radiating area of its piece is its length = sqrt(hullPieceMass)
   static float shipDrawScale=0.2;          //
   static float speedArrowsDivider=1;       //How much speed is represented by one arrow on the indicator
+  static float maxZoom=50;                 //
+  static float minZoom=0.2;                //
 
   //Bullet properties
   static float bullDmg=0.1;               //
