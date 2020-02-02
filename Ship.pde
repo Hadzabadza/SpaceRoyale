@@ -126,6 +126,31 @@ class Ship extends Object {
     for (int i=0; i<3; i++) particles.add(new Particle(sprites.ShieldWaves, new PVector(pos.x+60*cos(dir+PI/3*(i-1)), pos.y+60*sin(dir+PI/3*(i-1))), new PVector(warpSpeed*cos(dir+PI/3*(i-1)), warpSpeed*sin(dir+PI/3*(i-1))), dir+PI/3*(i-1), color(255), 0.54, -5, 0.05, 0, 255, false));
   }
 
+  void turnLeft() {
+    spin-=Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed;
+  };
+
+  void turnRight() {
+    spin+=Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed;
+  };
+
+  void turnLeft(float assistPower) {
+    spin-=(assistPower*Settings.assistedTurnSpeed)*thrust+Settings.staticTurnSpeed;
+  };
+
+  void turnRight(float assistPower) {
+    spin+=(assistPower*Settings.assistedTurnSpeed)*thrust+Settings.staticTurnSpeed;
+  };
+
+  void killSpin() {
+    spin+=Math.signum(spin)*-1*(Settings.staticTurnSpeed+Settings.assistedTurnSpeed);
+  }
+
+  void faceVector(PVector targetDir){
+    float dirDiff=VectorAngleDiff(PVector.fromAngle(dir),targetDir);
+    
+  }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                      //
 //                                    Update functions                                  //
@@ -234,26 +259,6 @@ class Ship extends Object {
       orbited=p;
       break;
     }
-  }
-
-  void turnLeft() {
-    spin-=Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed;
-  };
-
-  void turnRight() {
-    spin+=Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed;
-  };
-
-  void turnLeft(float assistPower) {
-    spin-=(assistPower*Settings.assistedTurnSpeed)*thrust+Settings.staticTurnSpeed;
-  };
-
-  void turnRight(float assistPower) {
-    spin+=(assistPower*Settings.assistedTurnSpeed)*thrust+Settings.staticTurnSpeed;
-  };
-
-  void killSpin() {
-    spin+=Math.signum(spin)*-1*(Settings.staticTurnSpeed+Settings.assistedTurnSpeed);
   }
 
   void zoomIn() {

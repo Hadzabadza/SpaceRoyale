@@ -1,11 +1,12 @@
-//TODO: Add direction and speed markers.  DONE
 //TODO: Add landing mode.
-//TODO: Move drawing of the player's UI into the ship or other manager. DONE
 //TODO: Add a planet scan system.
 //TODO: Orbital scan/planet interaction.
 //TODO: Make directions matter when facing planets from orbit/landing.
-//TODO: Add upgrades system.
 //TODO: Add UIs for new stuff.
+
+//TODO: DEGARBAGEIFY MAIN!!!
+
+//TODO: Add upgrades system.
 //TODO: Add difficulty levels.
 //TODO: Add intra-system node travel.
 //TODO: Add inter-system travel and animations.

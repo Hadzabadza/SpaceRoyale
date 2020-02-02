@@ -1,48 +1,51 @@
-import oscP5.*;                                             //Required libs for TouchOSC controls. //<>//
-import netP5.*; 
+import oscP5.*;   //Required libs for TouchOSC controls.  //<>//
+import netP5.*;   //
 
-Slider testSLD; 
-Slider operated;
+Slider testSLD;   //
+Slider operated;  //
 
 void setup() {
   size(1300, 700, P3D);                                     //Screen size, can't be dynamically adjusted
-  surface.setLocation((displayWidth-1300)/2, 
-  (displayHeight-700)/2);                                   //Location of the game window on screen
-  randomSeed(seed);
-
+  surface.setLocation((displayWidth-1300)/2,                //Location of the game window on screen
+  (displayHeight-700)/2);                                   //
+  
+  randomSeed(seed);                                         //DEBUG
+  
   pixFont=createFont("Minecraftia-Regular.ttf", 120, true); //The font of the game
-  textFont(pixFont, 12); 
-  sprites=new IMG();
-  sprites.loadImages();                                     //Loader for all the game's sprites
+  textFont(pixFont, 12);                                    //
 
+  sprites=new IMG();                                        //Loader for all the game's sprites
+  sprites.loadImages();                                     //
+  
   frameRate(Settings.FPS);                                  //DEBUG
 
-  init();
+  init();                                                   //
 }
 
-void init() {                                               //Initialiser. Useful for game restarting
-  gameState=0; 
+void init() {                                //Initialiser. Useful for game restarting
+  
+  gameState=0;                               //Gamestate reset
+  frameCount=0;                              //Framecount restart
 
-  frameCount=0;                                             //Framecount restart
+  stars=new ArrayList<Star>();               //Resets all tracked object lists
+  asteroids=new ArrayList<Asteroid>();       //
+  bullets=new ArrayList<Bullet>();           //
+  missiles=new ArrayList<Missile>();         //
+  ships=new Ship[Settings.ships];            //
+  objects=new ArrayList<Object>();           //
 
-  stars=new ArrayList<Star>();                              //Resets all tracked object lists.
-  asteroids=new ArrayList<Asteroid>();
-  bullets=new ArrayList<Bullet>(); 
-  missiles=new ArrayList<Missile>();
-  ships=new Ship[Settings.ships]; 
-  objects=new ArrayList<Object>();
+  particles=new ArrayList<Particle>();       //Particle buffers
+  spareParticles=new ArrayList<Particle>();  //
 
-  particles=new ArrayList<Particle>();                     //Particle buffers
-  spareParticles=new ArrayList<Particle>();
+  destroyees=new ArrayList<Object>();        //Object destruction and construction queues
+  newSpawns=new ArrayList<Object>();         //
 
-  destroyees=new ArrayList<Object>();                      //Object destruction and construction queues
-  newSpawns=new ArrayList<Object>();
+  screen=new PGraphics[Settings.ships];      //Cameras and displays
+  view=new ArrayList<View>();                //
 
-  screen= new PGraphics[Settings.ships];
-  view= new ArrayList<View>();
-  stars.add(new Star(0, 0));
+  stars.add(new Star(0, 0));                 //Creates the map
 
-  for (int i=0; i<Settings.ships; i++) {                   //Player spawning directions and positions
+  for (int i=0; i<Settings.ships; i++) {     //Player spawning directions and positions
     float startDir=random(TWO_PI);
     float startDist=random(stars.get(0).gravWellRadius*0.4, stars.get(0).gravWellRadius);
     PVector startPos=new PVector(startDist*cos(startDir), startDist*sin(startDir));

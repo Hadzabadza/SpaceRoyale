@@ -172,3 +172,7 @@ static class Settings {
   static float scaleChange=-0.001;  //
   static float defaultTimer=255;    //
 }
+
+float VectorAngleDiff(PVector a, PVector b){
+  return atan2(b.y,b.x)-atan2(a.y,a.x);
+}

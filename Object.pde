@@ -44,6 +44,9 @@ class Object { //Superclass for physical ingame objects
     if (checker.y<0) direction=TWO_PI+direction;
     return direction; 
   }
+  PVector getVectorTo(Object to){
+    return (new PVector(to.pos.x-pos.x,to.pos.y-pos.y));
+  }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                      //
