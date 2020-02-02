@@ -36,7 +36,11 @@ class Indicator{
 
 class VelocityIndicator extends Indicator{
   
-  Ship parent;
+  Ship parent;    //This indicator belongs to a ship (player)
+  PVector relVel; //Relative velocity
+  PVector relDir; //Used to define where to draw speed arrows
+  float speed=0;  //How many speed arrows are present
+  float speedDivider=
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                      //
@@ -47,6 +51,7 @@ class VelocityIndicator extends Indicator{
   VelocityIndicator(float x, float y, float sX, float sY, Ship _parent){
     super(x,y,sX,sY,_parent);
     parent=_parent;
+    relVel=new PVector(0,0);
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +70,11 @@ class VelocityIndicator extends Indicator{
 
   void draw(Object _relativeTo, color _velocityColour, PGraphics rr){
     rr.stroke(_velocityColour);
-    rr.line(parent.pos.x, parent.pos.y, parent.pos.x+(parent.vel.x-_relativeTo.vel.x)*Settings.FPS*1.5, parent.pos.y+(parent.vel.y-_relativeTo.vel.y)*Settings.FPS*1.5);
+    relVel.x=parent.vel.x-_relativeTo.vel.x;
+    relVel.y=parent.vel.y-_relativeTo.vel.y;
+    speed=relVel.mag();
+    for 
+    rr.line(parent.pos.x, parent.pos.y, parent.pos.x+(relVel.x)*Settings.FPS*1.5, parent.pos.y+(relVel.y)*Settings.FPS*1.5);
   }
 }
 
