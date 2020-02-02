@@ -77,6 +77,7 @@ class Ship extends Object {
     hullPieceArea=diameter*PI/32;
     cursor=new PVector(0.5,0.5);
     speedometer=new VelocityIndicator(width-80,80,50,50,this);
+    thermometer=new HeatIndicator(width-80,80,50,50,this);
     //for (int i=0; i<heatArray.length; i++) heatArray[i]=i*100;
   }
 
@@ -334,49 +335,6 @@ class Ship extends Object {
     }
   }
 
-  void drawHeat(PGraphics rr, PVector _pos) {
-    if (!displayPlanetMap) {
-      float startOffset=150;
-      float lineArcWidth=0.1;
-      float lineStep=4;
-      float hullTemp;
-      int maxLines=0;
-      rr.strokeWeight(1);
-      rr.stroke(0, 0, 200);
-      rr.line(_pos.x, _pos.y, _pos.x+100*cos(dir), _pos.y+100*sin(dir));
-      for (int i=0; i<heatArray.length; i++) {
-        hullTemp=heatArray[i]/Settings.hullPieceMass;
-        if (hullTemp>Settings.hullMeltingPoint) 
-          { 
-            maxLines=Settings.hullMeltingPoint/100;
-            float pX=sprt.width*cos(i*QUARTER_PI/4)*0.08;
-            float pY=sprt.height*sin(i*QUARTER_PI/4)*0.08;
-            particles.add(new Particle(sprites.Debris[round(random(0, sprites.debrisImages-1))], 
-              new PVector(
-                pos.x+random(-6,6)+vel.x-pX*cos(dir+PI)
-                -pY*sin(dir),
-                pos.y+random(-6,6)+vel.y-pX*sin(dir+PI)
-                +pY*cos(dir)),
-              new PVector(vel.x, vel.y), random(TWO_PI), color(255), 0.2, random(-1, -2), -0.0001, random(-0.5, 0.5), 255, true));
-            HP-=0.001;
-          }
-        else maxLines=round(hullTemp/100);
-        for (int j=0; j<maxLines; j++)
-        {
-          if (j==21) rr.strokeWeight=3;
-          else rr.strokeWeight=1;
-          rr.stroke (map(j, 6, 22, 100, 255), map(j, 10, 20, 255, 50), 0, 140+cos(gameTime)*50);
-          rr.line(_pos.x+(startOffset+lineStep*j)*cos(i*QUARTER_PI/4+lineArcWidth+dir), _pos.y+(startOffset+lineStep*j)*sin(i*QUARTER_PI/4+lineArcWidth+dir), _pos.x+(startOffset+lineStep*j)*cos(i*QUARTER_PI/4-lineArcWidth+dir), _pos.y+(startOffset+lineStep*j)*sin(i*QUARTER_PI/4-lineArcWidth+dir));
-        }
-      }
-    }
-  }
-
-  void drawVelocity(Object _relativeTo, color _velocityColour, PGraphics rr){
-    rr.stroke(_velocityColour);
-    rr.line(pos.x, pos.y, pos.x+(vel.x-_relativeTo.vel.x)*Settings.FPS*1.5, pos.y+(vel.y-_relativeTo.vel.y)*Settings.FPS*1.5);
-  }
-
   void draw(PGraphics rr) {
     /*rr.stroke(c);
      rr.fill(255);
@@ -401,11 +359,11 @@ class Ship extends Object {
     if (zoom<20) {
       if (orbited!=null){
         rr.fill(200);
-        drawVelocity(stars.get(0),color(200,12.75*zoom),rr);
-        drawVelocity(orbited,color(0,200,0,12.5*(25-zoom)),rr);
-      } else drawVelocity(stars.get(0),color(200),rr);
+        speedometer.draw(stars.get(0),color(200,12.75*zoom),rr);
+        speedometer.draw(orbited,color(0,200,0,12.5*(25-zoom)),rr);
+      } else speedometer.draw(stars.get(0),color(200),rr);
     }
-    else drawVelocity(stars.get(0),color(200),rr);
+    else speedometer.draw(stars.get(0),color(200),rr);
 
     rr.pushMatrix();
     PVector turretPos=new PVector(pos.x-Settings.turretXOffset*cos(dir)-Settings.turretYOffset*sin(dir), pos.y-Settings.turretXOffset*sin(dir)-Settings.turretYOffset*cos(dir+PI));

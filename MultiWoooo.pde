@@ -156,7 +156,7 @@ void draw() {
       if (!ships[i].destroyed) {
         ships[i].drawTarget(screen[i]); //Draws missile target
         ships[i].drawAim(screen[i]); //Draws turret aiming direction
-        ships[i].drawHeat(this.g, new PVector(screen[i].width/2+screen[i].width*i, screen[i].height/2));
+        ships[i].thermometer.draw(this.g, new PVector(screen[i].width/2+screen[i].width*i, screen[i].height/2));
       }
       screen[i].endDraw();
       image(screen[i], screenSize*i, 0);
