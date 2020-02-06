@@ -41,8 +41,17 @@ class Ship extends Object {
   boolean zoomOut;
   boolean missileAiming;
   boolean afterBurning;
+  boolean assistedLanding;
   int turnWheelInput;
   PVector cursor;
+
+  //Temporary variables to reduce unnecessary memory allocation
+    float _dirDiff=0;        //Used in faceVector()
+    float _turnSpeed=0;      //
+    float _leftTurnTime=0;   //
+    float _rightTurnTime=0;  //
+    float _brakeTime=0;      //
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                      //
@@ -142,13 +151,40 @@ class Ship extends Object {
     spin+=(assistPower*Settings.assistedTurnSpeed)*thrust+Settings.staticTurnSpeed;
   };
 
+  void turnLeft(int multiplier) {
+    spin-=(Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed)*multiplier;
+  };
+
+  void turnRight(int multiplier) {
+    spin+=(Settings.assistedTurnSpeed*thrust+Settings.staticTurnSpeed)*multiplier;
+  };
+
   void killSpin() {
-    spin+=Math.signum(spin)*-1*(Settings.staticTurnSpeed+Settings.assistedTurnSpeed);
+    // spin+=Math.signum(spin)*-1*(Settings.staticTurnSpeed+Settings.assistedTurnSpeed);
+    spin+=Math.signum(spin)*-1*(Settings.staticTurnSpeed+Settings.assistedTurnSpeed*thrust);
   }
 
   void faceVector(PVector targetDir){
-    float dirDiff=VectorAngleDiff(PVector.fromAngle(dir),targetDir);
-    
+     _dirDiff=VectorAngleDiff(PVector.fromAngle(dir),targetDir);
+     _turnSpeed=Settings.staticTurnSpeed+Settings.assistedTurnSpeed*thrust;
+     _leftTurnTime=0;
+     _rightTurnTime=0;
+     _brakeTime=spin/_turnSpeed;
+    if (_dirDiff>0){
+      _rightTurnTime=sqrt(2*_dirDiff/(_turnSpeed));
+      _leftTurnTime=sqrt(2*(TWO_PI-_dirDiff)/(_turnSpeed));
+    }
+    else{
+      _leftTurnTime=sqrt(2*abs(_dirDiff)/(_turnSpeed));
+      _rightTurnTime=sqrt(2*(TWO_PI+_dirDiff)/(_turnSpeed));
+    }
+    _rightTurnTime-=_brakeTime;
+    _leftTurnTime+=_brakeTime;
+    if (_leftTurnTime>0 && _rightTurnTime>0) {
+      if (_leftTurnTime<_rightTurnTime) turnLeft(2); else turnRight(2);
+    } else { killSpin(); }
+
+    // println (leftTurnTime, " ", rightTurnTime, " ", brakeTime, " ", spin, " ", dirDiff);
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -232,6 +268,7 @@ class Ship extends Object {
         turnLeft=false; 
         turnRight=false;
       }
+      if (assistedLanding&&orbited!=null) faceVector(getVectorTo(orbited).mult(-1));
       vel.x+=cos(dir)*thrust*thrust/100*afterBurner; //THRUST APPLICATION
       vel.y+=sin(dir)*thrust*thrust/100*afterBurner;
 

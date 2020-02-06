@@ -62,6 +62,10 @@ color backgroundColour= color(0);  //
 
 OscHub osc;  //
 
+/////////DEBUG VALUES/////////
+
+//NOTHING! YAY
+
 /////////!!!!!FIX THESE!!!!!/////////
 
 //NOTHING! YAY

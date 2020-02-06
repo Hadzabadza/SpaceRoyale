@@ -11,6 +11,7 @@ void keyPressed() { //Here are all the hard-coded buttons for keyboard controls.
     if (key == ' ')  ships[0].fire = true;
     if ((key == 'c')||(key=='C')) ships[0].afterBurning=true;
     if ((key == 'z')||(key=='Z')) ships[0].missileAiming=true;
+    if ((key == 'v')||(key=='V')) ships[0].assistedLanding=true;
   }
   if (ships.length>1&&!ships[1].displayPlanetMap) {
     if ((keyCode==UP)||(key==56))  ships[1].speedUp = true;
@@ -47,6 +48,7 @@ void keyReleased() {
     if ((key == 'c')||(key=='C')) ships[0].afterBurning=false;
     if ((key == 'x')||(key=='X'))  if (ships[0].warp) ships[0].stopWarp(); 
     else ships[0].warp=true;
+    if ((key == 'v')||(key=='V')) ships[0].assistedLanding=false;
     if ((key == 'z')||(key=='Z')) {
       ships[0].fireMissile();
       ships[0].missileAiming=false;

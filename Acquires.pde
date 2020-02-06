@@ -4,6 +4,8 @@
 //TODO: Make directions matter when facing planets from orbit/landing.
 //TODO: Add UIs for new stuff.
 
+//TODO: DEGARBAGEIFY INPUT!!
+
 //TODO: DEGARBAGEIFY MAIN!!!
 
 //TODO: Add upgrades system.
