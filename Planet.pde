@@ -198,16 +198,22 @@ class Planet extends Object {
       if (!s.warp) {
         currDist=getDistTo(s);
         if (currDist<gravWellRadius) {//&&currDist>radius*0.98) {
-          if(currDist>radius)
             s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
-          else for (int i=0; i<s.heatArray.length; i++) 
-          { 
-            float heatTransfer=ambientTemp*Settings.hullPieceMass;
-            if (heatTransfer>s.heatArray[i]) s.heatArray[i]+=(heatTransfer-s.heatArray[i])*0.01;
-             //println(ambientTemp*Settings.hullPieceMass/s.heatArray[i]);
+          if(currDist<radius) {
+            s.vel.add(new PVector(s.pos.x-pos.x, s.pos.y-pos.y).normalize().mult(gravPull/pow(currDist, 2)));
+            for (int i=0; i<s.heatArray.length; i++) 
+            { 
+              float heatTransfer=ambientTemp*Settings.hullPieceMass;
+              if (heatTransfer>s.heatArray[i]) s.heatArray[i]+=(heatTransfer-s.heatArray[i])*0.01;
+               //println(ambientTemp*Settings.hullPieceMass/s.heatArray[i]);
+            }
           }
         }
       }
+    }
+    for (Bullet b : bullets) { 
+      currDist=getDistTo(b);
+      if (currDist<gravWellRadius) b.vel.add(new PVector(pos.x-b.pos.x, pos.y-b.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
     }
   }
 

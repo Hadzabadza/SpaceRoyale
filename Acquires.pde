@@ -1,4 +1,5 @@
 //TODO: Add landing mode.
+//TODO: Comment on Slider's functionality.
 //TODO: Add a planet scan system.
 //TODO: Orbital scan/planet interaction.
 //TODO: Make directions matter when facing planets from orbit/landing.

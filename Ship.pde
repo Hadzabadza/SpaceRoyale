@@ -17,7 +17,7 @@ class Ship extends Object {
   int mssls=Settings.msslAmount;
   boolean displayPlanetMap;
   float[] heatArray;
-  float afterBurner=1;
+  float afterBurner=0;
   float hullPieceArea;
   PImage sprt=sprites.Ship;
 
@@ -245,12 +245,15 @@ class Ship extends Object {
         for (Star s : stars) if (checkCollision(s)) vel=new PVector();
       }
       if (afterBurning) {
-        if (land!=null) afterBurner=Settings.afterBurnerMaxCap+land.gravPull/pow(land.radius, 2)*2;
+        if (orbited!=null) {
+          afterBurner=getVectorTo(orbited).normalize().mult(orbited.gravPull/pow(getDistTo(orbited), 2)).mag();
+          println(afterBurner);
+        }
         else afterBurner=Settings.afterBurnerMaxCap;
-        thrust=1;
-        dock.SCUpdateThrustControls=true;
+        //thrust=1;
+        //dock.SCUpdateThrustControls=true;
       }
-      else afterBurner=1;
+      else afterBurner=0;
       if (speedUp) if (thrust<=0.99) {
         thrust+=0.01;
         dock.SCUpdateThrustControls=true;
@@ -269,8 +272,8 @@ class Ship extends Object {
         turnRight=false;
       }
       if (assistedLanding&&orbited!=null) faceVector(getVectorTo(orbited).mult(-1));
-      vel.x+=cos(dir)*thrust*thrust/100*afterBurner; //THRUST APPLICATION
-      vel.y+=sin(dir)*thrust*thrust/100*afterBurner;
+      vel.x+=cos(dir)*(pow(thrust,2)/100+afterBurner); //THRUST APPLICATION
+      vel.y+=sin(dir)*(pow(thrust,2)/100+afterBurner);
 
       /*if (vel.mag()>Settings.shipSpeedLimit) { //SPEED LIMIT
        vel=vel.normalize().mult(Settings.shipSpeedLimit);

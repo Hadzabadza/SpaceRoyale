@@ -141,7 +141,7 @@ static class Settings {
   static float targetingDistance=2550;     //
   static float staticTurnSpeed=0.0002;     //
   static float assistedTurnSpeed=0.00035;  //
-  static float afterBurnerMaxCap=3;        //
+  static float afterBurnerMaxCap=0.02;     //
   static int turretXOffset=-2;             //
   static int turretYOffset=8;              //
   static int msslSlotXOffset=13;           //
