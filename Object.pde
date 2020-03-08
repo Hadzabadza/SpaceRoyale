@@ -48,6 +48,10 @@ class Object { //Superclass for physical ingame objects
     return (new PVector(to.pos.x-pos.x,to.pos.y-pos.y));
   }
 
+  PVector calculateGravPull(Object pulled, float pullStrength, float currDist){ //Universal grav function (might be a bad idea)
+    return pulled.getVectorTo(this).normalize().mult(pullStrength/pow(currDist, Settings.gravdient)*Settings.gravMod);
+  }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                      //
 //                                    Update functions                                  //

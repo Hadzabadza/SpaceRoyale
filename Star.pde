@@ -112,16 +112,20 @@ class Star extends Object {
       if (!s.warp) {
         currDist=getDistTo(s);
         if (currDist<gravWellRadius&&currDist>radius) {
-          s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
+          s.vel.add(calculateGravPull(s, gravPull, currDist));
           //println(gravPull/pow(currDist, 2));
         }
       }
+    }
+    for (Planet p : planets) { 
+      currDist=getDistTo(p);
+      p.vel.add(calculateGravPull(p, gravPull, currDist));
     }
     for (Particle p : particles) { 
       currDist=getDistTo(p);
       if (currDist<radius) p.queueDestroy();
       else if (currDist<gravWellRadius) {
-        p.vel.add(new PVector(pos.x-p.pos.x, pos.y-p.pos.y).normalize().mult(gravPull/2/pow(currDist, 2)));
+        p.vel.add(calculateGravPull(p, gravPull, currDist));
       }
     }
   }

@@ -423,14 +423,16 @@ class Ship extends Object {
     rr.popMatrix();
 
     rr.strokeWeight(1);
-    if (zoom<Settings.maxZoom*0.5) {
-      if (orbited!=null){
-        rr.fill(200);
-        speedometer.draw(stars.get(0),color(200,12.75*zoom),layerUI);
-        speedometer.draw(orbited,color(0,200,0,12.5*(25-zoom)),layerUI);
-      } else speedometer.draw(stars.get(0),color(200),layerUI);
+    if (!displayPlanetMap) {
+      if (zoom<Settings.maxZoom*0.5) {
+        if (orbited!=null){
+          rr.fill(200);
+          speedometer.draw(stars.get(0),color(200,12.75*zoom),layerUI);
+          speedometer.draw(orbited,color(0,200,0,12.5*(25-zoom)),layerUI);
+        } else speedometer.draw(stars.get(0),color(200),layerUI);
+      }
+      else speedometer.draw(stars.get(0),color(200),layerUI);
     }
-    else speedometer.draw(stars.get(0),color(200),layerUI);
 
     rr.pushMatrix();
     PVector turretPos=new PVector(pos.x-Settings.turretXOffset*cos(dir)-Settings.turretYOffset*sin(dir), pos.y-Settings.turretXOffset*sin(dir)-Settings.turretYOffset*cos(dir+PI));

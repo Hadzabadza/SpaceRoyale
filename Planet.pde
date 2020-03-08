@@ -2,7 +2,7 @@ class Planet extends Object {
   
   //Orbital parameters
   Star orbitStar;               //Orbited star.
-  float starPull;               //Gravitational pull of the parent star.
+  PVector starPull;               //Gravitational pull of the parent star.
   float distance;               //Distance from the star.
   int gravWellRadius;           //Radius of the planetary gravity well.
   int gravWellDiameter;         //Diameter of the above.
@@ -52,7 +52,7 @@ class Planet extends Object {
     mass=mas;                                                          //
     density=dens;                                                      //
     distance = distS+orbitStar.radius;                                 //
-    starPull=s.gravPull/pow(distance, 2);                              //
+    starPull=calculateGravPull(s,s.gravPull,distance);                 //
     gravPull=mass;                                                     //
     gravWellRadius=round(radius*Settings.gravityWellRadiusMultiplier); //
     gravWellDiameter=gravWellRadius*2;                                 //
@@ -60,12 +60,12 @@ class Planet extends Object {
     float phase=random(0, TWO_PI);                                     //
 
     if (random(0, 1)<0.98) {                            //Small chance that the planet will have a retrograde orbit.
-      vel.x=sqrt(starPull*distance)*cos(phase+HALF_PI); //
-      vel.y=sqrt(starPull*distance)*sin(phase+HALF_PI); //
+      vel.x=starPull.x*cos(phase+HALF_PI); //
+      vel.y=starPull.y*sin(phase+HALF_PI); //
     } else                                              //
     {                                                   //
-      vel.x=sqrt(starPull*distance)*cos(phase-HALF_PI); //
-      vel.y=sqrt(starPull*distance)*sin(phase-HALF_PI); //
+      vel.x=starPull.x*cos(phase-HALF_PI); //
+      vel.y=starPull.y*sin(phase-HALF_PI); //
     }
 
     pos.x=orbitStar.pos.x+distance*cos(phase);               //
@@ -172,9 +172,9 @@ class Planet extends Object {
     float shipStarFunction=(tp.x-shadePoints[2].x)/(tp.y-shadePoints[2].y);
     //println(orbitNumber+" "+shadeFunctions[0]+" "+shadeFunctions[1]+" "+shipStarFunction+" ");
     if (shadeFunctions[0]<shipStarFunction)
-    if (shadeFunctions[1]>shipStarFunction)
-    if (dist(orbitStar.pos.x,orbitStar.pos.y,tp.x,tp.y)>=distance) 
-    return true;
+      if (shadeFunctions[1]>shipStarFunction)
+        if (dist(orbitStar.pos.x,orbitStar.pos.y,tp.x,tp.y)>=distance) 
+          return true;
     return false;
   }
 
@@ -185,8 +185,8 @@ class Planet extends Object {
 //////////////////////////////////////////////////////////////////////////////////////////
 
   void orbitalMovement() {
-    grav=new PVector(orbitStar.pos.x-pos.x, orbitStar.pos.y-pos.y).normalize().mult(starPull);
-    vel.add(grav);
+    // grav=new PVector(orbitStar.pos.x-pos.x, orbitStar.pos.y-pos.y).normalize().mult(starPull);
+    // vel.add(orbitStar.calculateGravPull(this,orbitStar.gravPull,getDistTo(orbitStar)));
     dirFromStar=orbitStar.getDirTo(this);
     shadePoints[0].x=pos.x+vel.x+radius*cos(dirFromStar-HALF_PI);
     shadePoints[0].y=pos.y+vel.y+radius*sin(dirFromStar-HALF_PI);
@@ -218,13 +218,14 @@ class Planet extends Object {
                //println(ambientTemp*Settings.hullPieceMass/s.heatArray[i]);
             }
           } 
-          else s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
+          else s.vel.add(calculateGravPull(s, gravPull, currDist));
         }
       }
     }
+
     for (Bullet b : bullets) { 
       currDist=getDistTo(b);
-      if (currDist<gravWellRadius) b.vel.add(new PVector(pos.x-b.pos.x, pos.y-b.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
+      if (currDist<gravWellRadius) b.vel.add(calculateGravPull(b, gravPull, currDist));
     }
   }
 

@@ -76,7 +76,8 @@ static class Settings {
   static int maxPlanetsPerStar =8;     //
   static int minAsteroidsPerChain =1;  //
   static int maxAsteroidsPerChain =20; //
-  static float gravMod=0.2;            //
+  static float gravMod=0.1;           //Universal gravity multiplier, should be lessened if movement is too crazy.
+  static float gravdient=1.8;          //This determines the steepness of a gravity well. 2 would simulate realistic inverse square gravity.
 
   //OSC stuff
   static String[] controllerIP={              //
