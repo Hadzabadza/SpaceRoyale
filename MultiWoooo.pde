@@ -1,4 +1,4 @@
-import oscP5.*;   //Required libs for TouchOSC controls.  //<>//
+import oscP5.*;   //Required libs for TouchOSC controls.  //<>// //<>//
 import netP5.*;   //
 
 Slider testSLD;   //
@@ -161,11 +161,12 @@ void draw() {
       if (Settings.DEBUG) {
         fill(130+50*sin(gameTime), 0, 0);
         text("DEBUG", screenSize*i+20, 20);
-        if (ships[i].displayPlanetMap)
+        if (ships[i].land!=null)
           fill(0, 130+50*sin(gameTime), 0);
         else
           fill(130+50*sin(gameTime), 0, 0);
         text("LAND", screenSize*i+24, 30);
+        text("SPEED: "+ships[0].afterBurner, screenSize*i+24, 40);
       }
       noFill();
       rect(screenSize*i+halfScreen-50, 10, 100, 10);

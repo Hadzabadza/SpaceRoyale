@@ -62,14 +62,6 @@ color backgroundColour= color(0);  //
 
 OscHub osc;  //
 
-/////////DEBUG VALUES/////////
-
-//NOTHING! YAY
-
-/////////!!!!!FIX THESE!!!!!/////////
-
-//NOTHING! YAY
-
 static class Settings {
 
   //Game settings  
@@ -83,8 +75,8 @@ static class Settings {
   static int minPlanetsPerStar =3;     //
   static int maxPlanetsPerStar =8;     //
   static int minAsteroidsPerChain =1;  //
-  static int maxAsteroidsPerChain =8;  //
-  static float celestialPull=0.00008;  //
+  static int maxAsteroidsPerChain =20; //
+  static float gravMod=0.2;            //
 
   //OSC stuff
   static String[] controllerIP={              //
@@ -127,7 +119,7 @@ static class Settings {
   //static float temperatureFalloff=  //
 
   //Planet properties
-  static float gravityWellRadiusMultiplier=13;  //
+  static float gravityWellRadiusMultiplier=10;  //
   static int planetScaler=1;                    //
   static float resDisplayThreshold=1;           //
   

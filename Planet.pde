@@ -9,16 +9,17 @@ class Planet extends Object {
   float gravPull;               //Gravitational pull of the planet.
   PVector grav;                 //Temporary vector for calculation of the parent star's gravity forces.
   int orbitNumber;              //Number of planet's orbit, also used as its ID.
+
   //Vars for calculating planetary shade
-  PVector[] shadePoints;        //0 - Left, 1 - right, 2 - tip (on the furthest point of stellar grav radius).
+  PVector[] shadePoints;        //0 - Left, 1 - right, 2 - tip. Tip lies on the furthest point of stellar grav radius.
   float[] shadeFunctions;       //0 - Left shade border function, 1 - right, 2 - function from the tip of the ship to the tip of the shade.
-  float dirFromStar;            //Direction from the start towards this planet, imagine this being the light beam's direction.
+  float dirFromStar;            //Direction from the origin towards this planet, imagine this being the light beam's direction.
   
   //Surface parameters
   PImage surface;               //Surface image that represents the planet on the solar system map.
   Map surfaceScreen;            //The actual class for representing the tiles on a screen.
-  int terrainSize;              //How many terrain tiles are on an axis (both axes are equal in size).
-  int surfWidthCoeff;           //How many pixels on the surface image is taken by a tile.
+  int terrainSize;              //How many terrain tiles are along an axis. Both axes are equal, as maps are squares.
+  int surfWidthCoeff;           //How many pixels on the surface image are taken by a tile.
   int surfHeightCoeff;          //
   float density;                //Bloats the planet's surface image inversely proportional to this value. TODO: Use in resource generation.
   float mass;                   //Planetary mass.
@@ -28,12 +29,13 @@ class Planet extends Object {
   float totalHeight=0;          //Total landmass of the planet. 
   float totalLava=0;            //Total lava level of the planet, TODO: replace with liquids.
   float waterLevel=0;           //Eye-candy water, to be removed. TODO: replace with actual liquids.
-  int mapRes;                   //This is the multiplier for the map's pixels (if the screen can fir two maps, each pixel will be twice its size).
+  int mapRes;                   //This is the multiplier for the map's pixel representation.
   IntDict terrainUpdateQueue;   //Unused due to being computationally expensive, used to even out the distribution of lava.
   float[] maxRes;               //Maximum amount ot resource on planet.
   Terrain [] terrain;           //Array of terrain tiles.
   Terrain selected;             //Currently selected tile. TODO: make this multiplayer-friendly.
   float ambientTemp;            //Planet's ambient temperature. All tiles start with this, heats the ship up to this value if landed.
+
   //Update queue
   float[] lavaChange;           //
   float[] liquidPressureChange; //
@@ -44,53 +46,53 @@ class Planet extends Object {
 //                                                                                      //
 //////////////////////////////////////////////////////////////////////////////////////////
 
-  Planet(Star s, float mas, float dens, float distS, int number) {
-    super(new PVector(), new PVector(), 0, sqrt(mas)/dens);
-    orbitStar=s;
-    mass=mas;
-    density=dens;
-    distance = distS+orbitStar.radius;
-    starPull=s.gravPull/pow(distance, 2);
-    gravPull=mass;
-    gravWellRadius=round(radius*Settings.gravityWellRadiusMultiplier);
-    gravWellDiameter=gravWellRadius*2;
-    waterLevel=random(0.1, 0.9);
-    float phase=random(0, TWO_PI);
+  Planet(Star s, float mas, float dens, float distS, int number) {     //
+    super(new PVector(), new PVector(), 0, sqrt(mas)/dens);            //
+    orbitStar=s;                                                       //
+    mass=mas;                                                          //
+    density=dens;                                                      //
+    distance = distS+orbitStar.radius;                                 //
+    starPull=s.gravPull/pow(distance, 2);                              //
+    gravPull=mass;                                                     //
+    gravWellRadius=round(radius*Settings.gravityWellRadiusMultiplier); //
+    gravWellDiameter=gravWellRadius*2;                                 //
+    waterLevel=random(0.1, 0.9);                                       //
+    float phase=random(0, TWO_PI);                                     //
 
-    if (random(0, 1)<0.98) { //Small chance that the planet will have a retrograde orbit.
-      vel.x=sqrt(starPull*distance)*cos(phase+HALF_PI);
-      vel.y=sqrt(starPull*distance)*sin(phase+HALF_PI);
-    } else
-    {
-      vel.x=sqrt(starPull*distance)*cos(phase-HALF_PI);
-      vel.y=sqrt(starPull*distance)*sin(phase-HALF_PI);
+    if (random(0, 1)<0.98) {                            //Small chance that the planet will have a retrograde orbit.
+      vel.x=sqrt(starPull*distance)*cos(phase+HALF_PI); //
+      vel.y=sqrt(starPull*distance)*sin(phase+HALF_PI); //
+    } else                                              //
+    {                                                   //
+      vel.x=sqrt(starPull*distance)*cos(phase-HALF_PI); //
+      vel.y=sqrt(starPull*distance)*sin(phase-HALF_PI); //
     }
 
-    pos.x=orbitStar.pos.x+distance*cos(phase);
-    pos.y=orbitStar.pos.y+distance*sin(phase);
-    spin=random(-1, 1)*TWO_PI/Settings.FPS/60; //Speed of planet's rotation, determined as revelations per minute.
-    orbitNumber=number;
-    terrainSize=round(radius*density)/2;
-    surface=createImage(terrainSize*4, terrainSize*4, ARGB);
-    surfWidthCoeff=surface.width/terrainSize;
-    surfHeightCoeff=surface.height/terrainSize;
-    ambientTemp=s.mass/(2*PI*distance)*radius; //This is how much energy a planet gets and has to give away to stabilise temperature.
-    ambientTemp*=PI*diameter/mass; //This is its actual temperature.
-    terrain=new Terrain[terrainSize*terrainSize];
+    pos.x=orbitStar.pos.x+distance*cos(phase);               //
+    pos.y=orbitStar.pos.y+distance*sin(phase);               //
+    spin=random(-1, 1)*TWO_PI/Settings.FPS/60;               //Speed of planet's rotation, in revelations per minute.
+    orbitNumber=number;                                      //
+    terrainSize=round(radius*density)/2;                     //
+    surface=createImage(terrainSize*4, terrainSize*4, ARGB); //
+    surfWidthCoeff=surface.width/terrainSize;                //
+    surfHeightCoeff=surface.height/terrainSize;              //
+    ambientTemp=s.mass/(2*PI*distance)*radius;               //This is how much energy a planet gets and has to give away to stabilise temperature.
+    ambientTemp*=PI*diameter/mass;                           //This is its actual temperature.
+    terrain=new Terrain[terrainSize*terrainSize];            //
     lavaChange=new float[terrainSize*terrainSize];           //
-    liquidPressureChange=new float[terrainSize*terrainSize];
-    if (height<width)
-      mapRes=floor(height/(terrainSize+20));
-    else
-      mapRes=floor(width/(terrainSize+20));
-    createMap();
-    shadePoints=new PVector[4];
-    shadeFunctions=new float[4];
-    for (int i=0; i<3; i++){
-      shadePoints[i]=new PVector(0,0);
-      shadeFunctions[i]=0;
-    }
-    maxRes=new float[resourceNames.length*3];
+    liquidPressureChange=new float[terrainSize*terrainSize]; //
+    if (height<width)                                        //
+      mapRes=floor(height/(terrainSize+20));                 //
+    else                                                     //
+      mapRes=floor(width/(terrainSize+20));                  //
+    createMap();                                             //
+    shadePoints=new PVector[4];                              //
+    shadeFunctions=new float[4];                             //
+    for (int i=0; i<3; i++){                                 //
+      shadePoints[i]=new PVector(0,0);                       //
+      shadeFunctions[i]=0;                                   //
+    }                                                        //
+    maxRes=new float[resourceNames.length*3];                //
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -98,6 +100,11 @@ class Planet extends Object {
 //                                    General functions                                 //
 //                                                                                      //
 //////////////////////////////////////////////////////////////////////////////////////////
+
+  boolean checkCollision(Object with, float radBonus) {
+    if (dist(pos.x, pos.y, with.pos.x, with.pos.y)<=with.radius+radius+radBonus) return true;
+    else return false;
+  }
 
   void createMap() { //Creates a surface map for the planet
     surface.loadPixels();
@@ -198,16 +205,20 @@ class Planet extends Object {
       if (!s.warp) {
         currDist=getDistTo(s);
         if (currDist<gravWellRadius) {//&&currDist>radius*0.98) {
-            s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
-          if(currDist<radius) {
-            s.vel.add(new PVector(s.pos.x-pos.x, s.pos.y-pos.y).normalize().mult(gravPull/pow(currDist, 2)));
+          if(s.land==this)
+           {
+            float currDir=getDirTo(s);
+            s.vel=vel.copy();
+            s.pos.x=pos.x+currDist*cos(currDir+spin);
+            s.pos.y=pos.y+currDist*sin(currDir+spin);
             for (int i=0; i<s.heatArray.length; i++) 
             { 
               float heatTransfer=ambientTemp*Settings.hullPieceMass;
               if (heatTransfer>s.heatArray[i]) s.heatArray[i]+=(heatTransfer-s.heatArray[i])*0.01;
                //println(ambientTemp*Settings.hullPieceMass/s.heatArray[i]);
             }
-          }
+          } 
+          else s.vel.add(new PVector(pos.x-s.pos.x, pos.y-s.pos.y).normalize().mult(gravPull/pow(currDist, 2)));
         }
       }
     }

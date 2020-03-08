@@ -16,6 +16,7 @@ class Ship extends Object {
   float distToTarget;
   int mssls=Settings.msslAmount;
   boolean displayPlanetMap;
+  boolean spaceStart=false;
   float[] heatArray;
   float afterBurner=0;
   float hullPieceArea;
@@ -164,8 +165,13 @@ class Ship extends Object {
     spin+=Math.signum(spin)*-1*(Settings.staticTurnSpeed+Settings.assistedTurnSpeed*thrust);
   }
 
-  void faceVector(PVector targetDir){
-     _dirDiff=VectorAngleDiff(PVector.fromAngle(dir),targetDir);
+  void faceVector(PVector targetDir){ //Automatically lines the ship up to the specififed direction
+
+    float controlledLandingAssist=0;                    //Allows limited manual steering during landing boost.
+    if (turnLeft) controlledLandingAssist=-0.1;        //
+      else if (turnRight) controlledLandingAssist=0.1; //
+
+     _dirDiff=VectorAngleDiff(PVector.fromAngle(dir-controlledLandingAssist),targetDir);
      _turnSpeed=Settings.staticTurnSpeed+Settings.assistedTurnSpeed*thrust;
      _leftTurnTime=0;
      _rightTurnTime=0;
@@ -187,6 +193,17 @@ class Ship extends Object {
     // println (leftTurnTime, " ", rightTurnTime, " ", brakeTime, " ", spin, " ", dirDiff);
   }
 
+  void landingMode(boolean start){
+    if (start){
+      assistedLanding = true;
+      if (land==null) spaceStart = true;
+      else spaceStart = false;
+    } 
+    else {
+      assistedLanding = false;
+    }
+  }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                      //
 //                                    Update functions                                  //
@@ -196,12 +213,15 @@ class Ship extends Object {
   void update() {
     if (dir<0) dir=TWO_PI+dir;
     else if (dir>0) dir=dir%TWO_PI;
+
     if (cooldown>0) cooldown-=0.01;
     if (HP<=0) queueDestroy();
+
     if (turnTurretLeft) aimDir-=0.042;
     if (turnTurretRight) aimDir+=0.042;
     if (fire) shoot();
-    if (warp)
+
+    if (warp) //Warping ignores most physics and interactions
     {
       pos.x+=warpSpeed*cos(dir);
       pos.y+=warpSpeed*sin(dir);
@@ -212,7 +232,8 @@ class Ship extends Object {
       }
       /*Warp effects spawner*/      if (frameCount%2==0) particles.add(new Particle(sprites.ShieldWaves, new PVector(pos.x+40*cos(dir), pos.y+40*sin(dir)), new PVector(0, 0), dir, color(255, 250), 0.35, -1, 0.0026, 0, 250, false));
     } else
-    {
+    { //When a ship is not in warp, it is affected by gravity, collisions, etc.
+      orbited=null;
       if (land!=null) { //Check if landed
         if (!checkCollision(land)) //Check if drifted away
         {
@@ -221,39 +242,41 @@ class Ship extends Object {
           land=null;
           dock.landingChange();
         } else {
-          float currDir=land.getDirTo(this);
-          float currDist=getDistTo(land);
-          if (currDist<land.radius-radius*0.2) {
-            //currDist=land.radius;
-            vel=land.vel.copy();
-          }
-          pos.x=land.pos.x+currDist*cos(currDir+land.spin);
-          pos.y=land.pos.y+currDist*sin(currDir+land.spin);
+          orbited=land;
         }
       } else {
-        for (Planet p : stars.get(0).planets) if (checkCollision(p)) //Find which planet collided with (landed on), if any
-        {
-          land=p;
-          //println(land.ambientTemp);
-          if (getDistTo(p)<p.radius-radius*0.2) {
-            vel.x=p.vel.x;
-            vel.y=p.vel.y;
-          }
-          dock.landingChange();
-          break;
+          for (Planet p : stars.get(0).planets) if (getDistTo(p)<p.gravWellRadius) {
+            orbited=p;
+            if (p.checkCollision(this, 10)) //Find which planet collided with (landed on), if any
+            {
+              //println(land.ambientTemp);
+              // if (getDistTo(p)<p.radius-radius*0.2) {
+              //   vel.x=p.vel.x;
+              //   vel.y=p.vel.y;
+              // }
+              land=p;
+              dock.landingChange();
+            }
+            break;
+          // for (Star s : stars) if (checkCollision(s)) vel=new PVector();
         }
-        for (Star s : stars) if (checkCollision(s)) vel=new PVector();
       }
-      if (afterBurning) {
+
+      if (assistedLanding) {
         if (orbited!=null) {
-          afterBurner=getVectorTo(orbited).normalize().mult(orbited.gravPull/pow(getDistTo(orbited), 2)).mag();
-          println(afterBurner);
+          faceVector(getVectorTo(orbited).mult(-1));
+          // faceVector(speedometer.calculateRelativeVelocity(orbited).mult(-1));
+          if (spaceStart) {
+            if (land==null) afterBurner=getVectorTo(orbited).normalize().mult(orbited.gravPull/pow(getDistTo(orbited), 2)).mag();
+            else afterBurner=Settings.afterBurnerMaxCap;
+          } else afterBurner=getVectorTo(orbited).normalize().mult(orbited.gravPull/pow(getDistTo(orbited), 2)).mag();
         }
         else afterBurner=Settings.afterBurnerMaxCap;
         //thrust=1;
         //dock.SCUpdateThrustControls=true;
       }
       else afterBurner=0;
+
       if (speedUp) if (thrust<=0.99) {
         thrust+=0.01;
         dock.SCUpdateThrustControls=true;
@@ -262,16 +285,18 @@ class Ship extends Object {
         thrust-=0.01;
         dock.SCUpdateThrustControls=true;
       }
+
       if (turnLeft) turnLeft();
       else if (turnRight) turnRight();
       else if (turnWheelInput==0) killSpin();
+
       if (turnWheelInput>1) turnWheelInput--; 
       else if (turnWheelInput==1) {
         turnWheelInput=0;
         turnLeft=false; 
         turnRight=false;
       }
-      if (assistedLanding&&orbited!=null) faceVector(getVectorTo(orbited).mult(-1));
+
       vel.x+=cos(dir)*(pow(thrust,2)/100+afterBurner); //THRUST APPLICATION
       vel.y+=sin(dir)*(pow(thrust,2)/100+afterBurner);
 
@@ -294,11 +319,6 @@ class Ship extends Object {
     if (zoomOut) zoomOut();
     findClosestTarget();
     updateHeat();
-    orbited=null;
-    for (Planet p:stars.get(0).planets) if (getDistTo(p)<p.gravWellRadius) {
-      orbited=p;
-      break;
-    }
   }
 
   void zoomIn() {

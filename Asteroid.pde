@@ -16,8 +16,8 @@ class Asteroid extends Object{
     mass=mas;
     distance = distS+orbitStar.radius;
     float phase=random(0, TWO_PI);
-    vel.x=sqrt(Settings.celestialPull*distance)*cos(phase+HALF_PI);
-    vel.y=sqrt(Settings.celestialPull*distance)*sin(phase+HALF_PI);
+    //vel.x=sqrt(Settings.celestialPull*distance)*cos(phase+HALF_PI);
+    //vel.y=sqrt(Settings.celestialPull*distance)*sin(phase+HALF_PI);
     pos.x=orbitStar.pos.x+distance*cos(phase);
     pos.y=orbitStar.pos.y+distance*sin(phase);
   }
@@ -41,7 +41,7 @@ class Asteroid extends Object{
     grav.x=-(pos.x-orbitStar.pos.x);
     grav.y=-(pos.y-orbitStar.pos.y);
     grav.normalize();
-    grav.mult(Settings.celestialPull);
+    //grav.mult(Settings.celestialPull);
     vel.add(grav);
     super.update();
   }

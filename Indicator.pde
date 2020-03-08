@@ -63,6 +63,18 @@ class VelocityIndicator extends Indicator{
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                      //
+//                                   General functions                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+  PVector calculateRelativeVelocity(Object _relativeTo){
+    relVel.x=parent.vel.x-_relativeTo.vel.x;
+    relVel.y=parent.vel.y-_relativeTo.vel.y;
+    return relVel.copy();
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
 //                                    Update functions                                  //
 //                                                                                      //
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -78,12 +90,11 @@ class VelocityIndicator extends Indicator{
   void draw(Object _relativeTo, color _velocityColour, PGraphics rr){
     rr.stroke(_velocityColour);
     rr.strokeWeight(1);
-    relVel.x=parent.vel.x-_relativeTo.vel.x;
-    relVel.y=parent.vel.y-_relativeTo.vel.y;
+    calculateRelativeVelocity(_relativeTo);
     speed=relVel.mag();
     relDir=relVel.normalize();
     angle=relDir.heading()+HALF_PI;
-    leftArrowDir.x=relDir.x+5*sin(angle-2.4434609528);  //2.4434609528 is 140 degrees.
+    leftArrowDir.x=relDir.x+5*sin(angle-2.4434609528);  //2.4434609528 rad is 140 degrees.
     leftArrowDir.y=relDir.y-5*cos(angle-2.4434609528);  //
     rightArrowDir.x=relDir.x+5*sin(angle+2.4434609528); //
     rightArrowDir.y=relDir.y-5*cos(angle+2.4434609528); //
