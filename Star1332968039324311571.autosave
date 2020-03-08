@@ -40,11 +40,12 @@ class Star extends Object {
        }
        isAsteroid=round(random(0, 100));*/
       float pMass=random(10000, 100000);
-      float pDens=random(0.5, 0.9);
-      float pRad= sqrt(pMass)/pDens;
-      distS+=random(1000, 2000)+pRad*Settings.gravityWellRadiusMultiplier*2;
-      planets[i]=new Planet(this, pMass, pDens, distS, i+1, pRad);
+      if (i>0) distS+=random(1000, 2000)+planets[i-1].gravWellDiameter;
+      else distS+=random(1000, 2000);
+      planets[i]=new Planet(this, pMass, random(0.5, 0.9), distS, i+1);
+      if (i==0) distS+=planets[0].gravWellRadius;
     }
+    distS+=random(2000, 5000);
     gravWellRadius=round(distS+planets[planets.length-1].gravWellDiameter);
     gravWellDiameter=gravWellRadius*2;
   }

@@ -46,30 +46,30 @@ class Planet extends Object {
 //                                                                                      //
 //////////////////////////////////////////////////////////////////////////////////////////
 
-  Planet(Star s, float mas, float dens, float distS, int number) {     //
-    super(new PVector(), new PVector(), 0, sqrt(mas)/dens);            //
+  Planet(Star s, float mas, float dens, float distS, int number, float rad) {     //
+    super(new PVector(), new PVector(), 0, rad);            //
     orbitStar=s;                                                       //
     mass=mas;                                                          //
     density=dens;                                                      //
     distance = distS+orbitStar.radius;                                 //
-    starPull=calculateGravPull(s,s.gravPull,distance);                 //
+    float phase=random(0, TWO_PI);                                     //
+    pos.x=orbitStar.pos.x+distance*cos(phase);                         //
+    pos.y=orbitStar.pos.y+distance*sin(phase);                         //
+    starPull=s.calculateGravPull(this,s.gravPull,distance);            //
     gravPull=mass;                                                     //
     gravWellRadius=round(radius*Settings.gravityWellRadiusMultiplier); //
     gravWellDiameter=gravWellRadius*2;                                 //
     waterLevel=random(0.1, 0.9);                                       //
-    float phase=random(0, TWO_PI);                                     //
+    float stopSpeed=sqrt(distance*starPull.mag());
 
     if (random(0, 1)<0.98) {                            //Small chance that the planet will have a retrograde orbit.
-      vel.x=starPull.x*cos(phase+HALF_PI); //
-      vel.y=starPull.y*sin(phase+HALF_PI); //
-    } else                                              //
-    {                                                   //
-      vel.x=starPull.x*cos(phase-HALF_PI); //
-      vel.y=starPull.y*sin(phase-HALF_PI); //
+      vel.x=stopSpeed*cos(phase+HALF_PI); //
+      vel.y=stopSpeed*sin(phase+HALF_PI); //
+    } else                                //
+    {                                     //
+      vel.x=stopSpeed*cos(phase-HALF_PI); //
+      vel.y=stopSpeed*sin(phase-HALF_PI); //
     }
-
-    pos.x=orbitStar.pos.x+distance*cos(phase);               //
-    pos.y=orbitStar.pos.y+distance*sin(phase);               //
     spin=random(-1, 1)*TWO_PI/Settings.FPS/60;               //Speed of planet's rotation, in revelations per minute.
     orbitNumber=number;                                      //
     terrainSize=round(radius*density)/2;                     //

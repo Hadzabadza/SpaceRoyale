@@ -76,8 +76,8 @@ static class Settings {
   static int maxPlanetsPerStar =8;     //
   static int minAsteroidsPerChain =1;  //
   static int maxAsteroidsPerChain =20; //
-  static float gravMod=0.1;           //Universal gravity multiplier, should be lessened if movement is too crazy.
-  static float gravdient=1.8;          //This determines the steepness of a gravity well. 2 would simulate realistic inverse square gravity.
+  static float gravMod=0.8;           //Universal gravity multiplier, should be lessened if movement is too crazy.
+  static float gravdient=1.9;          //This determines the steepness of a gravity well. 2 would simulate realistic inverse square gravity.
 
   //OSC stuff
   static String[] controllerIP={              //
@@ -120,7 +120,7 @@ static class Settings {
   //static float temperatureFalloff=  //
 
   //Planet properties
-  static float gravityWellRadiusMultiplier=10;  //
+  static float gravityWellRadiusMultiplier=14;  //
   static int planetScaler=1;                    //
   static float resDisplayThreshold=1;           //
   
